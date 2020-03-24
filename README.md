@@ -7,7 +7,7 @@ We will start with the code for searching.
 If you use this, please cite:
 
 Bond, Francis, Luís Morgado da Costa, and Tuấn Anh Lê (2015)
-[IMI — A Multilingual Semantic Annotation Environment(https://www.aclweb.org/anthology/P15-4002.pdf). In Proceedings of ACL-IJCNLP 2015 System Demonstrations, Beijing. pp 7–12
+[IMI — A Multilingual Semantic Annotation Environment](https://www.aclweb.org/anthology/P15-4002.pdf). In Proceedings of ACL-IJCNLP 2015 System Demonstrations, Beijing. pp 7–12
 
 ```bibtex
 @inproceedings{bond-etal-2015-imi,
