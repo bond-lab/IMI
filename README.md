@@ -1,5 +1,8 @@
 # IMI
-Code for searching and annotating the NTU Multilingual Corpus
+
+Code for searching and annotating the NTU Multilingual Corpus.  The code is under the MIT license.  The databases may have their own licenses.
+
+
 
 We will start with the code for searching.
 
@@ -27,3 +30,22 @@ Bond, Francis, Luís Morgado da Costa, and Tuấn Anh Lê (2015)
 ```
 
 There is code for exporting the corpus to XML here: https://github.com/lmorgadodacosta/NTUMC
+
+
+
+
+
+Put something like this in apache2/conf-enabled/httpd.conf
+```
+### NTUMC
+ScriptAlias /ntumc/cgi-bin/ /var/www/ntumc/cgi-bin/
+Alias /ntumc/ /var/www/ntumc/html/
+
+<Directory "/ntumc/cgi-bin/">
+AddHandler cgi-script .cgi 
+AllowOverride All
+Options -Indexes, +FollowSymLinks +ExecCGI
+Order allow,deny
+Allow from all
+</Directory>
+```

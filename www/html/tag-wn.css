@@ -1,0 +1,32 @@
+a.lbl:link {color:#000000;text-decoration:none;font-weight:bold;}}
+a.lbl:visited {color:#000000;text-decoration:none;font-weight:bold;}}
+a.lbl:hover {text-decoration:underline;}
+
+#line{
+  border-bottom:1px #aaaaaa solid;
+  overflow: visible;
+  height: 9px;
+  margin: 15px 0 10px 0;  
+}
+
+#line span{
+background-color: #aaaaaa;
+border-radius: 5px 5px 5px 3px;  //rounds corners 
+font-weight: normal;
+font-size:small;
+color: white;
+padding: 0 5px;
+}
+
+.match{
+  color:green;
+  font-weight: bold;
+}
+
+.tagme{background-color: yellow;text-decoration:none;}
+.notag{color: #660000;}
+.hastag{color: #003333;text-decoration:none;}
+.ignore{color: #333333;text-decoration:none;}
+.missing{color: #0033CC;text-decoration:none;}
+.error{color: #00CC33;text-decoration:none;}
+
