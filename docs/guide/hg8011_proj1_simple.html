@@ -1,0 +1,311 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>HG8011 Annotation Quick Start Guide</title>
+<style>
+h1, h2, h3 {font-family: Helvetica, Arial, Droid Sans, sans-serif}
+h3 {font-size: 1.4em}
+li {padding: 10px}
+img {border: 1px solid #999; box-shadow: 3px 3px 10px rgba(0, 0, 0, .2);}
+em {color: magenta}
+#toc {display: inline-block; background-color: #eee; padding-top: 10px; padding-bottom: 10px;}
+span.synset {font-family: "Courier New", "Courier", monospace}
+p.note {font-family: "Helvetica", "Arial", "Droid Sans", sans-serif; width: 30%;
+		border-color: #666;  border-style: solid; border-width: 0px 3px 0px 5px; 
+		background-color: #ccc; padding: 5px 10px; margin: 0px 0px 30px 80px} 
+p.note-red {border-left-color: #ff0000; border-right-color: #ff0000; background-color: #fee}
+td.tag_type {font-size: 1.2em; text-align: center; padding: 10px;}
+
+hr {border: 1px dashed #999}
+</style>
+</head>
+
+<h1>HG8011 Annotation - Quick Start Guide</h1>
+(Please refer to the main assignment page for details or clarification)
+
+<br /><br />
+
+Last Updated: 19-02-2018
+
+<!-- Change Log 
+	28-01-2016: Initial version
+	03-02-2016: 
+		- Made more clear to return to "Start Here" after log-in
+		- Made more clear how to navigate (sentence contexts, SIDs, etc)
+	05-02-2016:
+		- Added an example for when no (appropriate) synset could be found, and the steps to handle that
+	23-02-2016:
+		- Added "red" version of the .note class
+
+-->
+
+<br /><br />
+
+<p>Questions? Drop an email to both <em>bond</em> (+ @ieee.org) and <em>depa0003</em> (+ @e.ntu.edu.sg)<p>
+
+
+<ol id="toc">
+<li><a href="#gs">Getting Started</a></li>
+<li><a href="#ann">Annotation</a>
+	<ul>
+		<li>2.1 - <a href="#ann_gen">General Annotation</a></li>
+		<li>2.2 - <a href="#numletts">What do the numbers and letters mean?</a></i>
+		<li>2.3 - <a href="#nosyn">What if there is no (appropriate) synset to select?</a></li>
+	</ul>
+</ol>
+
+<hr />
+
+<a name="gs"></a><h2>1) Getting Started</h2>
+<ol>
+	<li>Go to the <a href="http://compling.hss.ntu.edu.sg/courses/hg8011/">main HG8011 course page</a></li>
+	<li>Go to <a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/project1.html" target="_blank">Disambiguation Task</a> (not "Project 1"!)</li>
+	<li>You will be at the task page.<br />
+	Scroll down slightly and you will see a <em>list of names</em>. 
+	<b>Look for your name.</b>
+		<ul><li>[Your name] + [(username {s1, s2, ...})]+ [range of sentences assigned to you]</li></ul>
+	<li>Click on <em>Start Here</em> beside your name</li>
+	<li>You will be asked to log in. Click on the "house" &#8962; icon (see image below)<br />
+	<img src="2 - Needs Login.png" />
+	<li>At the login screen:<br />
+	
+	<img src="3 - Login.png" />
+	
+	<br />
+	
+	Your <em>username</em> is indicated in the task page (in the format "s1", "s2", etc, etc)<br />
+	Your <em>password</em> is <b>Watson</b> (capital "W"). <b><u>Please change it ASAP!</u></b>*
+	<br />
+	<small>* But please, don't change it to something like <i>Holmes</i>...</small>
+	</li>
+	
+	<li>After logging in, you will be at the dashboard. To change password, click on <b>User Preferences</b><br />
+	<img src="4 - Dashboard.png" /><br />
+	</li>
+	
+	<li>To change your password: Click on <b>User Preferences</b>. You will see the Change Password screen.<br />
+	
+	<img src="4_5 - Change Password.png" style="height: 200px" /><br />
+	
+	Use this to change your password.
+	</li>
+	<li>Go back to the <a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/project1.html" target="_blank">Disambiguation Task page</a>, and click <b>once more</b> on <em>"Start Here"</em> beside your name.</li>
+		<ul><li>This time, you will be logged in</li></ul>
+		<ul><li><b>Make sure the username indicated is yours!</b></li></ul>
+</ol>
+
+<hr />
+
+<a name="ann"></a><h2>2) Annotation</h2>
+<a name="ann_gen"></a><h3>2.1 - General</h3>
+<ol>
+	<li>After you clicked "Start Here" beside your name, you will see the main annotation interface:<br />
+	<img src="6 - Tagging Interface 2_c.png" style="width: 1024px" /><br />
+	The interface is split into two panels: 
+		<ul>
+			<li>The left panel contains the annotation text and tools</li>
+			<li>The right panel contains the senses available available to choose from for the selected word</li>
+		</ul>
+	</li>
+	<li>On the <b>annotation half</b> of the screen (<em>left panel</em>):
+		<ul>
+			<li>The word <span style='background-color: yellow;'>highlighted in yellow</span> is the currently selected word.
+			<li>When you begin, the first word of your first sentence should already be <span style='background-color: yellow;'>highlighted</span> for you</li>
+		<p class="note note-red">Attention: Please make sure you are tagging the sentences allocated to you!</p>
+			<li>Words that are <span style='color: red; text-decoration: underline'>red and underlined</span> are <b>untagged</b></li>
+			<li>Words that are <span style='color: #033; text-decoration: underline'>dark green-blue and underlined</span> are <b>tagged</b></li>
+			<li>You will see some sentences <i>before</i> and <i>after</i> your actual sentence (ie, the context)</li>
+			<h4>Moving Around:</h4>
+			<li>Clicking on words in another sentence will <b>shift the context up (or down)</b>.
+				<ul><br />With the picture above as an example:
+					<li>Clicking on a word in sentence 55886 will show sentences 55883 &ndash; 55889
+					<li>Clicking on a word in sentence 55882 will show sentences 55879 &ndash; 55885
+				</ul>
+			<li>Therefore, as you move sentence by sentence, <b>the context will shift with you.</b></li>
+			<li>You can widen the context by changing the <tt>Sentence Context</tt> textbox at the bottom of the left panel.
+				<ul>
+					<li>Context is inclusive of the main sentence, bothways (as can be seen in the picture above)</li>
+				</ul>
+			</li>
+			<li>You can change the active/main sentence by changing the <tt>Goto sid</tt> textbox at the bottom of the left panel.</li>
+		</ul>
+	</li>
+	<li>On the <b>synset half</b> of the screen (<em>right panel</em>):
+		<ul>
+			<li>A list of available senses, plus the lemmas in the senses, their definitions and examples.</li>
+			<li>Each number has a subscripted letter (Example: 01<sub>a</sub>). 
+				<ul>
+					<li>n - <u>N</u>oun</li>
+					<li>v - <u>V</u>erb</li>
+					<li>a - <u>A</u>djective</li>
+					<li>r - Adve<u><b>r</b></u>b</li>
+					<li>x - Others</li>
+				</ul>
+			</li>
+			<li>Right at the top is a bar that shows "All", N, V, A and R. These are used to filter the synset results.</li>
+				<ul><li>They correspond to Show <u>All</u>, <u>N</u>oun, <u>V</u>erb, <u>A</u>djective and adve<u>R</u>b, respectively.</li></ul>
+		</ul>	
+	
+	<li>You will be presented with at least one tagging bar for the word. The numbered choices on the tagging bar correspond to the numbered choices for the synsets, as illustrated below:
+	<img src="Tagging Interface Overall (Numbers).png" style="width: 1200px" />
+	<li>To tag, simply select the appropriate synset via the tagging toolbar. (<b><a href="#numletts">What do the numbers and letters mean?</a></b>)
+	
+	<br /><br />
+	<b>Your choice will be automatically saved once selected.</b> A notification message will appear at the bottom to indicate it has been saved.<br /><br />
+	(In the above image, I have selected "1<sub>a</sub>" as the synset used to tag the word.)
+	
+		<ul><li>Some words can have a lot of senses, and some senses might be quite close to each other in meaning.</li>
+		    <li>As such, you will need to pick the best meaning</li>
+		    <li>We certainly welcome thoughtful tagging, but <em>do not overthink!</em></li>
+		    <li>Make use of the <b>Comments</b> box. (You'll see some uses for it below)</li>
+		    <li><b><a href="#nosyn">What if there is no (appropriate) synset to select?</a></b></li>
+		</ul>
+	</li>
+	
+	<li>Repeat the above step for all other words, until you have finished tagging your assigned sentences.</li>
+	
+	
+	<li>If it is a <b>multi-word expression</b> (MWE), you might be presented with multiple choices (multiple tagging bars):<br />
+		<img src="7 - Tagging MWE_anno.png" style="width: 800px" />
+		<ul>
+			<li>Click on the lemma of the other choice(s) (in this case, <i>ground floor</i>) to see the synsets available for it.</li>
+			<li>Tag the multi-word expression (Eg: <i>ground floor</i>) with a synset.</li>
+			<li>Tag the individual words (Eg: <i>ground</i> and <i>floor</i>) with <b>x</b>, as illustrated below.<br /> 
+			(Do make sure you tag <u>all</u> the individual words with <b>x</b>)<br />
+			<img src="7 - Tagging MWE_Xing.png">
+		</ul>
+	</li>
+	
+	<li>If the word...
+		<ul>
+			<li>... is mis-spelled, mis-tokenized, etc, tag it with <b>e</b>
+			<li>... does not appear in any synset, tag it with <b>w</b>, and make a suggestion (See <b><a href="#nosyn">What if there is no (appropriate) synset to select?</a></b>)
+			<li>... should not be tagged with any of the synsets, tag it with <b>x</b></li>
+			<li>In all cases, write your reasons in the <b>Comments</b> box</li>
+			<li>See <b><a href="#numletts">What do the numbers and letters mean?</a></b> for more information</li>
+			<p class="note" style="margin: 10px 0px 0px 0px">&raquo; Refer to the <b><a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/tagdoc.html" target="tagdoc_win">Detailed Documentation</a></b> for more on handling such cases</pi> 
+		</ul>
+	</li>
+			
+	
+</ol>
+
+<!---------------------- SUB-SECTIONS ------------------>
+<hr />
+<a name="numletts"></a><h3>2.2 - What do the numbers and letters mean? <small>(<a href="javascript:history.go(-1)">&uparrow; Back</a>)</small></h3>
+In the tagging bar, you will see some letters as well as a series of numbers (if any). The table below explains what they are:
+<table id="tag_tbl" border="1" cellspacing="0" cellpadding="5">
+	<tr><th></th><th>Description</th></tr>
+	<tr><td class="tag_type">1, 2, 3...n</td><td>These numbered choices correspond to the numbers of the synsets shown in the right panel.<br />
+				The letters in subscript (Eg: 1<sub>a</sub>, 2<sub>n</sub>) are the parts of speech
+				</td></tr>
+	<tr><td class="tag_type">e</td><td>Used to indicate an <em>error</em> in corpus/text (spelling, lemmatization, tokenization, etc)<br />
+			Eg: <i>does</i> being mistakenly analysed as <i>doe</i>+s and not <i>do</i>+es in "He <u>does</u> not know"<br /><br />
+			
+			Refer to the <a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/tagdoc.html" target="tagdoc_win">Detailed Documentation</a> for more cases to use <b>'e'</b>
+		
+			</td></tr>
+	<tr><td class="tag_type">x</td><td>Used to indicate that there is no need to tag the word<br />
+			Examples include <em>closed class parts-of-speech</em>, such as auxiliaries (<i>Fred <u>is</u> swimming; Fred <u>has</u> swum</i>)<br />
+					(Note: Copula <i>is</i> (to be) and verb <i>has</i> (to have) should still be tagged)<br /><br />
+			Refer to the <a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/tagdoc.html" target="tagdoc_win">Detailed Documentation</a> for more cases to use <b>'x'</b>
+				
+			</td></tr>
+	<tr><td class="tag_type">w</td><td>Used to indicate <em>suggestions</em> or <em>changes</em> to the wordnet. These include suggestions to add/remove lemmas, or to add a new synset.<br />
+			  You can also write other comments such as <tt>"I can't really decide between 012345678-x and 012345678-y"</tt>  <br /><br />
+			  Refer to the <a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/tagdoc.html" target="tagdoc_win">Detailed Documentation</a> for more cases to use <b>'w'</b> 
+			  </td></tr>
+	<tr><td colspan="2" align="center" bgcolor="#ddd">↓ For names (or part of a name), use the tags below ↓</td></tr>
+	<tr><td></td><td><b>Note: If the name already exists in the Wordnet as a synset (such as "Holmes"), choose that synset instead.<br /></b></td></tr>
+	<tr><td class="tag_type">Org</td><td><b>Organisation</b><br />Eg: <i>Scotland Yard</i> <br />(Note: Tag both <i>Scotland</i> and <i>Yard</i> individually as <b>org</b>)</td></tr>
+	<tr><td class="tag_type">Loc</td><td><b>Location</b><br />Eg: <i>Riding Thorpe Manor; Norfolk</i> <br />(Note: Tag <i>Riding</i>, <i>Thorpe</i> and <i>Manor</i> individually  as <b>loc</b>)</td></tr>
+	<tr><td class="tag_type">Per</td><td><b>Person</b><br />Eg: <i>Irene; Irene Adler</i> <br />(Note: Tag both <i>Irene</i> and <i>Adler</i> individually as <b>per</b>)</td></tr>
+	
+	<tr><td class="tag_type">Oth</td><td><b>Any Other proper name</b><br /><i>Samsung Galaxy S5</i> <br />(Note: Tag  <i>Samsung</i>, <i>Galaxy</i> and <i>S5</i> individually as <b>oth</b>)</td></tr>
+	<tr><td colspan="2" align="center" bgcolor="#ddd">↓ For other types, use the tags below ↓ </td></tr>
+	<tr><td class="tag_type">Dat</td><td><b>Date/Time</b><br />Eg: 3:13am; 26/01/1788</td></tr>
+	<tr><td class="tag_type">Num</td><td><b>Number</b><br />Eg: <i>12756; 1138; 802701</i><br />(Note: If the number already has a synset, tag it with that synset instead)</td></tr>
+	<tr><td class="tag_type">Year</td><td><b>Year</b><br /><i>1984; 2016</i><br />(Note: Be sure this is not just a normal Number)</td></tr>
+</table>
+	
+<hr /> 
+<a name="nosyn"></a><h3>2.3 - What if there is no (appropriate) synset to select? <small>(<a href="javascript:history.go(-1)">&uparrow; Back</a>)</small></h3>
+In some cases, a word might not have any (or any appropriate) sense/synset to select in the right panel.<br /><br />
+
+This can mean a few things:
+<ul>
+	<li>The word is not in any of the synsets (yet)</li>
+	<li>The synset for that concept does not exist at all</li>
+	<li>The base form of the word was mis-identified</li>
+</ul>
+
+In such a case, <b>tag the word as 'w'</b>.<br /><br />
+
+Now, begin by assuming the word (and its lemma) is not in a synset, but the concept of it exists somewhere in the wordnet.<br /><br />
+You should then try the following:
+<ul>
+	<li>Search for orthographical variants (Eg: <i>stir-fry</i> might be stored as <i>stirfry</i> in the wordnet)
+		<ul><li>If found, note in the Comments box. (Eg "<tt>Stir-fry: Orthographical variant of 'stirfry' in 00326459-v</tt>")</li></ul>
+	</li>
+	<li>Search for synonyms (Eg: You can search for "funny" if there is no synset for, say, <i>comical</i>)
+		<ul><li>If found, note this in the Comment box. (Eg "<tt>This lemma is a synonym of 012345678-x</tt>")</li></ul>
+	</li>
+	<li>Search for a hypernymous concept and see if its list of hyponyms contains the concept you want
+		<ul><li>Or vice-versa: search for a hyponymous concept, and see if the concept you want is a hypernym.</li>
+	    		<li>Also, search for possible co-hyponymous concepts</li>
+	    		<li>If found, note this in the Comment box. (Eg "<tt>This lemma is a hypernym/hyponym/co-hyponym of 012345678-x</tt>")
+		</ul>
+	</li>
+	<li><b>Example:</b> <i>Sherlock</i> currently does not belong to any appropriate synset.
+		<ul>
+			<li>So we search for something similar &#8212; a synoynym of sorts &#8212; such as <i>Holmes</i>, using the Search box at the bottom of the right panel.
+				<ul><li>We could also search for <i>Sherlock Holmes</i>.</li></ul>
+			</li>
+			<li>Synset <tt>09604451-n</tt> appears to be what we want. It's a hit! (In other cases, we might have to try a few synonyms before we get an appropriate synset)</li>
+			<li>We tag this word with <b>w</b>, if you haven't already done so.</li>
+			<li>Next, in the Comments box, we write:
+				<pre>	Lemma: Sherlock
+	This lemma is a synonym of 09604451-n
+				</pre>
+			</li> 
+			<p class="note" style="margin-left: 10px">Note: We are using a name here only as an example.<br />Under normal circumstances, if a name does not have an existing synset, then it should just be tagged with <b>per</b>, <b>org</b> or other named-entity type.<br /><br />
+			See <a href="#numletts">What do the numbers and letters mean?</a> for more on named entities and the tags to use.</p>
+			
+		</ul>
+	</li>
+</ul>
+<p class="note" style="margin-top: -10px ">&raquo; Refer to the <b><a href="http://compling.hss.ntu.edu.sg/ntumc-unipi/tagdoc.html" target="tagdoc_win">Detailed Documentation</a></b> for more on what to write in the Comments box</p>
+
+<b>Ok, you tried the above, but still nothing turns up.</b> <br /><br />
+
+<!--<b>Could there be an error in the base form?</b>
+For example, the base form of the word <i>leaves</i> &#8212; the verb &#8212; might be erroneously identified as <i>leaf</i>
+<br /><br />-->
+<b>It could thus be that the concept does not exist at all in the wordnet.</b> In this case, you can <em>suggest a new synset</em>.
+<ul>
+	<li>Search for other relations that you can use to describe the proposed new synsets
+		<ul><li>antonyms, hyponyms, hypernyms, etc. (See the detailed documentation for more information)</li></ul>
+	</li>
+	<li>Come up with a <b>definition</b> for the proposed new synset, as well as an example, if possible.
+		<ul>
+			<li>If you use the definitions found in another resource (Oxford Dictionaries, Wiktionary, etc), please <b>indicate the source</b>.</li>
+		</ul>
+	</li>
+	<li>Write the definition in the <b>Comments</b> box</li>
+	<li>Here is an example of the format for writing your definitions:
+		<pre>		Lemma: arrow (Singapore English)
+		This is a hypernym of 012345678-x
+		Def:	"To assign a task to someone. Generally used only if the task is unpleasant or boring."
+		Ex:     "They come and arrow me type their document"</pre>
+	</li>
+</ul>
+
+<b>Sometimes, it could mean the base form was mis-identified</b> (Eg: mis-identifying the base form of verb <i>leaves</i> as <i>leaf</i>, instead of <i>leave</i>)
+<br>
+Note down in the Comments box for such cases.
+
+<hr />
+
+Questions? Drop an email to both <em>bond</em> (+ @ieee.org) and <em>depa0003</em> (+ @e.ntu.edu.sg)
+
+</html>
