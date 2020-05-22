@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict as dd
@@ -34,20 +34,112 @@ mtags_human = { "e":"e",
               None : 'Not tagged'
 }
 
-valid_usernames = ['fcbond','lmorgado','letuananh','wangshan',
-                   'rosechen','gbonansinga',
-
-                   'tanzhixin','seayujie','wangwenjie',
-                   'lewxuhong','eshleygao',
-
-                   'gohrachael','wongsining','liutianli',
-                   'nurizdihar', 'violaow','hojiaqian',
-                   'sandrasoh']
+valid_usernames = ['fcbond','lmorgado', 'wangwenjie','hannahchoi','davidmoeljadi',
 
 
-corpuslangs = ['eng','cmn','jpn','ind']
 
-# old users: 'yuehuiting', 'honxuemin',
+'uinsuka01','uinsuka02','uinsuka03','uinsuka04','uinsuka05','uinsuka06','uinsuka07',
+'uinsuka08','uinsuka09','uinsuka10','uinsuka11','uinsuka12','uinsuka13','uinsuka14',
+'uinsuka15','uinsuka16','uinsuka17','uinsuka18','uinsuka19','uinsuka20','uinsuka21',
+'uinsuka22','uinsuka23','uinsuka24','uinsuka25','uinsuka26','uinsuka27','uinsuka28',
+'uinsuka29','uinsuka30',
+
+'alenci','gbonansinga','tpetrolito',
+
+'unipi1','unipi2','unipi3','unipi4',
+'unipi5','unipi6','unipi7','unipi8',
+'unipi9','unipi10','unipi11','unipi12',
+'unipi13','unipi14','unipi15','unipi16',
+'unipi17','unipi18','unipi19','unipi20',
+'unipi21','unipi22','unipi23','unipi24',
+'unipi25','unipi26','unipi27','unipi28',
+'unipi29','unipi30','unipi31','unipi32',
+'unipi33','unipi34','unipi35','unipi36',
+'unipi37','unipi38','unipi39','unipi40',
+'unipi41','unipi42','unipi43','unipi44',
+'unipi45','unipi46','unipi47','unipi48',
+'unipi49','unipi50','unipi51','unipi52',
+'unipi53','unipi54','unipi55','unipi56',
+'unipi57','unipi58','unipi59','unipi60',
+'unipi61','unipi62','unipi63','unipi64',
+'unipi65','unipi66','unipi67','unipi68',
+'unipi69','unipi70','unipi71','unipi72',
+'unipi73','unipi74','unipi75','unipi76',
+'unipi77','unipi78','unipi79','unipi80',
+'unipi81','unipi82','unipi83','unipi84',
+'unipi85','unipi86','unipi87','unipi88',
+'unipi89','unipi90','unipi91','unipi92',
+'unipi93','unipi94','unipi95','unipi96',
+'unipi97','unipi98','unipi99',
+
+                   's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 's20', 's21', 's22', 's23', 's24', 's25', 's26', 's27', 's28', 's29', 's30', 's31', 's32', 's33', 's34', 's35', 's36', 's37', 's38', 's39', 's40', 's41', 's42', 's43', 's44', 's45', 's46', 's47', 's48', 's49', 's50', 's51', 's52', 's53', 's54', 's55', 's56', 's57', 's58', 's59', 's60', 's61', 's62', 's63', 's64', 's65', 's66', 's67', 's68', 's69', 's70', 's71', 's72', 's73', 's74', 's75', 's76', 's77', 's78', 's79', 's80', 's81', 's82', 's83', 's84', 's85', 's86', 's87', 's88', 's89', 's90', 's91', 's92', 's93', 's94', 's95', 's96', 's97', 's98', 's99', 's100', 's101', 's102', 's103', 's104', 's105', 's106', 's107', 's108', 's109', 's110', 's111', 's112', 's113', 's114', 's115', 's116', 's117', 's118', 's119', 's120', 's121', 's122', 's123', 's124', 's125', 's126', 's127', 's128', 's129', 's130', 's131', 's132', 's133', 's134', 's135', 's136', 's137', 's138', 's139', 's140', 's141', 's142', 's143', 's144', 's145', 's146', 's147', 's148', 's149', 's150', 's151', 's152', 's153', 's154', 's155', 's156', 's157', 's158', 's159', 's160', 's161', 's162', 's163', 's164', 's165', 's166', 's167', 's168', 's169', 's170', 's171', 's172', 's173', 's174', 's175', 's176', 's177', 's178', 's179', 's180', 's181', 's182', 's183', 's184', 's185', 's186', 's187', 's188', 's189', 's190', 's191', 's192', 's193', 's194', 's195', 's196', 's197', 's198', 's199', 's200', 's201', 's202', 's203', 's204', 's205', 's206', 's207', 's208', 's209', 's210', 's211', 's212', 's213', 's214', 's215', 's216', 's217', 's218', 's219', 's220', 's221', 's222', 's223', 's224', 's225', 's226', 's227', 's228', 's229' ]
+ 
+valid_usernames_old = ['yuehuiting', 'honxuemin','rosechen','gbonansinga']
+
+
+corpuslangs = ['eng','cmn','jpn','ind','ita']
+
+
+
+vfargs = {'Something ----s' : 'V1', 
+          'Somebody ----s' : 'V1',
+          'It is ----ing' : 'V0',
+          'Something is ----ing PP' : 'V1',
+          'Something ----s something Adjective/Noun' : 'V2',
+          'Something ----s Adjective/Noun' : 'V2',
+          'Somebody ----s Adjective' : 'V2',
+          'Somebody ----s something' : 'V2',
+          'Somebody ----s somebody' : 'V2',
+          'Something ----s somebody' : 'V2',
+          'Something ----s something' : 'V2',
+          'Something ----s to somebody' : 'V2',
+          'Somebody ----s on something' : 'V2',
+          'Somebody ----s somebody something' : 'V3',
+          'Somebody ----s something to somebody' : 'V3',
+          'Somebody ----s something from somebody' : 'V2', 
+          'Somebody ----s somebody with something' : 'V2', 
+          'Somebody ----s somebody of something' : 'V2', 
+          'Somebody ----s something on somebody' : 'V2', 
+          'Somebody ----s somebody PP' : 'V2', 
+          'Somebody ----s something PP' : 'V2', 
+          'Somebody ----s PP' : 'V1', 
+          "Somebody's (body part) ----s" : 'VX', 
+          'Somebody ----s somebody to INFINITIVE' : 'V3', 
+          'Somebody ----s somebody INFINITIVE' : 'V3', 
+          'Somebody ----s that CLAUSE' : 'V2', 
+          'Somebody ----s to somebody' : 'V2', 
+          'Somebody ----s to INFINITIVE' : 'V2', 
+          'Somebody ----s whether INFINITIVE' : 'V2', 
+          'Somebody ----s somebody into V-ing something' : 'V3', 
+          'Somebody ----s something with something' : 'V2', 
+          'Somebody ----s INFINITIVE' : 'V2',
+          'Somebody ----s VERB-ing' : 'V2', 
+          'It ----s that CLAUSE' : 'VX', 
+          'Something ----s INFINITIVE ' : 'VX'}
+
+lexn2wpos={'adj':'a', 'noun':'n', 'verb':'v', 'adv':'r'}
+
+
+
+
+
+################################################################################
+# All existing synset links: used for dropdown selection menus, etc. (30 links)
+# And their ordered opposites. (e.g if X is hypo of Y, then Y is hype of X ).
+# Entailment and Causation don't currently have oposites.
+################################################################################
+synlinks = ["also", "hype", "inst", "hypo", "hasi", 
+            "mmem", "msub", "mprt", "hmem", "hsub", 
+            "hprt", "attr", "sim", "enta", "caus", 
+            "dmnc", "dmnu", "dmnr", "dmtc", "dmtu", 
+            "dmtr", "eqls", "ants", "hasq", "qant"]
+
+synlinksopp = ["also", "hypo", "hasi", "hype", "inst", 
+               "hmem", "hsub", "hprt", "mmem", "msub", 
+               "mprt", "attr", "sim", None, None, 
+               "dmtc", "dmtu", "dmtr", "dmnc", "dmnu", 
+               "dmnr", "eqls","ants","qant", "hasq"]
+
 
 wnnam = "Open Multilingual Wordnet"
 wnver = "1.0"
@@ -60,7 +152,7 @@ wnurl = "http://compling.hss.ntu.edu.sg/omw/index.html"
 # As only mappings for old versions of the tagset existed, we 
 # remapped the tagsets taking a few changes (e.g. for ENG & CMN)
 ####################################################################
-pos_tags = dd(lambda: dd(lambda: dd(unicode)))
+pos_tags = dd(lambda: dd(lambda: dd(str)))
 pos_tags['eng']['CC']['def'] = "coordinating conjunction"
 pos_tags['eng']['CC']['eng_def'] = "coordinating conjunction"
 pos_tags['eng']['CC']['upos'] = "CONJ"
@@ -166,6 +258,9 @@ pos_tags['eng']['RBS']['upos'] = "ADV"
 pos_tags['eng']['RP']['def'] = "particle"
 pos_tags['eng']['RP']['eng_def'] = "particle"
 pos_tags['eng']['RP']['upos'] = "PRT"
+pos_tags['eng']['SYM']['def'] = "symbol"
+pos_tags['eng']['SYM']['eng_def'] = "symbol"
+pos_tags['eng']['SYM']['upos'] = "SYM"
 pos_tags['eng']['TO']['def'] = "to"
 pos_tags['eng']['TO']['eng_def'] = "to"
 pos_tags['eng']['TO']['upos'] = "PRT"
@@ -321,6 +416,9 @@ pos_tags['cmn']['SB']['upos'] = "PRT"
 pos_tags['cmn']['SP']['def'] = "sentence-final particle"
 pos_tags['cmn']['SP']['eng_def'] = "sentence-final particle"
 pos_tags['cmn']['SP']['upos'] = "PRT"
+pos_tags['cmn']['SYM']['def'] = "symbol"
+pos_tags['cmn']['SYM']['eng_def'] = "symbol"
+pos_tags['cmn']['SYM']['upos'] = "SYM"
 pos_tags['cmn']['URL']['def'] = "url"
 pos_tags['cmn']['URL']['eng_def'] = "url"
 pos_tags['cmn']['URL']['upos'] = "SYM"
@@ -623,8 +721,8 @@ pos_tags['ind'][u'vbi']['upos'] = u"VERB"
 pos_tags['ind'][u'vbt']['def'] = u"intransitive verb"
 pos_tags['ind'][u'vbt']['eng_def'] = u"intransitive verb"
 pos_tags['ind'][u'vbt']['upos'] = u"VERB"
-pos_tags['ind'][u'rp']['def'] = u"particle"
-pos_tags['ind'][u'rp']['eng_def'] = u"particle"
+pos_tags['ind'][u'rp']['def'] = u"other closed class"
+pos_tags['ind'][u'rp']['eng_def'] = u"other closed class"
 pos_tags['ind'][u'rp']['upos'] = u"PRT"
 pos_tags['ind'][u'sc']['def'] = u"subordinate conjunction"
 pos_tags['ind'][u'sc']['eng_def'] = u"subordinate conjunction"
@@ -644,9 +742,6 @@ pos_tags['ind'][u'prl']['upos'] = u"ADV" #!!! needs David's revision
 pos_tags['ind'][u'wp']['def'] = u"wh-pronoun"
 pos_tags['ind'][u'wp']['eng_def'] = u"wh-pronoun"
 pos_tags['ind'][u'wp']['upos'] = u"PRON"
-pos_tags['ind'][u'wp2']['def'] = u"wh-pronoun (reduplication)"
-pos_tags['ind'][u'wp2']['eng_def'] = u"wh-pronoun (reduplication)"
-pos_tags['ind'][u'wp2']['upos'] = u"PRON"
 pos_tags['ind'][u'cdc']['def'] = u"collective cardinal number"
 pos_tags['ind'][u'cdc']['eng_def'] = u"collective cardinal number"
 pos_tags['ind'][u'cdc']['upos'] = u"NUM"
@@ -665,24 +760,9 @@ pos_tags['ind'][u'nn']['upos'] = u"NOUN"
 pos_tags['ind'][u'nn2']['def'] = u"common noun (reduplication)"
 pos_tags['ind'][u'nn2']['eng_def'] = u"common noun (reduplication)"
 pos_tags['ind'][u'nn2']['upos'] = u"NOUN"
-pos_tags['ind'][u'nnc']['def'] = u"countable common noun"
-pos_tags['ind'][u'nnc']['eng_def'] = u"countable common noun"
-pos_tags['ind'][u'nnc']['upos'] = u"NOUN"
-pos_tags['ind'][u'nnc2']['def'] = u"countable common noun (reduplication)"
-pos_tags['ind'][u'nnc2']['eng_def'] = u"countable common noun (reduplication)"
-pos_tags['ind'][u'nnc2']['upos'] = u"NOUN"
-pos_tags['ind'][u'nng']['def'] = u"genitive common noun"
-pos_tags['ind'][u'nng']['eng_def'] = u"genitive common noun"
-pos_tags['ind'][u'nng']['upos'] = u"NOUN"
 pos_tags['ind'][u'nnp']['def'] = u"proper noun"
 pos_tags['ind'][u'nnp']['eng_def'] = u"proper noun"
 pos_tags['ind'][u'nnp']['upos'] = u"PROPN"
-pos_tags['ind'][u'nns2']['def'] = u"???"
-pos_tags['ind'][u'nns2']['eng_def'] = u"???"
-pos_tags['ind'][u'nns2']['upos'] = u"X" #!!! needs David's revision
-pos_tags['ind'][u'nnu']['def'] = u"uncountable common noun"
-pos_tags['ind'][u'nnu']['eng_def'] = u"uncountable common noun"
-pos_tags['ind'][u'nnu']['upos'] = u"NOUN"
 pos_tags['ind'][u'jj']['def'] = u"adjective"
 pos_tags['ind'][u'jj']['eng_def'] = u"adjective"
 pos_tags['ind'][u'jj']['upos'] = u"ADJ"
@@ -701,15 +781,9 @@ pos_tags['ind'][u'md']['upos'] = u"AUX"
 pos_tags['ind'][u'neg']['def'] = u"negation"
 pos_tags['ind'][u'neg']['eng_def'] = u"negation"
 pos_tags['ind'][u'neg']['upos'] = u"PRT"
-pos_tags['ind'][u'wrb']['def'] = u"???"
-pos_tags['ind'][u'wrb']['eng_def'] = u"???"
-pos_tags['ind'][u'wrb']['upos'] = u"X" #!!! needs David's revision
-pos_tags['ind'][u'dt']['def'] = u"???"
-pos_tags['ind'][u'dt']['eng_def'] = u"???"
-pos_tags['ind'][u'dt']['upos'] = u"X" #!!! needs David's revision
-pos_tags['ind'][u'dt2']['def'] = u"???"
-pos_tags['ind'][u'dt2']['eng_def'] = u"???"
-pos_tags['ind'][u'dt2']['upos'] = u"X" #!!! needs David's revision
+pos_tags['ind'][u'dt']['def'] = u"determiner"
+pos_tags['ind'][u'dt']['eng_def'] = u"determiner"
+pos_tags['ind'][u'dt']['upos'] = u"DT" 
 pos_tags['ind'][u'pu(']['def'] = u"opening parenthesis"
 pos_tags['ind'][u'pu(']['eng_def'] = u"opening parenthesis"
 pos_tags['ind'][u'pu(']['upos'] = u"PUNCT"
@@ -719,9 +793,6 @@ pos_tags['ind'][u'pu)']['upos'] = u"PUNCT"
 pos_tags['ind'][u'pu!']['def'] = u"exclamation point"
 pos_tags['ind'][u'pu!']['eng_def'] = u"exclamation point"
 pos_tags['ind'][u'pu!']['upos'] = u"PUNCT"
-pos_tags['ind'][u'.']['def'] = u"???"
-pos_tags['ind'][u'.']['eng_def'] = u"???"
-pos_tags['ind'][u'.']['upos'] = u"X" #!!! needs David's revision
 pos_tags['ind'][u'pu"']['def'] = u"quotation mark"
 pos_tags['ind'][u'pu"']['eng_def'] = u"quotation mark"
 pos_tags['ind'][u'pu"']['upos'] = u"PUNCT"
@@ -769,8 +840,60 @@ pos_tags['ind'][u'pu•']['eng_def'] = u"•"
 pos_tags['ind'][u'pu•']['upos'] = u"PUNCT"
 
 
+
+pos_tags['ita'][u'A']['def'] = u"A"
+pos_tags['ita'][u'A']['eng_def'] = u"A"
+pos_tags['ita'][u'A']['upos'] = u"ADJ"
+pos_tags['ita'][u'AP']['def'] = u"AP"
+pos_tags['ita'][u'AP']['eng_def'] = u"AP"
+pos_tags['ita'][u'AP']['upos'] = u"PRON"
+pos_tags['ita'][u'B']['def'] = u"B"
+pos_tags['ita'][u'B']['eng_def'] = u"B"
+pos_tags['ita'][u'B']['upos'] = u"ADV"
+pos_tags['ita'][u'C']['def'] = u"C"
+pos_tags['ita'][u'C']['eng_def'] = u"C"
+pos_tags['ita'][u'C']['upos'] = u"CONJ"
+pos_tags['ita'][u'D']['def'] = u"D"
+pos_tags['ita'][u'D']['eng_def'] = u"D"
+pos_tags['ita'][u'D']['upos'] = u"DET"
+pos_tags['ita'][u'E']['def'] = u"E"
+pos_tags['ita'][u'E']['eng_def'] = u"E"
+pos_tags['ita'][u'E']['upos'] = u"ADP"
+pos_tags['ita'][u'F']['def'] = u"F"
+pos_tags['ita'][u'F']['eng_def'] = u"F"
+pos_tags['ita'][u'F']['upos'] = u"PUNCT"
+pos_tags['ita'][u'I']['def'] = u"I"
+pos_tags['ita'][u'I']['eng_def'] = u"I"
+pos_tags['ita'][u'I']['upos'] = u"X"
+pos_tags['ita'][u'N']['def'] = u"N"
+pos_tags['ita'][u'N']['eng_def'] = u"N"
+pos_tags['ita'][u'N']['upos'] = u"NUM"
+pos_tags['ita'][u'P']['def'] = u"P"
+pos_tags['ita'][u'P']['eng_def'] = u"P"
+pos_tags['ita'][u'P']['upos'] = u"PRON"
+pos_tags['ita'][u'R']['def'] = u"R"
+pos_tags['ita'][u'R']['eng_def'] = u"R"
+pos_tags['ita'][u'R']['upos'] = u"DET"
+pos_tags['ita'][u'S']['def'] = u"S"
+pos_tags['ita'][u'S']['eng_def'] = u"S"
+pos_tags['ita'][u'S']['upos'] = u"NOUN"
+pos_tags['ita'][u'T']['def'] = u"T"
+pos_tags['ita'][u'T']['eng_def'] = u"T"
+pos_tags['ita'][u'T']['upos'] = u"ADJ"
+pos_tags['ita'][u'V']['def'] = u"V"
+pos_tags['ita'][u'V']['eng_def'] = u"V"
+pos_tags['ita'][u'V']['upos'] = u"VERB"
+
+
+
+
+
+
+
+
+
 # UPOS TAGS
-upos_tags = dd(lambda: dd(lambda: dd(unicode)))
+upos_tags = dd(lambda: dd(lambda: dd(str)))
 
 upos_tags['ind']['ADV']['pos'] = [u'prl',u'rb']
 upos_tags['ind']['ADV']['def'] = u'adverb'
@@ -960,247 +1083,49 @@ upos_tags['jpn']['VERB']['def'] = u'动词'
 upos_tags['jpn']['VERB']['eng_def'] = u'verb'
 
 
-################ OLD WORKING DIFFERENT STRUCTURE OF DICT
-# pos_tags['eng']['CC'] = "coordinating conjunction"
-# pos_tags['eng']['CD'] = "cardinal number"
-# pos_tags['eng']['DT'] = "determiner"
-# pos_tags['eng']['EX'] = "existential there"
-# pos_tags['eng']['FW'] = "foreign word"
-# pos_tags['eng']['Fat'] = "???"
-# pos_tags['eng']['Fc'] = "[,]comma"
-# pos_tags['eng']['Fd'] = "???"
-# pos_tags['eng']['Fe'] = "???"
-# pos_tags['eng']['Fg'] = "???"
-# pos_tags['eng']['Fh'] = "???"
-# pos_tags['eng']['Fit'] = "???"
-# pos_tags['eng']['Fp'] = "[.]period"
-# pos_tags['eng']['Fpa'] = "???"
-# pos_tags['eng']['Fpt'] = "???"
-# pos_tags['eng']['Fs'] = "???"
-# pos_tags['eng']['Fx'] = "???"
-# pos_tags['eng']['Fz'] = "???"
-# pos_tags['eng']['IN'] = "preposition or subordinating conjunction"
-# pos_tags['eng']['JJ'] = "adjective"
-# pos_tags['eng']['JJR'] = "adjective, comparative"
-# pos_tags['eng']['JJS'] = "adjective, superlative"
-# pos_tags['eng']['MD'] = "modal"
-# pos_tags['eng']['NN'] = "noun, singular or mass"
-# pos_tags['eng']['NNP'] = "proper noun, singular"
-# pos_tags['eng']['NNS'] = "noun, plural"
-# pos_tags['eng']['NNPS'] = "proper noun, plural"
-# pos_tags['eng']['PDT'] = "predeterminer"
-# pos_tags['eng']['POS'] = "possessive ending"
-# pos_tags['eng']['PRP'] = "personal pronoun"
-# pos_tags['eng']['PRP$'] = "possessive pronoun"
-# pos_tags['eng']['RB'] = "adverb"
-# pos_tags['eng']['RBR'] = "adverb, comparative"
-# pos_tags['eng']['RBS'] = "adverb, superlative"
-# pos_tags['eng']['RP'] = "particle"
-# pos_tags['eng']['TO'] = "to"
-# pos_tags['eng']['UH'] = "Interjection"
-# pos_tags['eng']['VAX'] = "???"
-# pos_tags['eng']['VB'] = "verb, base form"
-# pos_tags['eng']['VBD'] = "verb, past tense"
-# pos_tags['eng']['VBG'] = "verb, gerund or present participle"
-# pos_tags['eng']['VBN'] = "verb, past participle"
-# pos_tags['eng']['VBP'] = "verb, non-3rd person singular present"
-# pos_tags['eng']['VBZ'] = "verb, 3rd person singular present"
-# pos_tags['eng']['WDT'] = "wh-determiner"
-# pos_tags['eng']['WP'] = "wh-pronoun"
-# pos_tags['eng']['WP$'] = "possessive wh-pronoun"
-# pos_tags['eng']['WRB'] = "wh-adverb"
-# pos_tags['eng']['Z'] = "???"
-# pos_tags['eng']['Zm'] = "???"
-# pos_tags['eng']['Zp'] = "???"
-# pos_tags['eng']['Zu'] = "???"
-
-# pos_tags['cmn']['AD'] = "adverb"
-# pos_tags['cmn']['AD2'] = "adverb (reduplication)"
-# pos_tags['cmn']['AS'] = "aspect particle"
-# pos_tags['cmn']['BA'] = "ba3 in ba-construction"
-# pos_tags['cmn']['CC'] = "coordinating conjunction"
-# pos_tags['cmn']['CD'] = "cardinal number"
-# pos_tags['cmn']['CS'] = "subordinating conjunction"
-# pos_tags['cmn']['DEC'] = "de5 as a complementizer or a nominalizer"
-# pos_tags['cmn']['DEG'] = "de5 as a genitive marker and an associative marker"
-# pos_tags['cmn']['DER'] = "resultative de5"
-# pos_tags['cmn']['DEV'] = "manner de5"
-# pos_tags['cmn']['DT'] = "determiner"
-# pos_tags['cmn']['ETC'] = "ETC (deng3 and deng3deng3)"
-# pos_tags['cmn']['FW'] = "foreign word"
-# pos_tags['cmn']['IJ'] = "interjection"
-# pos_tags['cmn']['JJ'] = "other noun modifier"
-# pos_tags['cmn']['JJ2'] = "other noun modifier (reduplication)"
-# pos_tags['cmn']['LB'] = "bei4 in long bei-construction"
-# pos_tags['cmn']['LC'] = "localizer"
-# pos_tags['cmn']['M'] = "measure word"
-# pos_tags['cmn']['M2'] = "measure word (reduplication)"
-# pos_tags['cmn']['MSP'] = "other particle"
-# pos_tags['cmn']['NN'] = "other noun"
-# pos_tags['cmn']['NN2'] = "other noun (reduplication)"
-# pos_tags['cmn']['NR'] = "proper noun"
-# pos_tags['cmn']['NT'] = "temporal noun"
-# pos_tags['cmn']['OD'] = "ordinal number"
-# pos_tags['cmn']['ON'] = "onomatopeia"
-# pos_tags['cmn']['P'] = "preposition"
-# pos_tags['cmn']['PN'] = "pronoun"
-# pos_tags['cmn']['PN2'] = "pronoun (reduplication)"
-# pos_tags['cmn']['PU'] = "punctuation"
-# pos_tags['cmn']['SB'] = "bei4 in short bei-construction"
-# pos_tags['cmn']['SP'] = "sentence-final particle"
-# pos_tags['cmn']['URL'] = "url"
-# pos_tags['cmn']['VA'] = "predicative adjective"
-# pos_tags['cmn']['VA2'] = "predicative adjective (reduplication)"
-# pos_tags['cmn']['VC'] = "copula"
-# pos_tags['cmn']['VE'] = "you3 as the main verb"
-# pos_tags['cmn']['VV'] = "other verb"
-# pos_tags['cmn']['VV2'] = "other verb (reduplication)"
-
-# pos_tags['jpn'][u'連体詞'] = u"???"
-# pos_tags['jpn'][u'接頭詞'] = u"???"
-# pos_tags['jpn'][u'接頭詞-形容詞接続'] = u"「お高い」「クソ高い」「まっ赤」"
-# pos_tags['jpn'][u'接頭詞-数接続'] = u"あとに数値がくるもの。"
-# pos_tags['jpn'][u'接頭詞-動詞接続'] = u"あとに動詞がくるもの。「ぶったたく」"
-# pos_tags['jpn'][u'接頭詞-名詞接続'] = u"あとに名詞がくるもの。"
-# pos_tags['jpn'][u'名詞'] = u"???"
-# pos_tags['jpn'][u'名詞-引用文字列'] = u"???"
-# pos_tags['jpn'][u'名詞-サ変接続'] = u"「～する」の形をとれるもの。"
-# pos_tags['jpn'][u'名詞-ナイ形容詞語幹'] = u"「～ない」の形をとれるもの。"
-# pos_tags['jpn'][u'名詞-形容動詞語幹'] = u"「～な」の形をとれるもの。"
-# pos_tags['jpn'][u'名詞-動詞非自立的'] = u"「～してごらん」「～してちょうだい」"
-# pos_tags['jpn'][u'名詞-副詞可能'] = u"おもに時相名詞。"
-# pos_tags['jpn'][u'名詞-一般'] = u"一般名詞。"
-# pos_tags['jpn'][u'名詞-数'] = u"数値。"
-# pos_tags['jpn'][u'名詞-接続詞的'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-一般'] = u"下のカテゴリにあてはまらないもの。山・川・商品名など。"
-# pos_tags['jpn'][u'名詞-固有名詞-人名'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-人名-一般'] = u"芸能人名など。"
-# pos_tags['jpn'][u'名詞-固有名詞-人名-姓'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-人名-名'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-組織'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-地域'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-地域-一般'] = u"???"
-# pos_tags['jpn'][u'名詞-固有名詞-地域-国'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-サ変接続'] = u"「巨大化」「キャンプ入り」"
-# pos_tags['jpn'][u'名詞-接尾-一般'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-形容動詞語幹'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-助数詞'] = u"単位。"
-# pos_tags['jpn'][u'名詞-接尾-助動詞語幹'] = u"「～してそう」「～そうだ」で使われる。"
-# pos_tags['jpn'][u'名詞-接尾-人名'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-地域'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-特殊'] = u"???"
-# pos_tags['jpn'][u'名詞-接尾-副詞可能'] = u"???"
-# pos_tags['jpn'][u'名詞-代名詞'] = u"???"
-# pos_tags['jpn'][u'名詞-代名詞-一般'] = u"???"
-# pos_tags['jpn'][u'名詞-代名詞-縮約'] = u"???"
-# pos_tags['jpn'][u'名詞-非自立'] = u"???"
-# pos_tags['jpn'][u'名詞-非自立-一般'] = u"???"
-# pos_tags['jpn'][u'名詞-非自立-形容動詞語幹'] = u"???"
-# pos_tags['jpn'][u'名詞-非自立-助動詞語幹'] = u"???"
-# pos_tags['jpn'][u'名詞-非自立-副詞可能'] = u"???"
-# pos_tags['jpn'][u'名詞-特殊'] = u"???"
-# pos_tags['jpn'][u'名詞-特殊-助動詞語幹'] = u"???"
-# pos_tags['jpn'][u'動詞'] = u"???"
-# pos_tags['jpn'][u'動詞-自立'] = u"???"
-# pos_tags['jpn'][u'動詞-接尾'] = u"???"
-# pos_tags['jpn'][u'動詞-非自立'] = u"「行ってしまう」「やっちゃったね」「ご遠慮願う」"
-# pos_tags['jpn'][u'形容詞'] = u"???"
-# pos_tags['jpn'][u'形容詞-自立'] = u"???"
-# pos_tags['jpn'][u'形容詞-接尾'] = u"???"
-# pos_tags['jpn'][u'形容詞-非自立'] = u"「聞きづらい」「見よい」"
-# pos_tags['jpn'][u'副詞'] = u"???"
-# pos_tags['jpn'][u'副詞-一般'] = u"???"
-# pos_tags['jpn'][u'副詞-助詞類接続'] = u"同一文節内に付属語がこれるもの。"
-# pos_tags['jpn'][u'接続詞'] = u"???"
-# pos_tags['jpn'][u'助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-格助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-格助詞-一般'] = u"???"
-# pos_tags['jpn'][u'助詞-格助詞-引用'] = u"???"
-# pos_tags['jpn'][u'助詞-格助詞-連語'] = u"解析ミスを防ぐためのマクロ。"
-# pos_tags['jpn'][u'助詞-係助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-終助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-接続助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-特殊'] = u"「せにゃならん」 これ以外の用途は不明。"
-# pos_tags['jpn'][u'助詞-副詞化'] = u"???"
-# pos_tags['jpn'][u'助詞-副助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-副助詞／並立助詞／終助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-並立助詞'] = u"???"
-# pos_tags['jpn'][u'助詞-連体化'] = u"???"
-# pos_tags['jpn'][u'助動詞'] = u"「そうでございます」"
-# pos_tags['jpn'][u'感動詞'] = u"???"
-# pos_tags['jpn'][u'記号'] = u"???"
-# pos_tags['jpn'][u'記号-句点'] = u"???"
-# pos_tags['jpn'][u'記号-読点'] = u"???"
-# pos_tags['jpn'][u'記号-空白'] = u"???"
-# pos_tags['jpn'][u'記号-アルファベット'] = u"???"
-# pos_tags['jpn'][u'記号-一般'] = u"???"
-# pos_tags['jpn'][u'記号-括弧開'] = u"???"
-# pos_tags['jpn'][u'記号-括弧閉'] = u"???"
-# pos_tags['jpn'][u'フィラー'] = u"(たぶん)音声認識用。"
-# pos_tags['jpn'][u'その他'] = u"???"
-# pos_tags['jpn'][u'その他-間投'] = u"「そんなぁ」"
-# pos_tags['jpn'][u'未知語'] = u"???"
 
 
-# pos_tags['ind'][u'cc'] = u"coordinate conjunction"
-# pos_tags['ind'][u'vbi'] = u"transitive verb"
-# pos_tags['ind'][u'vbt'] = u"intransitive verb"
-# pos_tags['ind'][u'rp'] = u"particle"
-# pos_tags['ind'][u'sc'] = u"subordinate conjunction"
-# pos_tags['ind'][u'rb'] = u"adverb"
-# pos_tags['ind'][u'prp'] = u"personal pronoun"
-# pos_tags['ind'][u'prn'] = u"number pronoun"
-# pos_tags['ind'][u'prl'] = u"locative pronoun"
-# pos_tags['ind'][u'wp'] = u"wh-pronoun"
-# pos_tags['ind'][u'wp2'] = u"wh-pronoun (reduplication)"
-# pos_tags['ind'][u'cdc'] = u"collective cardinal number"
-# pos_tags['ind'][u'cdi'] = u"irregular cardinal number"
-# pos_tags['ind'][u'cdo'] = u"ordinal cardinal number"
-# pos_tags['ind'][u'cdp'] = u"primary cardinal number"
-# pos_tags['ind'][u'nn'] = u"common noun"
-# pos_tags['ind'][u'nn2'] = u"common noun (reduplication)"
-# pos_tags['ind'][u'nnc'] = u"countable common noun"
-# pos_tags['ind'][u'nnc2'] = u"countable common noun (reduplication)"
-# pos_tags['ind'][u'nng'] = u"genitive common noun"
-# pos_tags['ind'][u'nnp'] = u"proper noun"
-# pos_tags['ind'][u'nns2'] = u"???"
-# pos_tags['ind'][u'nnu'] = u"uncountable common noun"
-# pos_tags['ind'][u'jj'] = u"adjective"
-# pos_tags['ind'][u'jj2'] = u"adjective (reduplication)"
-# pos_tags['ind'][u'fw'] = u"foreign word"
-# pos_tags['ind'][u'in'] = u"preposition"
-# pos_tags['ind'][u'md'] = u"modal or auxiliary verb"
-# pos_tags['ind'][u'neg'] = u"negation"
-# pos_tags['ind'][u'wrb'] = u"???"
-# pos_tags['ind'][u'dt'] = u"???"
-# pos_tags['ind'][u'dt2'] = u"???"
-# pos_tags['ind'][u'pu('] = u"opening parenthesis"
-# pos_tags['ind'][u'pu)'] = u"closing parenthesis"
-# pos_tags['ind'][u'pu!'] = u"exclamation point"
-# pos_tags['ind'][u'.'] = u"???"
-# pos_tags['ind'][u'pu"'] = u"quotation mark"
-# pos_tags['ind'][u'pu,'] = u"comma"
-# pos_tags['ind'][u'pu&'] = u"&"
-# pos_tags['ind'][u'pu-'] = u"dash"
-# pos_tags['ind'][u'pu.'] = u"."
-# pos_tags['ind'][u'pu/'] = u"/"
-# pos_tags['ind'][u'pu:'] = u":"
-# pos_tags['ind'][u'pu;'] = u";"
-# pos_tags['ind'][u'pu>'] = u">"
-# pos_tags['ind'][u'pu?'] = u"?"
-# pos_tags['ind'][u'pu©'] = u"©"
-# pos_tags['ind'][u'pu–'] = u"m dash"
-# pos_tags['ind'][u'pu“'] = u"opening quotes"
-# pos_tags['ind'][u'pu”'] = u"closing quotes"
-# pos_tags['ind'][u'pu•'] = u"•"
+upos_tags['ita']['ADV']['pos'] = [u'B']
+upos_tags['ita']['ADV']['def'] = u'adverb'
+upos_tags['ita']['ADV']['eng_def'] = u'adverb'
+upos_tags['ita']['NOUN']['pos'] = [u'S']
+upos_tags['ita']['NOUN']['def'] = u'noun'
+upos_tags['ita']['NOUN']['eng_def'] = u'noun'
+upos_tags['ita']['ADP']['pos'] = [u'E']
+upos_tags['ita']['ADP']['def'] = u'adposition'
+upos_tags['ita']['ADP']['eng_def'] = u'adposition'
+upos_tags['ita']['PUNCT']['pos'] = [u'F']
+upos_tags['ita']['PUNCT']['def'] = u'punctuation'
+upos_tags['ita']['PUNCT']['eng_def'] = u'punctuation'
+upos_tags['ita']['DET']['pos'] = [u'D',u'R']
+upos_tags['ita']['DET']['def'] = u'determiner'
+upos_tags['ita']['DET']['eng_def'] = u'determiner'
+upos_tags['ita']['PRON']['pos'] = [u'P',u'AP']
+upos_tags['ita']['PRON']['def'] = u'pronoun'
+upos_tags['ita']['PRON']['eng_def'] = u'pronoun'
+upos_tags['ita']['NUM']['pos'] = [u'N']
+upos_tags['ita']['NUM']['def'] = u'numeral'
+upos_tags['ita']['NUM']['eng_def'] = u'numeral'
+upos_tags['ita']['X']['pos'] = [u'I']
+upos_tags['ita']['X']['def'] = u'other'
+upos_tags['ita']['X']['eng_def'] = u'other'
+upos_tags['ita']['CONJ']['pos'] = [u'C']
+upos_tags['ita']['CONJ']['def'] = u'coordinating conjunction'
+upos_tags['ita']['CONJ']['eng_def'] = u'coordinating conjunction'
+upos_tags['ita']['ADJ']['pos'] = [u'A',u'T']
+upos_tags['ita']['ADJ']['def'] = u'adjective'
+upos_tags['ita']['ADJ']['eng_def'] = u'adjective'
+upos_tags['ita']['VERB']['pos'] = [u'V']
+upos_tags['ita']['VERB']['def'] = u'verb'
+upos_tags['ita']['VERB']['eng_def'] = u'verb'
 
 
 
 
 
-t = dd(lambda: dd(unicode))
+
+
+t = dd(lambda: dd(str))
 # thing, lang, = label
 t['eng']['eng'] = 'English'
 t['eng']['ind'] = 'Inggeris'
@@ -1250,6 +1175,7 @@ t['slv']['eng'] = 'Slovene'
 t['spa']['eng'] = 'Spanish'
 t['tha']['eng'] = 'Thai'
 t['bul']['eng'] = 'Bulgarian'
+t['hrv']['eng'] = 'Croatian'
 
 
 # wikt / cldr languages
@@ -1423,7 +1349,9 @@ class omwlang:
 
     @staticmethod
     def ntumclist():
-        langsntumc = ("eng", "ind", "zsm",  "jpn", "cmn", "qcn")
+        langsntumc = ("eng", "ind", "zsm",  
+                      "jpn", "cmn", "qcn",
+                      'ita')
         return langsntumc
 
     @staticmethod
@@ -1437,7 +1365,7 @@ class omwlang:
             "ita", "por", "nob", "nno", "dan",
             "swe", "fra", "fin", "ell", "glg",
             "cat", "spa", "eus", "als", "pol",
-            "bul")
+            "bul", "hrv")
         return langsprojects
 
     @staticmethod
@@ -1452,7 +1380,7 @@ class omwlang:
             "ita", "por", "nob", "nno", "dan",
             "swe", "fra", "fin", "ell", "glg",
             "cat", "spa", "eus", "als", "pol",
-            "bul",
+            "bul", "hrv",
             
             # From WIKT & CLDR
             'aar', 'afr', 'aka', 'als', 'amh',

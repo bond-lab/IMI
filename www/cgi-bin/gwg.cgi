@@ -11,6 +11,8 @@ from ntumc_webkit import *
 from ntumc_util import * 
 from lang_data_toolkit import *
 
+
+
 start_time = time.time() # TIME
 
 
@@ -19,20 +21,20 @@ start_time = time.time() # TIME
 # langselect = Language updates. If empty, langs in cookie  will be used;
 ################################################################################
 form = cgi.FieldStorage()
-lang = cgi.escape(form.getfirst("lang", ""))
-lang2 = cgi.escape(form.getfirst("lang2", "eng"))
-ss = cgi.escape(form.getfirst("ss", ""))
-synset = cgi.escape(form.getfirst("synset", ""))
-lemma = cgi.escape(form.getfirst("lemma", ""))
-lemma = cgi.escape(lemma.strip())
-pos = cgi.escape(form.getfirst("pos", ""))
-gridmode = cgi.escape(form.getvalue("gridmode", "grid"))
-# langselect = form.getlist("langselect[]")
-langselect = [cgi.escape(l) for l in form.getlist("langselect[]")]
+lang = form.getfirst("lang", "")
+lang2 = form.getfirst("lang2", "eng")
+ss = form.getfirst("ss", ())
+synset = form.getfirst("synset")
 
+lemma = form.getfirst("lemma")
+if lemma:
+    lemma = lemma.strip()
 
+pos = form.getfirst("pos", "")
+gridmode = form.getvalue("gridmode", "grid")
+langselect = form.getlist("langselect[]")
 ################################################################################
-if re.match('(\d+)-[avnrxz]',lemma):
+if lemma and re.match('(\d+)-[avnrxz]',lemma):
     synset = lemma
     lemma = ''
 ################################################################################
@@ -44,7 +46,7 @@ if re.match('(\d+)-[avnrxz]',lemma):
 ################################################################################
 scaling = 100
 
-if gridmode not in ('ntumcgrid', 'ntumcgridA', 'ntumcgridB', 'grid', 'gridx', 'cow', 'wnbahasa', 
+if gridmode not in ('ntumcgrid', 'grid', 'gridx', 'cow', 'wnbahasa', 
                     'wnja', 'ntumc-noedit'):
     gridmode = 'grid'
 
@@ -53,43 +55,21 @@ if gridmode == "ntumcgrid":
     wnnam = "NTUMC+ Open Multilingual Wordnet"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
-    wndb = "wn-ntumc"
-    wndb_path = "../db/wn-ntumc.db"
+    wndb = "../db/wn-ntumc.db"
     scaling = 90
-
-elif gridmode == "ntumcgridA":
-    langs = omwlang.ntumclist()
-    wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
-    wnver = "0.9"
-    wndb = "wn-ntumcA"
-    wndb_path = "../db/wn-ntumcA.db"
-    scaling = 90
-
-elif gridmode == "ntumcgridB":
-    langs = omwlang.ntumclist()
-    wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
-    wnver = "0.9"
-    wndb = "wn-ntumcB"
-    wndb_path = "../db/wn-ntumcB.db"
-    scaling = 90
-
 
 elif gridmode == "ntumc-noedit":
     langs = omwlang.ntumclist()
     wnnam = "NTUMC+ Open Multilingual Wordnet"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
-    wndb = "wn-ntumc"
-    wndb_path = "../db/wn-ntumc.db"
+    wndb = "../db/wn-ntumc.db"
     scaling = 90
         
 elif gridmode == "grid":
     langs = omwlang.humanprojectslist()
     wnnam = "Open Multilingual Wordnet"
-    wndb = "wn-multix"
-    wndb_path = "../../omw/wn-multix.db"
+    wndb = "../../omw/wn-multix.db"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "1.2"
 
@@ -124,18 +104,17 @@ elif gridmode == "gridx":
 else:
     langs = omwlang.humanprojectslist()
     wnnam = "Open Multilingual Wordnet"
-    wndb = "wn-multix"
-    wndb_path = "../../omw/wn-multix.db"
+    wndb = "../../omw/wn-multix.db"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/summ.html"
     wnver = "1.2"
 
 omwnam = "Extended Open Multilingual Wordnet"
 omwurl = "http://compling.hss.ntu.edu.sg/omw/summx.html"
-wncgi = "wn-gridx.cgi?gridmode=%s" % (gridmode)
+wncgi = "gwg.cgi?gridmode=%s" % (gridmode)
 editcgi = "annot-gridx.cgi" # allows for add/edit wordnet entries 
 addnewcgi = "addnew.cgi" # adds new synsets
 addnecgi = "addne.cgi" # adds Named Entities
-sumocgi="http://54.183.42.206:8080/sigma/Browse.jsp?kb=SUMO&CorpuscularObject"
+sumocgi="http://sigma-01.cim3.net:8080/sigma/Browse.jsp?kb=SUMO"
 
 relnam= {'ants':u'⇔', 'derv':u'⊳', 'pert':u'⊞'}
 ################################################################################
@@ -143,7 +122,7 @@ relnam= {'ants':u'⇔', 'derv':u'⊳', 'pert':u'⊞'}
 
 
 ### Connect to the database
-con = sqlite3.connect(wndb_path)
+con = sqlite3.connect(wndb)
 c = con.cursor()
 
 
@@ -266,7 +245,7 @@ if "PreviousSearch" in C and lemma == "":
     else:
         lemma = C['PreviousSearch'].value
 else:
-    if lemma != "":
+    if lemma:
         C["PreviousSearch"] = lemma
     elif synset != "":
         C["PreviousSearch"] = synset
@@ -555,6 +534,7 @@ print("<body>")
 # IF QUERY == List of Synsets (this is used as a frame,  with the tagging tools)
 ################################################################################
 if (ss):
+    print("CORPUS MODE") #TEST
     sss = ss.split()
     ass = ",".join("'%s'" % s for s in sss)
     lems = expandlem(lemma)
@@ -647,24 +627,25 @@ if (ss):
 
     # FETCH COMMENTS
     coms = dd(list)
-    if gridmode == "ntumcgrid":
-        c.execute("""SELECT synset, comment, u, t 
-                     FROM synset_comment
-                     WHERE synset in (%s)
-                     ORDER BY t""" % ass)
-        rows = c.fetchall()
-        for r in rows:
-            comment = cgi.escape(r[1],True)
-            user = r[2]
-            time = r[3]
+    c.execute("""SELECT synset, comment, u, t 
+                 FROM synset_comment
+                 WHERE synset in (%s)
+                 ORDER BY t""" % ass)
+    rows = c.fetchall()
+    for r in rows:
+        comment = cgi.escape(r[1],True)
+        user = r[2]
+        time = r[3]
 
-            coms[r[0]].append( (comment,user,time) )
+        coms[r[0]].append( (comment,user,time) )
+
 
 
 
     ###############################
     # Print HTML (List of Synsets)
     ###############################
+
 
     if gridmode == "ntumcgrid":
 
@@ -675,30 +656,30 @@ if (ss):
     print(HTML.showallunder_bttn("ss_table",'All'))
     print("&nbsp;&nbsp;")
 
-    print(HTML.showOnlyRowsByClass_bttn('n','N'))
+    print(HTML.showOnlyRowsByClass_bttn('n','N'),)
     print("&nbsp;")
-    print(HTML.showOnlyRowsByClass_bttn('v','V'))
+    print(HTML.showOnlyRowsByClass_bttn('v','V'),)
     print("&nbsp;")
-    print(HTML.showOnlyRowsByClass_bttn('a','A'))
+    print(HTML.showOnlyRowsByClass_bttn('a','A'),)
     print("&nbsp;")
-    print(HTML.showOnlyRowsByClass_bttn('r','R'))
+    print(HTML.showOnlyRowsByClass_bttn('r','R'),)
     print("&nbsp;&nbsp;")
 
     if gridmode == "ntumcgrid":
 
-        print( HTML.multidict_bttn(lang, lemma))
-        print( "&nbsp;")
-        print( HTML.ne_bttn())
-        print( "&nbsp;")
-        print(HTML.newsynset_bttn())
+        print(HTML.multidict_bttn(lang, lemma),)
+        print("&nbsp;")
+        print(HTML.ne_bttn(),)
+        print("&nbsp;")
+        print(HTML.newsynset_bttn(),)
 
 
         # TOGGLE SHOW/HIDE INDIVIDUAL POS
-        # print "&nbsp;&nbsp;&nbsp;"
-        # print HTML.hideRowsByClass_bttn('n','N'),
-        # print HTML.hideRowsByClass_bttn('v','V'),
-        # print HTML.hideRowsByClass_bttn('a','A'), 
-        # print HTML.hideRowsByClass_bttn('r','R'),
+        # print("&nbsp;&nbsp;&nbsp;")
+        # print(HTML.hideRowsByClass_bttn('n','N'),)
+        # print(HTML.hideRowsByClass_bttn('v','V'),)
+        # print(HTML.hideRowsByClass_bttn('a','A'), )
+        # print(HTML.hideRowsByClass_bttn('r','R'),)
 
 
     if gridmode == "ntumc-noedit":
@@ -734,7 +715,7 @@ if (ss):
         else:
             wfrmssymb = ''
 
-        ### print offset number
+        ### print offset number)
         poscolor = ''
         if pos == s[-1]:
             poscolor=" color='DarkRed' "
@@ -815,7 +796,7 @@ if (ss):
         else:
             print("  <td  valign='top'><font size='-1'>%s</font>" % "NO LEX")
 
-        # print "  <td  valign='top'>&nbsp;&nbsp;&nbsp;&nbsp;</td>"
+        # print("  <td  valign='top'>&nbsp;&nbsp;&nbsp;&nbsp;</td>")
 
 
         # Print definitions (BothLangs, SearchLang, BackoffLang)
@@ -902,19 +883,20 @@ if (ss):
 # IF QUERY == A Single Synset
 ###############################
 elif (synset):
+    print("SYNSET MODE 0") #TEST
 
     # FETCH COMMENTS
     coms = []
+    c.execute("""SELECT comment, u, t 
+                 FROM synset_comment
+                 WHERE synset = ?
+                 ORDER BY t""", [synset])
+    rows = c.fetchall()
+    for r in rows:
+        coms.append((cgi.escape(r[0],True),r[1],r[2]))
 
-    if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
-        c.execute("""SELECT comment, u, t 
-                     FROM synset_comment
-                     WHERE synset = ?
-                     ORDER BY t""", [synset])
-        rows = c.fetchall()
-        for r in rows:
-            coms.append((cgi.escape(r[0],True),r[1],r[2]))
 
+    print("SYNSET MODE 1") #TEST
 
     # Check if it's part of Core
     c.execute("""SELECT core from core
@@ -928,20 +910,18 @@ elif (synset):
             'http://wordnet.princeton.edu/wordnet/download/standoff/'))
     core = ' '.join(cores)
 
+
+
+
     # Fetch Definitions
-    c.execute("""SELECT lang, sid, def, usr 
+    c.execute("""SELECT lang, sid, def 
                  FROM synset_def 
                  WHERE synset = ?
               """, (synset,))
     rows = c.fetchall()
     defs = dd(lambda: dd(str))
     for r in rows:
-        if r[3]:
-            def_with_usr= str(r[3]) + ": " + str(r[2])
-        else:
-            def_with_usr= "Original" + ": " + str(r[2])
-            
-        defs[r[0]][int(r[1])] = def_with_usr
+        defs[r[0]][int(r[1])] = r[2]
 
     # Fetch the highest definition ID
     # (in case the def sid is not 0 - e.g. was deleted)
@@ -1167,7 +1147,7 @@ elif (synset):
 
             ws.append("""<span title='source: %s&#xA;conf: %0.2f;&#xA;%s' %s'>%s</span>%s %s
                       """ % (src, conf, frmsymb, opac, w, freq, deriv))
-        print("<td><i>%s</i>" % (", ".join(ws)))    # prints the list of word
+        print("<td><i>%s</i>" % (", ".join(ws)))    # prints the list of words
 
 
         #############################
@@ -1224,36 +1204,27 @@ elif (synset):
             print("</td>")
 
 
-        print("</tr>")
+        print("</tr>"              )
     print("</table>")
 
     #############################################
     # PRINT DEFINITIONS
     #############################################
-    # print "<div id='line'><span>Definitions</span></div>\n"
-
-    if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
-        # Edit Synset and Add New Synset buttons
-        print("<div id='line'><span>Definitions " + HTML.newdef_bttn(synset,wndb) + "</span></div>\n")
-    else:
-        print("<div id='line'><span>Definitions</span></div>\n")
-
+    print("<div id='line'><span>Definitions</span></div>\n")
     print("<dl>")
     # intersection between (existing langs in defs and examples) 
     # and (langs allowed by the gridmode)
     for l in list(set(defs.keys() + exes.keys()).intersection(langselect)):   
         if l == 'img':
             continue
-        print("<dt><strong>%s</strong>" % omwlang.trans(l, lang))
+        print("<dt><strong>%s</strong>" % omwlang.trans(l, lang) )
         print("<dd>")
-        # print "; ".join(defs[l][d] for d in defs[l]) 
-        for d in defs[l]:
-            print(str(defs[l][d]) + "<br>")
+        print("; ".join(defs[l][d] for d in defs[l]) )
         print(" " )
 
         ###### EXPERIMENTAL AUDIO
         # if l == "eng":
-        #     print HTML.googlespeech_text(l,". ".join(defs[l][d] for d in defs[l]))
+        #     print(HTML.googlespeech_text(l,". ".join(defs[l][d] for d in defs[l])))
 
         if exes[l]:  ### fixme should use lemmas to match examples (or do off line)
             examples = "; ".join([exes[l][d] for d in exes[l]][:5])  ## show only 5
@@ -1280,7 +1251,7 @@ elif (synset):
                       omwlang.trans(rel, l))
                   print("<td>")
                   for (sss, name) in rels[rel]:
-                      print("<a title='%s' href='%s&synset=%s&lang=%s&lang2=%s'>%s</a>" % \
+                      print("<a title='%s' href='%s&synset=%s&lang=%s&lang2=%s'>%s</a>" % 
                           (sss, wncgi, sss, lang, lang2, name))
                   print("</td></tr>")
 
@@ -1422,6 +1393,9 @@ elif (synset):
 # IF QUERY == Lemma (string)
 #######################################
 elif (lemma):   ## Show all the entries for this lemma in language
+
+    print("LEMMA MODE") #TEST
+
     print(HTML.status_bar(usrname))  # Top (Right) Status Bar
     print(u"<h6>Results for «&#8239;%s&#8239;» (%s)</h6>\n" % (lemma, lang))
     ## note the use of narrow non-breaking spaces
@@ -1580,11 +1554,11 @@ elif (lemma):   ## Show all the entries for this lemma in language
             print("<tr>\n")
 
             # Synset
-            print("""<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>)
+            print("""<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>
                      <nobr>%s""" %  (wncgi, s, lang, lang2, s))
             if freq[s] > 0: ### frequency
-                print("<font size='-1'>(%d)</font>" % (freq[s]))
-            print("</nobr><br><font size='-1'>%s</font></a></td>" % wfrmssymb)
+                print("<font size='-1'>(%d)</font>" % (freq[s]),)
+            print("</nobr><br><font size='-1'>%s</font></a></td>" % wfrmssymb,)
 
 
 
@@ -1677,8 +1651,8 @@ else:
     print("<h4> Welcome to the %s (%s)</h4>\n" % (wnnam, wnver))
 
     if gridmode == "ntumcgrid":
-        print(HTML.ne_bttn())
-        print(HTML.newsynset_bttn())
+        print(HTML.ne_bttn(),  )
+        print(HTML.newsynset_bttn(),)
         print(HTML.multidict_bttn(lang, lemma))
     if gridmode == "ntumc-noedit":
         print(HTML.multidict_bttn(lang, lemma))
@@ -1698,16 +1672,16 @@ except:
 print("""<hr><p>""")
 
 # This is the original that takes the full list of languages!
-# print HTML.search_form(wncgi, lemma, langs, lang, "Langs: ", lang2, scaling),
+# print(HTML.search_form(wncgi, lemma, langs, lang, "Langs: ", lang2, scaling),)
 
 print(HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling)) # Print Search Form
-# print HTML.language_selection(langselect, langs, wncgi)
+# print(HTML.language_selection(langselect, langs, wncgi))
 
 # # Multidict should be ported to compling excluding CCD 
 # # (which we don't have permission to share)
 # if gridmode != "ntumcgrid":
 #     if lang in ("cmn", "eng"):
-#         print HTML.multidict_bttn(lang, lemma)
+#         print(HTML.multidict_bttn(lang, lemma))
 
 time_end = time.time()
 
@@ -1718,15 +1692,15 @@ if len(lemma_hist) > 0:
     print("<hr>")
     print("Seen Lemmas: ")
     for w in lemma_hist:
-        print ("""<a style='color:black;text-decoration:none;'
+        print( """<a style='color:black;text-decoration:none;'
                    href='%s&lemma=%s'>%s</a>; """ % (wncgi, w, w))
 
 
-#print synset_hist #TEST
+#print(synset_hist #TEST)
 
 
 # Print Language Selection Panel
-print("""<hr><div style="font-size:90%;color:grey;float:right">""")
+print("""<hr><div style="font-size:90%;color:grey;float:right">""" )
 print(HTML.language_selection(langselect, langs, wncgi))
 print("""<br><span style="font-size:80%%;color:grey;">(%s seconds)</span></div>"""  % (str(time_end - start_time)[:7]))
 

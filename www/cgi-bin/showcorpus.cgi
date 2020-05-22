@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # KNOWN BUGS:
@@ -16,18 +16,13 @@ import re, sqlite3, collections
 from collections import defaultdict as dd
 
 import datetime
-import sys, codecs
+
 
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-reload(sys)
-sys.setdefaultencoding('utf8')
-
-
 # create the error log for the cgi errors
-errlog = codecs.open('cgi_err.log', 'w+', "utf-8")
+errlog = open('cgi_err.log', 'w+', encoding="utf-8")
 errlog.write("LAST SEARCH LOG:\n")
 
 
@@ -88,10 +83,12 @@ try:
 except:
     sid_from = 0
 sid_to = cgi.escape(form.getfirst("sid_to", '1000000'))
+
 try:
     sid_to = int(sid_to)
 except:
     sid_to = 1000000
+#print(sid_from, sid_to)
 ##########################################
 
 # pos_eng = form.getlist("selectpos-eng")
@@ -249,14 +246,14 @@ if mode == "wordview":
         ss_names[synset] = [name, src]
         ss_defs[synset][lang][sid] = ss_def
     try:
-        html_word = cgi.escape(word.decode("utf8"), quote=True)
+        html_word = cgi.escape(word, quote=True)
     except:
         html_word = '' # The forms fails to read ; as the argument for word!
     try:
-        html_lemma = cgi.escape(lemma.decode("utf8"), quote=True)
+        html_lemma = cgi.escape(lemma, quote=True)
     except:
         html_lemma = '' # The forms fails to read ; as the argument for lemma!
-    html_pos = cgi.escape(postag.decode("utf8"), quote=True)
+    html_pos = cgi.escape(postag, quote=True)
 
     lemma_href = """<a class='fancybox fancybox.iframe' 
                     href='%s%s'>%s</a>
@@ -713,7 +710,7 @@ else:
 # FETCH COOKIE
 ################################################################
 # hashed_pw = ""
-# if environ.has_key('HTTP_COOKIE'):
+# if 'HTTP_COOKIE' in environ:
 #    for cookie in environ['HTTP_COOKIE'].split(';'):
 #       (key, value ) = cookie.strip().split('=');
 #       if key == "UserID":
@@ -770,7 +767,7 @@ print(u"""Content-type: text/html; charset=utf-8\n
         $('#selectpos').multipleSelect();
     </script> """),
 
-print """ \n <!-- TO SHOW POS DIVS IN A SELECT LANG OPTIONS-->
+print(""" \n <!-- TO SHOW POS DIVS IN A SELECT LANG OPTIONS-->
     <script>
     $(document).ready(function () {
       $('.defaulthide').hide();
@@ -780,7 +777,7 @@ print """ \n <!-- TO SHOW POS DIVS IN A SELECT LANG OPTIONS-->
         $('#pos-'+$(this).val()).show();
       })
     });
-    </script>""" % searchlang
+    </script>""" % searchlang)
 
 print(u"""<!-- TO SHOW / HIDE BY ID (FOR DIV)-->
     <script type="text/javascript">
@@ -1032,13 +1029,13 @@ print(u"""<!-- TO SHOW / HIDE BY ID (FOR DIV)-->
 """)
 
 if release_match_style:
-    print """ <style> 
+    print(""" <style> 
 .match{
   color:black;
   font-weight: normal;
   text-decoration:none;
 }
-</style>"""
+</style>""")
 
 print("""<title>%s</title>
  </head>
@@ -1073,14 +1070,14 @@ try:
     # print sid_cid #TEST
 
     if len(sids) == 0:
-        print "<b>Results for: </b>"
+        print("<b>Results for: </b>")
         if searchquery == "":
-            print "No query was made."
+            print("No query was made.")
         else:
-            print searchquery[:-1]
+            print(searchquery[:-1])
             
-        print "<br>"
-        print "<b>No results were found!</b>"
+        print("<br>")
+        print("<b>No results were found!</b>")
 
     # ALL THIS SHOULD BE: IF "CONCEPT" OR "C-LEMMA"
     # THEY SHOLD BE FILTERED BY TAG = x OR e
@@ -1090,8 +1087,8 @@ try:
         count = 0
         for sid in sid_cid.keys():
             count += len(sid_cid[sid])
-        print "<b>%d Results for: </b>" % count
-        print cgi.escape(searchquery[:-1], quote=True)
+        print("<b>%d Results for: </b>" % count)
+        print(cgi.escape(searchquery[:-1], quote=True))
 
         print("""<table class="striped tight">""")
         print("""<thead><tr><th>Sid</th><th>Sentence</th></tr></thead>""")
@@ -1108,10 +1105,10 @@ try:
                 # sentiment = """<div style="height:0.5em; 
                 # background: linear-gradient(to right"""
 
-                print """<tr>"""
-                print """<td><a class='largefancybox fancybox.iframe' 
+                print("""<tr>""")
+                print("""<td><a class='largefancybox fancybox.iframe' 
                 href='%s?corpus=%s&sid=%d&lemma=%s'>%s</a></td>
-                """ % (showsentcgi, searchlang, sid, '', sid)
+                """ % (showsentcgi, searchlang, sid, '', sid))
 
                 s_string = ""
                 for wid, wid_info in sorted(sid_wid[sid].items()):
@@ -1147,7 +1144,7 @@ try:
                                                -1*ss_resource_sent[tag]['MLSentiCon']['Negative'])
                             except:
                                 MLSentiCon += 0
-                                print "failed to add to MLSentiCon"
+                                print("failed to add to MLSentiCon")
                             score += MLSentiCon
                         sentitooltip = """ MLSentiCon: %0.3f; """ % (MLSentiCon,)
 
@@ -1234,14 +1231,14 @@ try:
                                                     tags_tooltip, href_word)
 
 
-                print """<td>%s""" % s_string
+                print("""<td>%s""" % s_string)
 
 
                 ############################ TRIAL
                 # sid hold the original sentence id
                 # links[lang][original_sid] outputs a set of translation sids
                 for lang2 in langs2:
-                    print "<p>"
+                    print("<p>")
 
                     for lsid in links[lang2][int(sid)]:
 
@@ -1287,7 +1284,7 @@ try:
                                                        -1*ss_resource_sent[tag]['MLSentiCon']['Negative'])
                                     except:
                                         MLSentiCon += 0
-                                        print "failed to add to MLSentiCon"
+                                        print("failed to add to MLSentiCon")
                                     score += MLSentiCon
                                 sentitooltip = """ MLSentiCon: %0.3f; """ % (MLSentiCon,)
 
@@ -1372,11 +1369,11 @@ try:
                                 >%s</span> """ % (html_lemma, html_pos, 
                                                     tags_tooltip, href_word)
 
-                        print "%s" % s_string
+                        print("%s" % s_string)
 
-                        print """<span title='%s'><sub>(%s)</sub>
-                                 </span>""" % (lsid,lang2)
-                    print "</p>"
+                        print("""<span title='%s'><sub>(%s)</sub>
+                                 </span>""" % (lsid,lang2))
+                    print("</p>")
                     ################ END TRIAL
 
 
@@ -1386,9 +1383,9 @@ try:
                 # if 'sentiwn' in senti or 'mlsenticon' in senti or senti == 'comp':
                 #     print sentiment
 
-                print """</td>"""
-                print """</tr>"""
-        print "</table>"
+                print("""</td>""")
+                print("""</tr>""")
+        print("</table>")
 
     #############################################
     # WORD-BASED SEARCH (NO CONCEPT RESTRICTION)
@@ -1399,20 +1396,20 @@ try:
             for wid, wid_info in sid_wid[sid].items():
                 if wid in sid_matched_wid[sid]:
                     count += 1
-        print "<b>%d Results for: </b>" % count
-        print searchquery[:-1]
+        print("<b>%d Results for: </b>" % count)
+        print(searchquery[:-1])
 
 
         print("""<table class="striped tight">""")
         print("""<thead><tr><th>Sid</th><th>Sentence</th></tr></thead>""")
 
         for sid in sorted(sid_wid.keys()):
-            print """<tr>"""
+            print("""<tr>""")
             # print """<td>%s</td>""" % sid
 
-            print """<td><a class='largefancybox fancybox.iframe' 
+            print("""<td><a class='largefancybox fancybox.iframe' 
             href='%s?corpus=%s&sid=%d&lemma=%s'>%s</a></td>
-            """ % (showsentcgi, searchlang, sid, '', sid)
+            """ % (showsentcgi, searchlang, sid, '', sid))
 
             # print """<td>%s</td>""" % sid_wid[sid].items() #TEST
 
@@ -1450,7 +1447,7 @@ try:
                                            -1*ss_resource_sent[tag]['MLSentiCon']['Negative'])
                         except:
                             MLSentiCon += 0
-                            print "failed to add to MLSentiCon"
+                            print("failed to add to MLSentiCon")
                         score += MLSentiCon
                     sentitooltip = """ MLSentiCon: %0.3f; """ % (MLSentiCon,)
 
@@ -1537,7 +1534,7 @@ try:
                                          tags_tooltip, href_word)
 
 
-            print """<td>%s""" % s_string
+            print("""<td>%s""" % s_string)
 
 
 
@@ -1548,7 +1545,7 @@ try:
 
                 errlog.write("When printing, lang2 = '%s'\n" %(lang2)) #LOG
 
-                print "<p>"
+                print("<p>")
 
                 #BUG!!! links.keys() only has 1 lang, even though langs2 has 2
                 errlog.write("lsid list = '%s'\n" % '|'.join(links.keys())) #LOG
@@ -1594,7 +1591,7 @@ try:
                                                    -1*ss_resource_sent[tag]['MLSentiCon']['Negative'])
                                 except:
                                     MLSentiCon += 0
-                                    print "failed to add to MLSentiCon"
+                                    print("failed to add to MLSentiCon")
                                 score += MLSentiCon
                             sentitooltip = """ MLSentiCon: %0.3f; """ % (MLSentiCon,)
 
@@ -1674,34 +1671,34 @@ try:
                                                  tags_tooltip, sentitooltip,href_word)
 
 
-                    print "%s" % s_string
+                    print("%s" % s_string)
 
-                    print """<span title='%s'><sub>(%s)</sub>
-                             </span>""" % (lsid,lang2)
+                    print("""<span title='%s'><sub>(%s)</sub>
+                             </span>""" % (lsid,lang2))
 
                     errlog.write("langs2:%s lsid=%d\n" %(lang2, lsid)) #LOG
 
 
-                print "</p>"
+                print("</p>")
 
 
-            print """</td>"""
-            print """</tr>"""
+            print("""</td>""")
+            print("""</tr>""")
 
-        print "</table>"
+        print("</table>")
 
     else:
-        print "Nothing found!"
+        print("Nothing found!")
 
 except:
-    print "<br>"
-    print "<h6> Welcome! Please query the database!</h6>"
+    print("<br>")
+    print("<h6> Welcome! Please query the database!</h6>")
 
 
 ##########################################
 # SEARCH FORM!
 ###########################################
-print """<hr>"""
+print("""<hr>""")
 # START FORM
 print("""<form action="" id="newquery" method="post">""")
 
@@ -1716,23 +1713,23 @@ for l in corpuslangs:
 print("""</select>""")
 
 # MULTISELECT FOR LANGS2
-print """<select id="langs2" name="langs2" multiple="multiple">"""
+print("""<select id="langs2" name="langs2" multiple="multiple">""")
 for l in corpuslangs:
     if l in langs2:
-        print """<option value='%s' selected>%s</option>
-              """ % (l, omwlang.trans(l, 'eng'))
+        print("""<option value='%s' selected>%s</option>
+              """ % (l, omwlang.trans(l, 'eng')))
     else:
-        print """<option value='%s'>%s</option>
-              """ % (l, omwlang.trans(l, 'eng'))
-print """</select>
+        print("""<option value='%s'>%s</option>
+              """ % (l, omwlang.trans(l, 'eng')))
+print("""</select>
         <script>
             $('#langs2').multipleSelect({
                 placeholder: "Align with: (langs)",
                 width: "13em"
             });
-        </script>"""
+        </script>""")
 
-print """&nbsp;&nbsp;</nobr> """
+print("""&nbsp;&nbsp;</nobr> """)
 # TAG
 print("""<nobr>Concept:""")
 print("""<input name="concept" id="idconcept" size="9" pattern="None|x|e|w|loc|org|per|dat|oth|[<>=~!]?[0-9]{8}-[avnrxz]" title = "xxxxxxxx-a/v/n/r/x/z |x|e|w|loc|org|per|dat|oth" style="font-size:80%%" placeholder="%s"/>&nbsp;&nbsp;</nobr>""" % ph_concept)
@@ -1803,9 +1800,9 @@ else:
 # SHOWS POS SELECT AND HELP DIV PER LANGUAGE (HIDDEN/TRIGGERED BY
 # SELECTING A LANGUAGE ABOVE)
 for l in corpuslangs:
-    print """<nobr><span id="pos-%s" class="defaulthide">POS:""" % l
-    print """<select id="selectpos-%s" name="selectpos-%s" 
-              multiple="multiple">""" % (l, l)
+    print("""<nobr><span id="pos-%s" class="defaulthide">POS:""" % l)
+    print("""<select id="selectpos-%s" name="selectpos-%s" 
+              multiple="multiple">""" % (l, l))
 
     maxlenght = 7 # used to figure out the width of the select
     for p in sorted(pos_tags[l].keys()):
@@ -1813,41 +1810,41 @@ for l in corpuslangs:
             maxlenght = len(p)
 
         if p in pos_form[searchlang]:
-            print """<option value ='%s' selected>%s</option>
-              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True))
+            print("""<option value ='%s' selected>%s</option>
+              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True)))
         else:
-            print """<option value ='%s'>%s</option>
-              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True))
+            print("""<option value ='%s'>%s</option>
+              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True)))
 
-    print """</select>
+    print("""</select>
         <script>
             $('#selectpos-%s').multipleSelect({
                 placeholder: "Select POS",
                 width: "%dem"
             });
-        </script>""" % (l, maxlenght+2)
+        </script>""" % (l, maxlenght+2))
 
     print("""<a class='fancybox' href='#postags-%s' 
           style='color:black;text-decoration:none;'><!--
           --><sup>?</sup></a></span></nobr>""" % l)
 
 # SEARCH LIMITS
-print """<nobr>Limit: <select name="limit" style="font-size:80%">"""
+print("""<nobr>Limit: <select name="limit" style="font-size:80%">""")
 for value in ['10','25','50','100','all']:
     if value == limit:
-        print """<option value ='%s' selected>%s</option>""" % (value, value)
+        print("""<option value ='%s' selected>%s</option>""" % (value, value))
     else:
-        print """<option value ='%s'>%s</option>""" % (value, value)
-print """</select>&nbsp;&nbsp;</nobr>"""
+        print("""<option value ='%s'>%s</option>""" % (value, value))
+print("""</select>&nbsp;&nbsp;</nobr>""")
 
 
 # SUBMIT BUTTON
-print """<button class="small"> <a href="javascript:{}"
+print("""<button class="small"> <a href="javascript:{}"
          onclick="document.getElementById('newquery').submit(); 
          return false;"><span title="Search">
          <span style="color: #4D99E0;"><i class='icon-search'></i>
-         </span></span></a></button></p>"""
-print """</form>"""
+         </span></span></a></button></p>""")
+print("""</form>""")
 
 
 
@@ -1855,14 +1852,14 @@ print """</form>"""
 ####################################
 # FOOTER
 ####################################
-print """<hr><a href='%s'>More detail about the %s (%s)</a>
-      """ % (url, cginame, ver)
-print '<p>Developers:'
-print ' <a href="">Luís Morgado da Costa</a> '
-print '&lt;<a href="mailto:lmorgado.dacosta@gmail.com">lmorgado.dacosta@gmail.com</a>&gt;'
-print '; '
-print ' <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a> '
-print '&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;'
+print("""<hr><a href='%s'>More detail about the %s (%s)</a>
+      """ % (url, cginame, ver))
+print('<p>Developers:')
+print(' <a href="">Luís Morgado da Costa</a> ')
+print('&lt;<a href="mailto:lmorgado.dacosta@gmail.com">lmorgado.dacosta@gmail.com</a>&gt;')
+print('; ')
+print(' <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a> ')
+print('&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;')
 
 
 ####################################
@@ -1876,8 +1873,8 @@ for l in corpuslangs:
                   <br>""" % (p, info['eng_def'], info['def']))
     print("""</div>""")
 
-print "  </body>"
-print "</html>"
+print("  </body>")
+print("</html>")
 
 errlog.close()
 

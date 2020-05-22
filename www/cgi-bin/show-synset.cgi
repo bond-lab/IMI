@@ -15,19 +15,17 @@ import os
 import operator
 from collections import defaultdict as dd
 
+# FIXME(Wilson): Undefined variables: sid, window, lemma, linkdb, corpus2
+
 showsentcgi = "show-sent.cgi"
 
 form = cgi.FieldStorage()
-corpus = form.getfirst("corpus", "cmn")
-sid = int(form.getfirst("sid", 1))
-window = int(form.getfirst("window", 5))
-if window > 200:
-    window = 200
-lemma = form.getfirst("lemma", "")
-lemma = lemma.strip()
+corpus = form.getfirst("corpus", "eng")
+synset = form.getfirst("synset", "00001740-n")
+lang=form.getfirst("lang", "eng")
 
-corpus2 = 'eng'
-linkdb = 'cmn-eng'
+# corpus2 = 'eng'
+# linkdb = 'cmn-eng'
 
 con = sqlite3.connect("../db/%s.db" % corpus)
 c = con.cursor()
@@ -87,8 +85,8 @@ if os.path.isfile("../db/%s.db" % linkdb):
 ##
 if os.path.isfile("../db/%s.db" % corpus2):
     tcon = sqlite3.connect("../db/%s.db" % corpus2)
-    tc = tcon.cursor()
-    query="""select sid, sent from sent
+    tc = tcon.cursor() 
+    query="""select sid, sent from sent  
         where sid in (%s)""" % ','.join('?'*len(ttt.keys()))
     tc.execute(query, ttt.keys())
     for (sd, sent) in tc:
@@ -135,7 +133,7 @@ for c in sorted(corp.keys()):
                 print("%s&nbsp;&nbsp;&nbsp;&nbsp;%s" % (s, ss[d][s]))
             for t in links[s]:
                 print("<br/><font color='#505050' class='trans'>%s&nbsp;&nbsp;&nbsp;&nbsp;%s</font>" % (t, 
-                                                                                      ttt[t]) )
+                                                                                      ttt[t]))
             print("</div>")
 
 print("""</body></html>""")
