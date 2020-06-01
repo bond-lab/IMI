@@ -67,56 +67,94 @@ wcur = wcon.cursor()
 # totag query
 def select_concept():
     lems = list(expandlem(lemma))
-    query = """SELECT sid, cid, clemma, tag, ntag, tags, comment 
-                 FROM concept WHERE clemma in (%s) 
-                 ORDER BY tag, sid, cid LIMIT ? """ % ','.join('?'*len(lems))
+    query = """
+      SELECT sid, cid, clemma, tag, ntag, tags, comment 
+      FROM concept WHERE clemma in (%s) 
+      ORDER BY tag, sid, cid 
+      LIMIT ?
+    """ % placeholders_for(lems)
     #print query 
     cur.execute(query, lems + [int(lim)])
     tm.stop().log("Job = selecting concepts")
     return cur.fetchall()
 
 def select_cwlink():
-    return cur.execute("""
+    query = """
         SELECT sid, wid, cid 
         FROM cwl
-        WHERE sid in (select sid from concept where clemma in (%s) 
-                      order by tag, sid, cid LIMIT ?)"""% ','.join('?'*len(lems)), 
-                               lems + [int(lim)]).fetchall()
+        WHERE sid IN (
+            SELECT sid FROM concept 
+            WHERE clemma IN (%s) 
+            ORDER BY tag, sid, cid 
+            LIMIT ?)
+    """ % placeholders_for(lems)
+    return cur.execute(query, lems + [int(lim)]).fetchall()
 
 def select_tag_distribution():
-        query = """SELECT count(tag), tag FROM concept WHERE clemma in (%s) group by tag order by count(tag) desc; """ % ','.join('?'*len(lems))
-        jilog('Executing query: %s' % query)
-        jilog('Values: %s' % str(lems))
-        cur.execute(query, lems)
-        return cur.fetchall()
+    query = """
+        SELECT count(tag), tag 
+        FROM concept 
+        WHERE clemma in (%s) 
+        GROUP BY tag 
+        ORDER BY count(tag) DESC;
+    """ % placeholders_for(lems)
+    jilog('Executing query: %s' % query)
+    jilog('Values: %s' % str(lems))
+    cur.execute(query, lems)
+    return cur.fetchall()
 
 def select_word():
-    return cur.execute("""select wid, word, pos, lemma, sid 
-                               from word where sid in (select sid from concept 
-                               where clemma in (%s) 
-                               order by tag, sid, cid LIMIT ?) order by sid, wid""" % ','.join('?'*len(lems)),
-                            lems + [ int(lim)]).fetchall()
+    query = """
+        SELECT wid, word, pos, lemma, sid 
+        FROM word WHERE sid IN (
+            SELECT sid FROM concept 
+            WHERE clemma IN (%s) 
+            ORDER BY tag, sid, cid 
+            LIMIT ?) 
+        ORDER BY sid, wid
+    """ % placeholders_for(lems)
+    return cur.execute(query, lems + [int(lim)]).fetchall()
 
 def select_sentence_id(lemma):
-    return cur.execute("select distinct sid from word where lemma like ? or word like ?", (unicode(lemma), unicode(lemma))).fetchall()
+    query = """
+        SELECT DISTINCT sid FROM word 
+        WHERE lemma LIKE ? OR word LIKE ?
+    """
+    return cur.execute(query, [str(lemma), str(lemma)]).fetchall()
 
 def select_word_from_sentence(sids):
-    return cur.execute("select sid, wid, word, lemma from word where sid in (%s) order by sid, wid" % ','.join(sids)).fetchall()
+    query = """
+        SELECT sid, wid, word, lemma FROM word 
+        WHERE sid IN (%s) ORDER BY sid, wid
+    """ % placeholders_for(sids)
+    return cur.execute(query).fetchall()
 
 # 2014-06-30 [Tuan Anh]
 # fix 500 items limitation
 def select_other_concept(lems):
-    all_sids_query = """SELECT distinct sid FROM concept WHERE clemma in (%s) ORDER BY tag, sid, cid LIMIT %d""" % (','.join('?'*len(lems)), int(lim))
-    all_cids_query = """SELECT distinct cid FROM concept WHERE clemma in (%s) ORDER BY tag, sid, cid LIMIT %d""" % (','.join('?'*len(lems)), int(lim))
-    query="""SELECT b.cid, b.sid, b.wid, c.clemma, c.tag, c.tags, c.comment  
-                 FROM concept AS z
-                 JOIN cwl AS a ON  z.sid=a.sid and z.cid=a.cid 
-                 JOIN cwl AS b ON a.sid=b.sid and a.wid=b.wid 
-                 JOIN concept as c on b.sid=c.sid and b.cid=c.cid 
-                 WHERE z.sid in (%s) and z.cid in (%s) and z.clemma in (%s)"""  % (
-            all_sids_query,  all_cids_query, ','.join('?'*len(lems)))
+    all_sids_query = """
+        SELECT DISTINCT sid FROM concept 
+        WHERE clemma IN (%s) 
+        ORDER BY tag, sid, cid LIMIT ?
+    """ % placeholders_for(lems)
+    all_cids_query = """
+        SELECT DISTINCT cid FROM concept 
+        WHERE clemma in (%s) 
+        ORDER BY tag, sid, cid LIMIT %d
+    """ % placeholders_for(lems)
+    query = """
+        SELECT b.cid, b.sid, b.wid, c.clemma, c.tag, c.tags, c.comment  
+            FROM concept AS z
+            JOIN cwl AS a ON  z.sid=a.sid AND z.cid=a.cid 
+            JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
+            JOIN concept as c ON b.sid=c.sid AND b.cid=c.cid 
+            WHERE z.sid in (%s) 
+                AND z.cid IN (%s) 
+                AND z.clemma IN (%s)
+    """  % (all_sids_query, all_cids_query, placeholders_for(lems))
     jilog("Find other concept: %s [lemma = %s]" % (query, lems))
-    return cur.execute(query, lems + lems + lems).fetchall()
+    lim = [int(lim)]
+    return cur.execute(query, lems + lim + lems + lim + lems).fetchall()
 
 ## 2014-07-01 [Tuan Anh]
 # Add filter
@@ -129,26 +167,48 @@ def select_corpus(lang):
 ## ACCESS [WORDNET]
 
 def select_wordnet_freq(all_synsets):
-    a_query = "select lemma, freq, synset from sense left join word on word.wordid = sense.wordid where synset in (%s) and sense.lang = ? ORDER BY synset, freq DESC" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT lemma, freq, synset 
+        FROM sense 
+        LEFT JOIN word ON word.wordid = sense.wordid 
+        WHERE synset IN (%s) 
+            AND sense.lang = ? 
+        ORDER BY synset, freq DESC
+    """ % placeholders_for("'%s'" % x for x in all_synsets)
+    params = [str(x) for x in all_synsets] + ['eng']
     jilog("I'm selecting %s" % a_query)
     tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    results = wcur.execute(a_query, params).fetchall()
     tm.stop().log("task = select word left join sense")
     return results
 
 def select_synset_def(all_synsets):
-    a_query = "SELECT def, synset FROM synset_def WHERE synset in (%s) and lang = ? order by synset, sid" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT def, synset 
+        FROM synset_def 
+        WHERE synset IN (%s) 
+            AND lang = ? 
+        ORDER BY synset, sid
+    """ % placeholders_for("'%s'" % x for x in all_synsets)
+    params = [str(x) for x in all_synsets] + ['eng']
     jilog("I'm selecting %s\n" % a_query)
     tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    results = wcur.execute(a_query, params).fetchall()
     tm.stop().log("task = select synset_def")
     return results
 
 def select_synset_def_ex(all_synsets):
-    a_query = "SELECT def, synset FROM synset_ex WHERE synset in (%s) and lang = ? order by synset, sid" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT def, synset 
+        FROM synset_ex 
+        WHERE synset IN (%s) 
+            AND lang = ? 
+        ORDER BY synset, sid
+    """ % placeholders_for("'%s'" % x for x in all_synsets)
+    params = [str(x) for x in all_synsets] + ['eng']
     jilog("I'm selecting %s\n" % a_query)
     tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    results = wcur.execute(a_query, params).fetchall()
     tm.stop().log("task = synset_ex")
     return results
 ####################################################################
@@ -189,80 +249,80 @@ sss = ss.split()
 
 def tagbox(sss, cid, wp, tag, ntag, com):
     """Create the box for tagging entries"""
-    print "<span style='background-color: #eeeeee;'>"  ### FIXME cute css div
+    print("<span style='background-color: #eeeeee;'>")  ### FIXME cute css div
     for i, t in enumerate(sss):
         # 2012-06-25 [Tuan Anh]
         # Prevent funny wordwrap where label and radio button are placed on different lines
-        print"<span style='white-space: nowrap;background-color: #dddddd'><input type='radio' name='cid_%s' value='%s'" % (cid, t),
+        print("<span style='white-space: nowrap;background-color: #dddddd'><input type='radio' name='cid_%s' value='%s'" % (cid, t),)
         if (t == tag):
-            print " CHECKED "
+            print(" CHECKED ")
         if wp == t[-1]:
-            print " />%d<sub><font color='DarkRed' size='-2'>%s</font></sub></span>\n" % (i+1, t[-1])
+            print(" />%d<sub><font color='DarkRed' size='-2'>%s</font></sub></span>\n" % (i+1, t[-1]))
         else:
-            print " />%d<sub><font size='-2'>%s</font></sub></span>\n" % (i+1, t[-1])
+            print(" />%d<sub><font size='-2'>%s</font></sub></span>\n" % (i+1, t[-1]))
     for tk in mtags:
         # 2012-06-25 [Tuan Anh]
         # Friendlier tag value display
         tv = mtags_human[tk]
-        print"<span style='white-space: nowrap;background-color:#dddddd'><input type='radio' name='cid_%s' title='%s' value='%s'" % (cid, tv, tk)
+        print("<span style='white-space: nowrap;background-color:#dddddd'><input type='radio' name='cid_%s' title='%s' value='%s'" % (cid, tv, tk))
         if (tk == tag):
-            print " CHECKED "
+            print(" CHECKED ")
         show_text = mtags_short[tk] if tk in mtags_short else tk
-        print " /><span title='%s'>%s</span></span>\n" % (tv, show_text)
-    tagv=''
-    if unicode(tag) != unicode(ntag):
-        tagv=ntag
+        print(" /><span title='%s'>%s</span></span>\n" % (tv, show_text))
+    tagv = ''
+    if str(tag) != str(ntag):
+        tagv = ntag
     if tagv:
-        print """<span style='background-color: #dddddd;white-space: nowrap;border: 1px solid black'>%s</span>""" % tagv
+        print("""<span style='background-color: #dddddd;white-space: nowrap;border: 1px solid black'>%s</span>""" % tagv)
 #     print """
 # <input style='font-size:12px; background-color: #ececec;' 
 #  title='tag' type='text' name='ntag_%s' value='%s' size='%d'
 #  pattern ="loc|org|per|dat|oth|[<>=~!]?[0-9]{8}-[avnr]"
 #  />""" % (cid, tagv, 8)
     comv = com if com is not None else '';
-    print """  <textarea style='font-size:12px; height: 18px; width: 150px; 
+    print("""  <textarea style='font-size:12px; height: 18px; width: 150px;
   background-color: #ecffec;' 
-  title= 'comment' name='com_%s'>%s</textarea>""" % (cid, comv)
+  title= 'comment' name='com_%s'>%s</textarea>""" % (cid, comv))
 
-    print "</span>"  ### FIXME cute css div
+    print("</span>")  ### FIXME cute css div
 
 
 
 
 ### Header
 
-print "Content-type: text/html; charset=utf-8\n"
-print "<html>"
-print "  <head>"
-print "    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>"
-print "    <meta http-equiv='content-language' content='zh'>"
-print "    <title>%s %s %s</title>" % (lemma, corpus,lang)
-print "    <script src='../tag-wid.js' language='javascript'></script>"
+print("Content-type: text/html; charset=utf-8\n")
+print("<html>")
+print("  <head>")
+print("    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>")
+print("    <meta http-equiv='content-language' content='zh'>")
+print("    <title>%s %s %s</title>" % (lemma, corpus,lang))
+print("    <script src='../tag-wid.js' language='javascript'></script>")
 # 2014-06-10 [Tuan Anh]
 # Added CSS & JQuery support
-print "    <script src='../jquery.js' language='javascript'></script>"
+print("    <script src='../jquery.js' language='javascript'></script>")
 # 2014-07-02 [Tuan Anh]
 # Add jquery-ui support
-print "    <script src='../jquery-ui.js' language='javascript'></script>"
-print "    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>"
-print "    <link rel='stylesheet' type='text/css' href='../common.css'>"
+print("    <script src='../jquery-ui.js' language='javascript'></script>")
+print("    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>")
+print("    <link rel='stylesheet' type='text/css' href='../common.css'>")
 # 2014-06-11 [Tuan Anh]
 # Make synset clickable
-print "    <script src='../tag_lex.js' language='javascript'></script>"
-print """
+print("    <script src='../tag_lex.js' language='javascript'></script>")
+print("""
   <script>
      $( document ).ready(page_init);
   </script>
-"""
-print "  </head>"
-print "  <body>"
+""")
+print("  </head>")
+print("  <body>")
 #print "    <h4>%s in %s (%s)</h4>" % (lemma, corpus,lang)
 
 
 if re.match('(\d+)-[avnr]',lemma):
     ### synset
-    print "Looking for synset %s" % lemma
-    print "Not actually implemented yet"
+    print("Looking for synset %s" % lemma)
+    print("Not actually implemented yet")
 else:
     ### Find the concepts for the lemmas
     tm = Timer()
@@ -277,7 +337,7 @@ else:
         ###
         ### Form
         ###
-        print u"""
+        print(u"""
         <form method="get" action="%s" target='_parent'>   
           <strong>«&#8239;%s&#8239;» in %s (%s)</strong>: 
           <input type='hidden' name='corpus' value='%s'>
@@ -285,19 +345,19 @@ else:
           <input type="text" style='font-size:14px;' name="lemma" value="%s" size=8 maxlength=30>
           <input type="submit" name="Query" value="Search">
           <select name="lim">
-        """ % (taglcgi, lemma, corpus, lang, corpus,lang,lemma)
+        """ % (taglcgi, lemma, corpus, lang, corpus,lang,lemma))
         
         for key in sorted(lims.keys()):
             if key == int(lim):
-                print "    <option value='%s' selected>%s</option>" % (key, lims[key])
+                print("    <option value='%s' selected>%s</option>" % (key, lims[key]))
             else:
-                print "    <option value='%s'>%s</option>" % (key, lims[key])
-        print u"""
+                print("    <option value='%s'>%s</option>" % (key, lims[key]))
+        print(u"""
           </select>
           <a href="multidict.cgi?lg1=%s&lemma1=%s" target="_blank"><button type="button">Multidict</button></a>
-        """ % (lang, lemma)
+        """ % (lang, lemma))
         ### documentation
-        print """<a href='../tagdoc.html' target='_blank'><button type="button">?</button></a>"""
+        print("""<a href='../tagdoc.html' target='_blank'><button type="button">?</button></a>""")
 
         # [FILTER]
         # print """<button type='button' id='btnToolbox'>Advanced</button>"""
@@ -311,7 +371,7 @@ else:
         # print """Corpus: %s """ % HTML.dropdownbox('sfcorpus', filter_corpus_values, sfcorpus)
         # print """<input type="submit" name="Query" value="Search">"""
         # print "</div>"
-        print "</form>"
+        print("</form>")
         # print "<script>alert('%s');</script>" % sfcorpus;
         ## [HEADER]
         
@@ -348,7 +408,7 @@ else:
             show[tag][sid][cid] = [cwl_map[(sid, cid)], clemma, ntag, tags, comment]
         ## store the concept ids 
         ## [Tuan Anh]: 2014-06-10 (to identify a concept, we need both sentence ID and concept ID)
-        cids = u" ".join(["%s|%s" % (unicode(r[0]), unicode(r[1])) for r in totag])  ### all the cids
+        cids = u" ".join(["%s|%s" % (str(r[0]), str(r[1])) for r in totag])  ### all the cids
         ## store the concepts (sid, cid) so we can check for other tags semi-efficiently
         cidsids = [(r[0], r[1]) for r in totag]
         others = dd(list)
@@ -379,20 +439,20 @@ else:
         ##
         ## Start the form
         ##
-        print """
+        print("""
     <form name='tag' method="post" action="%s" target='_parent'>   
       <input type='hidden' name='corpus' value='%s'>
       <input type='hidden' name='lang' value='%s'>
       <input type='hidden' name='lemma' value='%s'>
       <input type='hidden' name='cids' value='%s'>
       <input type='hidden' name='lim' value='%s'>
-    """ % (taglcgi,  corpus, lang, lemma, cids, lim)
+    """ % (taglcgi,  corpus, lang, lemma, cids, lim))
     
         ### default values
-        print "<a id='bookmark_PAGE_TOP'/>"
-        print "<p><strong>Default</strong>:"
+        print("<a id='bookmark_PAGE_TOP'/>")
+        print("<p><strong>Default</strong>:")
         tagbox(sss, 'all', '', '', '', com_all)
-        print "<input type='submit' name='Query' value='tag'>"
+        print("<input type='submit' name='Query' value='tag'>")
 
         all_synset_group = sorted(show.keys()) 
         jilog("all_synset_group = %s" % all_synset_group)
@@ -409,7 +469,7 @@ else:
             display_text = t if not t in mtags_human else mtags_human[t]
             freq = '0%' if not t in tag_freqs else tag_freqs[t]
             item_text_by_tag[t] = u"""<span title='%s'>%d<sub><font color='DarkRed' size='-2'>%s</font></sub></span>""" % (display_text, i+1, t[-1])
-            if unicode(t) in all_synset_group:
+            if str(t) in all_synset_group:
                 #jilog("%s is IN %s" % (t, all_synset_group))
                 text_items.append("<a href='bookmark_%s'>%s <font size='-1'>(%s)</font></a>" % (t, item_text_by_tag[t], freq))
                 pass
@@ -420,7 +480,7 @@ else:
             display_text = t if not t in mtags_human else mtags_human[t]
             item_text_by_tag[t] = display_text
             freq = '0%' if not t in tag_freqs else tag_freqs[t]
-            if unicode(t) in all_synset_group:
+            if str(t) in all_synset_group:
                 #jilog("%s is IN %s" % (t, all_synset_group))
                 text_items.append (u"""<a href='bookmark_%s'>%s <font size='-1'>(%s)</font></a>"""%(t, t, freq) )
                 pass
@@ -442,7 +502,7 @@ else:
         # Add comment summary box
         if len(all_comments) > 0:
             all_comments_text = ''
-            for a_pair in reversed(sorted(all_comments.iteritems(), key=operator.itemgetter(1, 0))):
+            for a_pair in reversed(sorted(all_comments.items(), key=operator.itemgetter(1, 0))):
                 all_comments_text += "<tr> <td>%s</td> <td>%s</td> </tr>" % a_pair
             # 2014-06-11 [Tuan Anh]
             # Make the synsets clickable
@@ -457,11 +517,11 @@ else:
                 all_comments_text = all_comments_text.replace('[wn_list_loc(%s)]' % t, """(%d<sub><font color='DarkRed' size='-2'>%s</font></sub>)"""%( i+1, t[-1]))
             # remove any not found synset
             all_comments_text = re.sub(r'(\[wn_list_loc\([0-9]{8}-[varn]\)\])', '(NITL)', all_comments_text)
-            print """
+            print("""
             <br/>
             <button id="btnToggle" type="button">All Comments</button>
             <div id="CommentSummary" class="CommentSummary"><table border='1'><tr><td>Comment</td><td>freq</td></tr>%s</table></div>
-            """ % (all_comments_text)
+            """ % (all_comments_text))
     
         ### per sentence values
     
@@ -509,48 +569,48 @@ else:
         navigator_bar_html = "<a href='#bookmark_PAGE_TOP' class='bookmark_top' alt='Top'></a> <a href='#bookmark_PAGE_BOTTOM' class='bookmark_bottom'></a> "
         for ltag in all_synset_group:
             ### print the tag (and if it is a synset, information about it)
-            print "<hr/>"
-            print "<p>"
+            print("<hr/>")
+            print("<p>")
             # [SYNSETGROUP] each synset group has a header. (synset-id, definition, etc)
             # 2014-07-02 [Tuan Anh]
             # Add bookmark jump
             tag_bookmark_name = "bookmark_" + str(ltag)
             print ("<a id='%s'/>" % tag_bookmark_name)
             if ltag and re.match('(\d+)-[avnr]',ltag):
-                print navigator_bar_html
+                print(navigator_bar_html)
                 # lemmas and freq
                 if str(ltag) in lemma_freq_dict:
                     for r in lemma_freq_dict[str(ltag)]:
-                        print "<font color='green'><b><i>%s</i></b></font><sub><font size='-2'>%d</font></sub> " % (r[0], int(r[1] or 0))
+                        print("<font color='green'><b><i>%s</i></b></font><sub><font size='-2'>%d</font></sub> " % (r[0], int(r[1] or 0)))
                 ## synset ID
-                print "(<a style='color: Navy;' href='%s?synset=%s' target='wn'>%s</a>)" %(wncgi, ltag, ltag)
+                print("(<a style='color: Navy;' href='%s?synset=%s' target='wn'>%s</a>)" %(wncgi, ltag, ltag))
 
                 if ltag in synset_def_dict:
-                    print "<font size='-1'>%s</font>" % "; ".join(synset_def_dict[ltag])
+                    print("<font size='-1'>%s</font>" % "; ".join(synset_def_dict[ltag]))
 
                 if ltag in synset_ex_dict:
-                    print "<i><font size='-1'>%s</font></i>" % "; ".join(synset_ex_dict[ltag])
+                    print("<i><font size='-1'>%s</font></i>" % "; ".join(synset_ex_dict[ltag]))
 
             elif ltag in mtags_human:
-                print "<p>"
-                print navigator_bar_html
-                print "<strong>%s</strong>" %(mtags_human[ltag])
+                print("<p>")
+                print(navigator_bar_html)
+                print("<strong>%s</strong>" %(mtags_human[ltag]))
             else:
-                print "<p>"
-                print navigator_bar_html
-                print "<strong>%s</strong>" %(ltag)
+                print("<p>")
+                print(navigator_bar_html)
+                print("<strong>%s</strong>" %(ltag))
     
             for lsid in sorted(show[ltag].keys()):
                 for lcid in show[ltag][lsid]:
                     ## Concepts, grouped by sentence
-                    print "<br><a class='sid' href='%s?corpus=%s&sid=%d&lemma=%s' target='_blank'>%d</a>" % (showsentcgi, 
-                                                                                        corpus, lsid, clemma, lsid)
+                    print("<br><a class='sid' href='%s?corpus=%s&sid=%d&lemma=%s' target='_blank'>%d</a>" % (showsentcgi, 
+                                                                                        corpus, lsid, clemma, lsid))
                     (cwds, clemma, ntag, tags, com) = show[ltag][lsid][lcid]
                     # 2014-06-12 [Tuan Anh]
                     # I changed this part of code to improve the performance
                     # This query should be executed only once per sentence
                     # d. execute("select wid, word, pos, lemma from word where sid =? order by sid, wid", (lsid,) )
-                    print "<br>"
+                    print("<br>")
                     if not ntag:
                         ntag=ltag
                     if not ltag:
@@ -567,61 +627,61 @@ else:
                             # tt = '%s?corpus=%s&sid=%d&wid=%d&ss=%s' %(tagwcgi, corpus, lsid, wid, tags)
                             tt = '%s?lemma=%s' %(taglcgi, lemma)
                             ttt = cgi.escape('%d:%s:%s&#013;%s:%s' % (wid, pos, lemma, ntag, com))
-                            print "<a style='color: Green;' title = '%s' href='%s' target='_parent'>%s</a><sub><font size='-2'>%s</font></sub>" % (ttt, tt, word, wp)
+                            print("<a style='color: Green;' title = '%s' href='%s' target='_parent'>%s</a><sub><font size='-2'>%s</font></sub>" % (ttt, tt, word, wp))
                         else:
-                            print "<span title='%d:%s:%s'>%s</span> " % (wid, pos, lemma, word)                    
+                            print("<span title='%d:%s:%s'>%s</span> " % (wid, pos, lemma, word))
                     ## 
                     ## Tags
                     ##
-                    print "<br>"  ### FIXME cute css div
+                    print("<br>")  ### FIXME cute css div
                     tagbox(sss, "%s_%s" % (lsid, lcid), wp, ltag, ntag, com)
                     #print "<br>"  ### FIXME cute css div
                     oth = list()
                     for cwd in cwds:
                         oth += others[(lsid, cwd)]
                     if oth:
-                        print "("
+                        print("(")
                         for (clemma, tag, tags, com, cwid) in oth:
                             t = ''
                             if com:
                                 t = "title='%s'" % cgi.escape(com)
-                            print """
+                            print("""
     <a style='color: Green;' %s
     href='%s?corpus=%s&lang=%s&lemma=%s&lim=%d' 
     target='_blank'>%s</a><sub>
     <font size='-2'>%s</font></sub>""" % (t, taglcgi, corpus, lang, clemma, int(lim),
-                                          clemma, tag)
-                        print ")<br>"
+                                          clemma, tag))
+                        print(")<br>")
     
-        print "<a id='bookmark_PAGE_BOTTOM'/>"
-        print """
+        print("<a id='bookmark_PAGE_BOTTOM'/>")
+        print("""
            <div align='right'><input type="submit" name="Query" value="tag"></div>
-        </form>"""
+        </form>""")
     elif not lemma:
-        print u"""<h4>Please enter a lemma to tag in %s (%s)</h4>
+        print(u"""<h4>Please enter a lemma to tag in %s (%s)</h4>
         <form method="get" action="%s" target='_parent'>   
           <input type='hidden' name='corpus' value='%s'>
           <input type='hidden' name='lang' value='%s'>
           <input type="text" style='font-size:14px;' name="lemma" value="%s" size=8 maxlength=30>
           <input type="submit" name="Query" value="Search">
           <select name="lim">
-        """ % (corpus, lang, taglcgi, corpus,lang,lemma)            
+        """ % (corpus, lang, taglcgi, corpus,lang,lemma))
         for key in sorted(lims.keys()):
             if key == lim:
-                print "    <option value='%s' selected>%s</option>" % (key, lims[key])
+                print("    <option value='%s' selected>%s</option>" % (key, lims[key]))
             else:
-                print "    <option value='%s'>%s</option>" % (key, lims[key])
-        print u"""
+                print("    <option value='%s'>%s</option>" % (key, lims[key]))
+        print(u"""
           </select>
         </form>
-        """
+        """)
     else:
         ### 
         ### No concept!  
         ### let's add it
         ### 
-        print u"<h4>«&#8239;%s&#8239;» is not stored as a concept in the corpus</h4>" % lemma
-        print u"""
+        print(u"<h4>«&#8239;%s&#8239;» is not stored as a concept in the corpus</h4>" % lemma)
+        print(u"""
       <form method="get" action="%s" target='_parent'>   
           <input type="submit" name="Query" value="Add">«&#8239;%s&#8239;» to %s?
           <input type='hidden' name='addme' value='%s'>
@@ -630,9 +690,9 @@ else:
           <input type='hidden' name='lang' value='%s'>
           <input type=hidden name="lim" value ='%s'> 
       </form>
-        """ % (taglcgi, lemma, corpus, lemma, lemma, corpus, lang,  lim)
+        """ % (taglcgi, lemma, corpus, lemma, lemma, corpus, lang,  lim))
 
-        ls = re.split(ur' |_|∥', lemma) if lemma else ''
+        ls = re.split(r' |_|∥', lemma) if lemma else ''
         sids = [str(s[0]) for s in select_sentence_id(ls[0])] if ls else []
         if sids and len(sids) > 0:
             sents = dd(lambda:dd(list))
@@ -653,16 +713,16 @@ else:
                         if len(matched) == len(ls):
                             matches[sid].append(matched)
             if matches:
-                print u"<p>It appears in the following sentences:"
+                print(u"<p>It appears in the following sentences:")
                 for sid in matches:
-                    print "<br><b>%s</b>: " % sid
+                    print("<br><b>%s</b>: " % sid)
                     for wid in sents[sid]:
                         if any((wid in wids) for wids in matches[sid]):
-                            print "<b><font color='green'>%s</font></b>" % sents[sid][wid][0],
+                            print("<b><font color='green'>%s</font></b>" % sents[sid][wid][0],)
                         else:
-                            print sents[sid][wid][0],
-                        print
-        print u"""
+                            print(sents[sid][wid][0],)
+                        print()
+        print(u"""
         <form method="get" action="%s" target='_parent'>   
           <strong>«&#8239;%s&#8239;» in %s (%s)</strong>: 
           <input type='hidden' name='corpus' value='%s'>
@@ -670,24 +730,24 @@ else:
           <input type="text" style='font-size:14px;' name="lemma" value="%s" size=8 maxlength=30>
           <input type="submit" name="Query" value="Search">
           <select name="lim">
-        """ % (taglcgi, lemma, corpus, lang, corpus,lang,lemma)            
+        """ % (taglcgi, lemma, corpus, lang, corpus,lang,lemma))
         for key in sorted(lims.keys()):
             if key == lim:
-                print "    <option value='%s' selected>%s</option>" % (key, lims[key])
+                print("    <option value='%s' selected>%s</option>" % (key, lims[key]))
             else:
-                print "    <option value='%s'>%s</option>" % (key, lims[key])
-        print u"""
+                print("    <option value='%s'>%s</option>" % (key, lims[key]))
+        print(u"""
           </select>
         </form>
-        """
+        """)
             
 
 ### Ending Information
 
 
-print '<hr><p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a> '
-print '&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;'
+print('<hr><p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a> ')
+print('&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;')
 
-print "  </body>"
-print "</html>"
+print("  </body>")
+print("</html>")
 
