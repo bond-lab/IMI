@@ -536,7 +536,7 @@ print("<body>")
 if (ss):
     print("CORPUS MODE") #TEST
     sss = ss.split()
-    ass = ",".join("'%s'" % s for s in sss)
+    ass = placeholders_for(sss)
     lems = expandlem(lemma)
 
     # Fetch Lemmas by gridmode
@@ -551,7 +551,7 @@ if (ss):
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC"""
 
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, [*sss, lang, lang2])
 
     elif gridmode in ("cow","wnbahasa","wnja"):
         sql = """SELECT synset, s.lang, lemma, 
@@ -564,7 +564,7 @@ if (ss):
                  LEFT JOIN word
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC """
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, [*sss, lang, lang2])
 
     else: # gridx or ntumcgrid modes (do not restrict by confidence level)
         sql = """SELECT synset, s.lang, lemma, 
@@ -576,7 +576,7 @@ if (ss):
                  LEFT JOIN word
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC """
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, (*sss, lang, lang2))
 
     words = dd(lambda: dd(list))
     freq = dd(int)
@@ -592,7 +592,7 @@ if (ss):
                  FROM synset_def
                  WHERE synset in (%s)
                  AND lang in (?, ?)
-              """ % ass, (lang, lang2))                                       
+              """ % ass, [*sss, lang, lang2])
 
     defs = dd(lambda: dd(lambda: dd(str)))
     for r in c:
@@ -603,7 +603,7 @@ if (ss):
                  FROM synset_ex 
                  WHERE synset in (%s) 
                  AND lang in (?, ?)
-              """ % ass, (lang, lang2))
+              """ % ass, [*sss, lang, lang2])
 
     exes = dd(lambda: dd(lambda: dd(str)))
     for r in c:
@@ -614,7 +614,7 @@ if (ss):
                  FROM xlink
                  WHERE synset in (%s)
                  AND resource = '%s'
-              """ % (ass, 'svframes'))
+              """ % (ass, 'svframes'), [*sss])
     rows = c.fetchall()
 
     vframes = dd(lambda: dd(list))
@@ -630,7 +630,7 @@ if (ss):
     c.execute("""SELECT synset, comment, u, t 
                  FROM synset_comment
                  WHERE synset in (%s)
-                 ORDER BY t""" % ass)
+                 ORDER BY t""" % ass, [*sss])
     rows = c.fetchall()
     for r in rows:
         comment = cgi.escape(r[1],True)
@@ -901,7 +901,7 @@ elif (synset):
     # Check if it's part of Core
     c.execute("""SELECT core from core
                  WHERE synset = ? 
-                 ORDER BY core""", (synset,))
+                 ORDER BY core""", [synset])
     rows = c.fetchall()
     cores = []
     for r in rows:
@@ -917,7 +917,7 @@ elif (synset):
     c.execute("""SELECT lang, sid, def 
                  FROM synset_def 
                  WHERE synset = ?
-              """, (synset,))
+              """, [synset])
     rows = c.fetchall()
     defs = dd(lambda: dd(str))
     for r in rows:
@@ -935,7 +935,7 @@ elif (synset):
                  FROM xlink
                  WHERE synset = ? 
                  AND resource = ? 
-              """, (synset, 'svframes'))
+              """, [synset, 'svframes'])
     rows = c.fetchall()
 
     vframes = dd(list)
@@ -977,7 +977,7 @@ elif (synset):
     c.execute("""SELECT lang, sid, def 
                  FROM synset_ex 
                  WHERE synset = ? 
-              """, (synset,))
+              """, [synset])
     rows = c.fetchall()
     exes = dd(lambda: dd(str))
     for r in rows:
@@ -994,7 +994,7 @@ elif (synset):
                      LEFT JOIN word
                      ON word.wordid = s.wordid 
                      ORDER BY freq DESC, confidence DESC
-                  """, (synset,))
+                  """, [synset])
 
     elif gridmode == "grid": # senses with confidence == 1.0 in the wn-multi.db are the human projects
         c.execute("""SELECT s.lang, lemma, freq, 
@@ -1005,7 +1005,7 @@ elif (synset):
                            AND sense.confidence IS '1.0') s
                      LEFT JOIN word
                      WHERE word.wordid = s.wordid
-                     ORDER BY freq DESC, confidence DESC""", (synset,))
+                     ORDER BY freq DESC, confidence DESC""", [synset])
 
     elif gridmode in ("cow", "wnbahasa","wnja"):    
         c.execute("""SELECT s.lang, lemma, freq, 
@@ -1018,7 +1018,7 @@ elif (synset):
                      LEFT JOIN word
                      WHERE word.wordid = s.wordid
                      ORDER BY freq DESC, confidence DESC
-                  """ % ','.join('?'*len(langselect)), ([synset] + list(langselect)))
+                  """ % placeholders_for(langselect), [synset] + list(langselect))
 
     else: # treat everything else as gridx
         c.execute("""SELECT s.lang, lemma, freq, 
@@ -1029,7 +1029,7 @@ elif (synset):
                      LEFT JOIN word
                      ON word.wordid = s.wordid 
                      ORDER BY freq DESC, confidence DESC
-                  """, (synset,))
+                  """, [synset])
 
     rows = c.fetchall()
     words = dd(list)
@@ -1044,7 +1044,7 @@ elif (synset):
                  ON xlinks.wordid = word.wordid
                  WHERE synset = ?
                  AND resource = ?
-              """, (synset, 'lvframes'))
+              """, [synset, 'lvframes'])
     rows = c.fetchall()
     lvframes = dd(lambda: dd(list))
 
@@ -1062,7 +1062,7 @@ elif (synset):
                  ON senslink.wordid1 = w1.wordid 
                  LEFT JOIN word as w2 
                  ON senslink.wordid2 = w2.wordid  
-                 WHERE synset1 = ?""",  (synset,))
+                 WHERE synset1 = ?""",  [synset])
 
     for r in c:  # senslinks[(lang, lemma1)] = (link, lemma2, synset2)
         senslinks[r[1], r[0]].append((r[2], r[3], r[4]))
@@ -1074,7 +1074,7 @@ elif (synset):
                  LEFT JOIN synset 
                  ON synlink.synset2 = synset.synset 
                  WHERE synset1 = ?
-              """, (synset,))
+              """, [synset])
     rows = c.fetchall()
 
     rels = dd(list)
@@ -1087,7 +1087,7 @@ elif (synset):
                  FROM xlink
                  WHERE synset = ? 
                  AND resource = ? 
-              """, (synset, 'lexnames'))
+              """, [synset, 'lexnames'])
     rows = c.fetchone()
 
     if rows:
@@ -1158,7 +1158,7 @@ elif (synset):
                      FROM xlink
                      WHERE synset = ? AND resource = ?
                      ORDER BY confidence
-                  """, (synset,resource))
+                  """, [synset,resource])
         cl = c.fetchall()
         if cl:
             print("&nbsp;&nbsp;&nbsp;&nbsp;[CL: ")
@@ -1166,7 +1166,7 @@ elif (synset):
                 c.execute("""SELECT name
                              FROM synset
                              WHERE synset = ?
-                          """, (original_ss,))
+                          """, [original_ss])
                 ssname = c.fetchone()[0]
                 # this is to avoid annoying spaces after print statements!
                 if i != len(cl)-1:
@@ -1280,7 +1280,7 @@ elif (synset):
     c.execute("""SELECT xref, misc 
                  FROM xlink 
                  WHERE resource='sumo'
-                 AND synset=?""", (synset,))
+                 AND synset=?""", [synset])
     xrefs = c.fetchall()
     if xrefs:
         print("<p>%s:  " % label('SUMO', 'Suggested Upper Merged Ontology', 
@@ -1293,7 +1293,7 @@ elif (synset):
     c.execute("""SELECT xref, misc 
                FROM xlink 
                WHERE resource='TempoWN' 
-               AND synset=?""", (synset,))
+               AND synset=?""", [synset])
     xrefs = c.fetchall()
     if xrefs:
         print("<p>%s:  " % label('TempoWN', 'Tempo Wordnet',  
@@ -1326,7 +1326,7 @@ elif (synset):
     c.execute("""SELECT xref, misc
                FROM xlink 
                WHERE resource='SentiWN' 
-               AND synset=?""", (synset,))
+               AND synset=?""", [synset])
     xrefs = c.fetchall()
     if xrefs:
         print("<p>%s: " % label('SentiWN', 'SentiWordNet3.0',  
@@ -1351,7 +1351,7 @@ elif (synset):
     c.execute("""SELECT xref, misc 
                FROM xlink 
                WHERE resource='MLSentiCon' 
-               AND synset=?""", (synset,))
+               AND synset=?""", [synset])
     xrefs = c.fetchall()
     if xrefs:
         print("%s: " % label('MLSentiCon', 'Multilingual Sentiment Lexicon',  
@@ -1410,19 +1410,19 @@ elif (lemma):   ## Show all the entries for this lemma in language
 
         c.execute("""SELECT DISTINCT synset 
                      FROM synset_def 
-                     WHERE def GLOB '%s'  
+                     WHERE def GLOB ?
                      AND lang = ?
                      LIMIT 200
-                  """ % (lemma[5:]), [lang])
+                  """, [lemma[5:], lang])
     else:
 
 
         if containsAny(lemma, ".*+?[]"):
-            glob = " OR lemma GLOB '%s' " % lemma
+            glob = " OR lemma GLOB ? " # % lemma
         else:
             glob = ""
 
-        lemma_q = "lemma IN (%s) %s " % (','.join('?'*len(lems)), glob)
+        lemma_q = "lemma IN (%s) %s " % (placeholders_for(lems), glob)
 
 
 
@@ -1439,9 +1439,10 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      %s
                      AND sense.lang = ?
                      LIMIT 200
-                  """ % (lemma_q, 
-                         sense_conf), 
-                        (lems + [lang]))  ### lems, lang
+                  """ % (lemma_q, sense_conf), 
+                  (lems  # consumed in "lemma IN (...)"
+                   + [lemma] if glob else []  # consumed by "OR lemma GLOB ?"
+                   + [lang]))  # consumed by sense.leng = ?
 
     row = c.fetchall()
 
@@ -1452,7 +1453,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
         for s in row:
             sss.add(s[0])
 
-        ass = ",".join("'%s'" % s for s in list(sss))
+        ass = placeholders_for(sss)
 
         if gridmode in ('cow','wnbahasa','wnja','grid'):     
             sense_conf = """ AND sense.confidence IS '1.0' """
@@ -1471,7 +1472,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      LEFT JOIN word
                      WHERE word.wordid = s.wordid
                      ORDER BY freq DESC
-                  """ % (ass, sense_conf), (lang, lang2) )
+                  """ % (ass, sense_conf), [*sss, lang, lang2] )
 
 
 
@@ -1490,7 +1491,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      FROM synset_def 
                      WHERE synset in (%s) 
                      AND lang in (?, ?)
-                  """ % ass, (lang, lang2))
+                  """ % ass, [*sss, lang, lang2])
 
         defs = dd(lambda: dd(lambda: dd(str)))
         for r in c:
@@ -1505,7 +1506,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      WHERE synset2 = synset
                      AND synset1 in (%s) 
                      AND link = 'dmnc'
-                  """ % ass)
+                  """ % ass, [*sss])
         # synset1 : [synset2, name]
         dmncs = dd(list)
         for r in c:
@@ -1517,7 +1518,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      FROM xlink
                      WHERE synset in (%s) 
                      AND resource = '%s' 
-                  """ % (ass, 'svframes'))
+                  """ % (ass, 'svframes'), [*sss])
         rows = c.fetchall()
 
         vframes = dd(lambda: dd(list))

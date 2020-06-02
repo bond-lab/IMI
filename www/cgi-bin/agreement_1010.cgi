@@ -151,8 +151,8 @@ c = con.cursor()
 
 c.execute("""SELECT sid, sent
              FROM  sent
-             WHERE sid >= %s 
-             AND sid <= %s""" % (sid_from, sid_to))
+             WHERE sid >= ? 
+             AND sid <= ?""", (sid_from, sid_to))
 for (sid, sentence) in c:
     sent[sid] = sentence
 
@@ -163,12 +163,12 @@ con.close()
 concept_query = """SELECT sid, cid, clemma, tag, tags, 
                           comment, usrname 
                    FROM concept 
-                   WHERE sid >= %s AND sid <= %s 
-                   ORDER BY sid, cid""" % (sid_from, sid_to)
+                   WHERE sid >= ? AND sid <= ? 
+                   ORDER BY sid, cid"""
 
 word_query = """SELECT sid, wid, word, pos, lemma
                 FROM word
-                WHERE sid >= %s AND sid <= %s""" % (sid_from, sid_to)
+                WHERE sid >= ? AND sid <= ?"""
 
 
 
@@ -180,7 +180,7 @@ for db in dbs + target_db:
     # sys.stderr.write('CONNECTING TO DB: ' + db_ref + ' ' + db[1] + '\n') #TEST#
     # sys.stderr.write('RUNNING QUERY: ' + concept_query + '\n') #TEST#
 
-    c.execute(concept_query)
+    c.execute(concept_query, (sid_from, sid_to))
     for (sid, cid, clemma, tag, tags, comment, usrname) in c:
         data[sid][cid][db_ref]['tag'] = str(tag).strip()
         data[sid][cid][db_ref]['clem'] = clemma

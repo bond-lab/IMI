@@ -283,12 +283,20 @@ def all_corpusdb():
 ### get the synsets for a lemma
 ###
 def lem2ss(c, lem, lang):
-    """return a list of possible synsets for lang; backing off to lang1"""
+    """return a list of possible synsets for lang; backing off to lang1
+
+    TODO(Wilson): Migrate to ntumc_tagdb.py?
+    """
     lems = list(expandlem(lem))
-    c.execute("""SELECT distinct synset 
-             FROM word LEFT JOIN sense ON word.wordid = sense.wordid 
-             WHERE lemma in (%s) AND sense.lang = ?
-             ORDER BY freq DESC""" % ','.join('?'*len(lems)), (lems + [lang]))
+    query = """
+        SELECT DISTINCT synset 
+        FROM word
+        LEFT JOIN sense ON word.wordid = sense.wordid 
+        WHERE lemma in (%s) 
+            AND sense.lang = ?
+        ORDER BY freq DESC
+    """ % placeholders_for(lems)
+    c.execute(query, list(lems) + [lang])
     rows = c.fetchall()
     # if not rows and lang != lang1:
     # w.execute("""SELECT distinct synset
@@ -297,29 +305,127 @@ def lem2ss(c, lem, lang):
     #              ORDER BY freq DESC""" % ','.join('?'*len(lems)), (lems + [lang1]))
     # rows = w.fetchall()
     # com_all='FW:eng'
+
     ### sort by POS
     return sorted([s[0] for s in rows], key=lambda x: x[-1])
 
 def set_rest_x(c, usrname, sid, cid):
-    query="""
-UPDATE concept SET tag='x', usrname=? 
-WHERE ROWID=(
-    SELECT bcon.ROWID 
-    FROM cwl AS a INNER JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
-    LEFT JOIN concept AS acon ON a.sid=acon.sid and a.cid=acon.cid
-    LEFT JOIN concept AS bcon ON b.sid=bcon.sid and b.cid=bcon.cid
-    WHERE a.sid=? and a.cid=? and acon.tag not in ('x', 'e') AND bcon.tag IS NULL
-)"""
+    query = """
+        UPDATE concept 
+        SET tag='x', usrname=? 
+        WHERE ROWID=(
+            SELECT bcon.ROWID 
+            FROM cwl AS a
+            INNER JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
+            LEFT JOIN concept AS acon ON a.sid=acon.sid AND a.cid=acon.cid
+            LEFT JOIN concept AS bcon ON b.sid=bcon.sid AND b.cid=bcon.cid
+            WHERE a.sid=? 
+                AND a.cid=? 
+                AND acon.tag NOT IN ('x', 'e') 
+                AND bcon.tag IS NULL)
+    """
     c.execute(query, (usrname, sid,cid))
 
 
 
 def sql_escape(text):
-    final = ""
-    for letter in text:
-        if letter == "'" or letter == '"':
-            final += letter
-            final += letter
+    """Duplicates instances of ' and " in the given text"""
+    quotes = [
+        '"',  # double quotes
+        "'"   # single quotes
+    ]
+    final = [
+        letter * 2 if (letter in quotes) else letter
+        for letter in text
+    ]
+    return ''.join(final)
+    # for letter in text:
+    #     if letter == "'" or letter == '"':
+    #         final += letter
+    #         final += letter
+    #     else:
+    #         final += letter
+    # return final
+
+
+def placeholders_for(iterable, paramstyle='qmark', startfrom=1, delim=','):
+    """Makes query placeholders for the input iterable: [1, 2, 3] => '?,?,?'
+
+    Returns a string that can safely be formatted directly into your query.
+    If the type of object in the `iterable` argument is str, bytes, or 
+    does not implement the iterator protocol, the object will be coerced a 
+    list containing that one object.
+    This may have unintended consequences.
+    If iterable == [], then '' will be returned. 
+    If iterable == '', then '?' is returned instead.
+    
+    Only ordered paramstyles (qmark|numeric|format) are supported.
+
+    List of paramstyles - https://www.python.org/dev/peps/pep-0249/#paramstyle
+    
+    Examples:
+    assert placeholders_for(b'test') == '?'
+    assert placeholders_for([1, 2, 3]) == '?,?,?'
+    assert placeholders_for('spam', paramstyle='format') == '%s'
+    assert placeholders_for([1, 2, 3], 'numeric') == ':1,:2,:3'
+    assert placeholders_for(dict(A=1, B=2, C=3), 'numeric', 7, '_') == ':7_:8_:9'
+    assert placeholders_for([]) == ''   # Empty collection
+    assert placeholders_for('') == '?'  # NULL-like atomic value is truthy
+    assert placeholders_for([[], '']) == '?,?'  # Probably a bad idea
+    
+    Args:
+    iterable - any object. If a str, bytes, or non-iterable object is given,
+               this value is coerced into a list containing that one object.
+
+    paramstyle - str. Only (qmark|numeric|format) is supported.
+
+    delim - str. The token delimiting each placeholder.
+
+    startfrom - int. Sets the initial number to count from when using the 
+                'numeral' paramstyle.
+    """
+
+    # Guard against non-iterator values passed to the `iterable` param.
+    try:
+        # Coerce iterable literals into a list with just 1 element
+        if isinstance(iterable, str) or isinstance(iterable, bytes):
+            iterable = [iterable]
+        
+        # Try to trigger a TypeError
         else:
-            final += letter
-    return final
+            iterable = iter(iterable)
+    
+    except TypeError as err:
+        # If raised due to non-iterable type, coerce to list with just 1 element
+        if 'object is not iterable' in str(err):
+            iterable = [iterable]
+        else:
+            raise
+
+    # paramstyle defaults to qmark
+    paramstyle = paramstyle or 'qmark'
+
+    # Refuse the temptation to guess the order of unordered paramstyles
+    if paramstyle in ('named', 'pyformat'):
+        err = ('cannot guess the order of placeholders for unordered '
+               'paramstyle "{}"')
+        raise NotImplementedError(err.format(paramstyle))
+
+    if paramstyle == 'numeric':
+        iterable = (':%d' % i + startfrom for i, _ in enumerate(iterable))
+    
+    elif paramstyle == 'format':
+        iterable = ('%s' for x in iterable)
+
+    # Unsupported paramstyles, see NotImplementedError above.
+    # elif paramstyle == 'named':
+    #     iterable = (':{}'.format(key) for key in iterable)
+
+    # elif paramstyle == 'pyformat':
+    #     iterable = ('%({})s'.format(key) for key in iterable)
+
+    # Handle the default qmark paramstyle
+    else:
+        iterable = ('?' for x in iterable)
+
+    return delim.join(iterable)

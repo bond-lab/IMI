@@ -56,10 +56,10 @@ cc = conc.cursor()
 
 cc.execute("""SELECT pos, word, count(word) 
                FROM word
-               WHERE sid > %s
-               AND sid < %s
+               WHERE sid > ?
+               AND sid < ?
                GROUP BY pos, word
-               ORDER BY pos, count(word) DESC """ % (sid_from, sid_to))
+               ORDER BY pos, count(word) DESC """, [sid_from, sid_to])
 
 rows = cc.fetchall()
 

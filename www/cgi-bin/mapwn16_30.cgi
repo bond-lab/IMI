@@ -12,6 +12,7 @@ import pickle
 
 import datetime
 
+from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
@@ -58,9 +59,9 @@ WHERE sense.wordid = word.wordid
 AND synset_def.synset = sense.synset
 AND synset_def.lang in ('eng')
 AND sense.lang in ('eng')
-AND sense.synset in (%s)""" % ",".join("'%s'" % s for s in ssbag)
+AND sense.synset in (%s)""" % placeholders_for(ssbag)
 
-wn.execute(fetch_ss_bylemma)
+wn.execute(fetch_ss_bylemma, list(ssbag))
 rows = wn.fetchall()
 ss_dict = dd(lambda: dd(lambda: dd(lambda:set())))
 for r in rows:

@@ -500,7 +500,7 @@ function subandref(){
 ### Fetching Synsets
 
 c.execute(""" SELECT synset, pos, name, src FROM synset 
-              WHERE src in (%s) """ % source )
+              WHERE src in (?) """, [source] )
 
 rows = c.fetchall()
 

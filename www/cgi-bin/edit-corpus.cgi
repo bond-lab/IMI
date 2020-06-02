@@ -291,11 +291,11 @@ def process_chunks(c):
     fetch_chunks = """SELECT c.sid, c.xid, c.score, xwl.wid
                    FROM chunks as c
                    LEFT JOIN xwl
-                   WHERE c.sid = %d
+                   WHERE c.sid = ?
                    AND c.sid = xwl.sid
                    AND c.xid = xwl.xid
-                   """ % int(sid)
-    c.execute(fetch_chunks)
+                   """
+    c.execute(fetch_chunks, [int(sid)])
     rows = c.fetchall()
     for r in rows:
         (sid, xid, score, wid) = (r[0],r[1],r[2],r[3])
@@ -308,8 +308,8 @@ def process_chunks(c):
                FROM sentiment 
                JOIN cwl WHERE sentiment.sid = cwl.sid 
                AND sentiment.cid = cwl.cid 
-               AND sentiment.sid = %s""" % sid
-    c.execute(fetch_senti_wid)
+               AND sentiment.sid = ?"""
+    c.execute(fetch_senti_wid, [int(sid)])
 
     # sentiment = {sid: {wid :  score}} 
     senti_wid = dd(lambda: dd(int))
@@ -480,11 +480,11 @@ def process_new_error(c):
     fetch_errors = """SELECT e.sid, e.eid, e.label, ewl.wid
                    FROM error as e
                    LEFT JOIN ewl
-                   WHERE e.sid = %d
+                   WHERE e.sid = ?
                    AND e.sid = ewl.sid
                    AND e.eid = ewl.eid
-                   """ % int(sid)
-    c.execute(fetch_errors)
+                   """
+    c.execute(fetch_errors, [int(sid)])
     rows = c.fetchall()
     for r in rows:
         (sid, eid, label, wid) = (r[0],r[1],r[2],r[3])

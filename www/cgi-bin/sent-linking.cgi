@@ -6,6 +6,7 @@ import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 import sqlite3, codecs
 from collections import defaultdict as dd
+from ntumc_utils import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
@@ -77,31 +78,28 @@ sents_links = dd(lambda: dd(set))
 if db != None:
     ############################################################################
     # FETCH THE DOC_ID FROM THE DOC_NAME
-    fetch_docID = """SELECT docid FROM doc WHERE doc='%s' """ % docName
-    curs_fl.execute(fetch_docID)
+    fetch_docID = """SELECT docid FROM doc WHERE doc=? """
+    curs_fl.execute(fetch_docID, [docName])
     rows = curs_fl.fetchall()
     for r in rows:
         fl_docID = r[0]
-    curs_tl.execute(fetch_docID)
+    curs_tl.execute(fetch_docID, [docName])
     rows = curs_tl.fetchall()
     for r in rows:
         tl_docID = r[0]
     ############################################################################
 
     ############################################################################
-    fetch_sents_fl = """SELECT sid, sent FROM sent 
-                        WHERE docID = %d """ % int(fl_docID)
-    fetch_sents_tl = """SELECT sid, sent FROM sent 
-                        WHERE docID = %d """ % int(tl_docID)
-
-    curs_fl.execute(fetch_sents_fl)
+    fetch_sents = """SELECT sid, sent FROM sent 
+                     WHERE docID = ? """
+    
+    curs_fl.execute(fetch_sents, [int(fl_docID)])
     rows = curs_fl.fetchall()
     for r in rows:
         (sid, sent) = (r[0],r[1])
         sents[fl][sid] = sent        
-    fl_sids = ",".join("'%s'" % s for s in sents[fl].keys())
 
-    curs_tl.execute(fetch_sents_tl)
+    curs_tl.execute(fetch_sents, [int(tl_docID)])
     rows = curs_tl.fetchall()
     for r in rows:
         (sid, sent) = (r[0],r[1])
@@ -109,10 +107,11 @@ if db != None:
     ############################################################################
 
     ############################################################################
+    fl_sids = placeholders_for(sents[fl].keys())
     fetch_all = """SELECT slid, fsid, tsid
                    FROM slink
-                   WHERE fsid in (%s) """ % (fl_sids)
-    curs.execute(fetch_all)
+                   WHERE fsid in (%s) """ % fl_sids
+    curs.execute(fetch_all, list(sents[fl].keys()))
     rows = curs.fetchall()
     for r in rows:
         (slid, fsid, tsid) = (r[0],r[1],r[2])

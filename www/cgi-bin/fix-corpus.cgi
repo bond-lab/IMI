@@ -321,7 +321,7 @@ if editm == "update" and userID in valid_usrs:
         wids_old = set()
         a.execute( """SELECT wid, usrname
                       FROM cwl 
-                      WHERE sid LIKE "%s" AND cid=?""" % (int(sid_edit),), [cid] )
+                      WHERE sid LIKE ? AND cid=?""", [str(int(sid_edit)), cid])
         for (wid_old, usrname) in a:
             wids_old.add(wid_old)
 
@@ -707,7 +707,7 @@ pid = dict()
 sentcomment = dict()
 a.execute( """SELECT sid, pid, sent, comment
               FROM  sent
-              WHERE sid LIKE "%s" """ % sid_edit )
+              WHERE sid LIKE ? """, [str(sid_edit)] )
 for (sid, p, s, c) in a:
     sent[sid] = s
     pid[sid] = p
@@ -719,7 +719,7 @@ for (sid, p, s, c) in a:
 words = dict()
 a.execute( """SELECT wid, word, pos, lemma, comment
               FROM word
-              WHERE sid LIKE "%s" """ % sid_edit )
+              WHERE sid LIKE ? """, [str(sid_edit)] )
 for (wid, word, pos, lemma, comment) in a:
     words[wid] = [word, pos, lemma, comment]
 
@@ -730,7 +730,7 @@ concepts = dict()
 a.execute( """SELECT cid, clemma, tag, tags, 
                      comment, usrname 
               FROM concept 
-              WHERE sid LIKE "%s" """ % (sid_edit,) )
+              WHERE sid LIKE ? """, [str(sid_edit)] )
 
 for (cid, clemma, tag, tags, comment, ursname) in a:
     concepts[cid] = [clemma, tag, ursname, comment]
@@ -742,7 +742,7 @@ cwls = dd(lambda: [])
 cwls_usr = dd(lambda: set())
 a.execute( """SELECT wid, cid, usrname 
               FROM cwl 
-              WHERE sid LIKE "%s" """ % (sid_edit,) )
+              WHERE sid LIKE ? """, [str(sid_edit)])
 
 for (wid, cid, usrname) in a:
     cwls[cid].append(wid)

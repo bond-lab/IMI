@@ -56,8 +56,8 @@ if db != None:
     # FETCH SENTENCE
     ############################################################################
     fetch_sents = """SELECT sid, sent FROM sent 
-                     WHERE sid = %d """ % int(sid)
-    curs.execute(fetch_sents)
+                     WHERE sid = ? """
+    curs.execute(fetch_sents, [int(sid)])
     rows = curs.fetchall()
     for r in rows:
         (sid, sent) = (r[0],r[1])
@@ -69,8 +69,8 @@ if db != None:
     ############################################################################
     fetch_words = """ SELECT sid, wid, word, pos, lemma
                       FROM word
-                      WHERE sid = %d""" % int(sid)
-    curs.execute(fetch_words)
+                      WHERE sid = ?"""
+    curs.execute(fetch_words, [int(sid)])
     rows = curs.fetchall()
     full_wid_set = set()
     for r in rows:
@@ -84,8 +84,8 @@ if db != None:
     ############################################################################
     fetch_concepts = """ SELECT sid, cid, clemma, tag 
                          FROM concept
-                         WHERE sid =  %d """ % int(sid)
-    curs.execute(fetch_concepts)
+                         WHERE sid =  ? """
+    curs.execute(fetch_concepts, [int(sid)])
     rows = curs.fetchall()
     for r in rows:
         (sid, cid, clemma, tag) = (r[0],r[1],r[2],r[3])
@@ -97,8 +97,8 @@ if db != None:
     ############################################################################
     fetch_cwls = """SELECT sid, wid, cid 
                     FROM cwl 
-                    WHERE sid = %d """ % int(sid)
-    curs.execute(fetch_cwls)
+                    WHERE sid = ? """ 
+    curs.execute(fetch_cwls, [int(sid)])
     rows = curs.fetchall()
     for r in rows:
         (sid, wid, cid) = (r[0],r[1],r[2])
@@ -117,11 +117,11 @@ if db != None:
                                  xwl.wid, c.comment
                        FROM chunks as c
                        LEFT JOIN xwl
-                       WHERE c.sid = %d
+                       WHERE c.sid = ?
                        AND c.sid = xwl.sid
                        AND c.xid = xwl.xid
-                    """ % int(sid)
-        curs.execute(fetch_chunks)
+                    """
+        curs.execute(fetch_chunks, [int(sid)])
         rows = curs.fetchall()
         for r in rows:
             (sid, xid, score, wid, comm) = (r[0],r[1],r[2],r[3],r[4])
@@ -151,8 +151,8 @@ if db != None:
                    FROM sentiment 
                    JOIN cwl WHERE sentiment.sid = cwl.sid 
                    AND sentiment.cid = cwl.cid 
-                   AND sentiment.sid = %s""" % sid
-        curs.execute(query)
+                   AND sentiment.sid = ?"""
+        curs.execute(query, [int(sid)])
 
         # sentiment = {sid: {wid :  score}} 
         for (sid, wid, score) in curs:

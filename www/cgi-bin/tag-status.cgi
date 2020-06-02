@@ -186,9 +186,9 @@ lemma_tags = dd(lambda: dd(int))
 a.execute("""SELECT tag, clemma, count(*)
              FROM concept
              WHERE (tag in ('x','w','e','') OR tag is Null)
-             AND sid > %s AND sid < %s
+             AND sid > ? AND sid < ?
              GROUP BY clemma, tag
-             ORDER BY count(*)""" %(sid_from, sid_to))
+             ORDER BY count(*)""", [sid_from, sid_to])
 for (tag, clemma, count) in a:
     lemma_tags[tag][clemma] = count
 
@@ -196,9 +196,9 @@ sid_tags = dd(lambda: dd(int))
 a.execute("""SELECT sid, tag, count(*) 
              FROM concept
              WHERE (tag in ('x','w','e','') OR tag is Null)
-             AND sid > %s AND sid < %s 
+             AND sid > ? AND sid < ?
              GROUP BY sid, tag 
-             ORDER BY count(*)""" %(sid_from, sid_to))
+             ORDER BY count(*)""", [sid_from, sid_to])
 for (sid, tag, count) in a:
     sid_tags[tag][sid] = count
 
@@ -206,9 +206,9 @@ lemma_all = dd(lambda: dd(list))
 a.execute("""SELECT sid, tag, clemma
              FROM concept
              WHERE (tag in ('x','w','e','') OR tag is Null)
-             AND sid > %s AND sid < %s 
+             AND sid > ? AND sid < ?
              GROUP BY sid, tag 
-             ORDER BY count(*)""" %(sid_from, sid_to))
+             ORDER BY count(*)""", [sid_from, sid_to])
 for (sid, tag, clemma) in a:
     lemma_all[tag][clemma].append(sid)
 

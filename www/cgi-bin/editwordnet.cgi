@@ -195,7 +195,7 @@ try:
                 dlang = deflangs[i] # MATCH LANG PER DEF
 
                 # FETCH THE HIGHEST SID (THERE IS ALWAYS SOMETHING TO RETURN)
-                curs.execute(""" SELECT max(sid) from synset_def where synset like '%s' """ % synset)
+                curs.execute(""" SELECT max(sid) from synset_def where synset like ? """, [synset])
                 sid = int(curs.fetchone()[0]) + 1 # NEW SID is +1 to highest
 
                 # INSERT NEW DEFINITONS
@@ -226,8 +226,8 @@ try:
                 # FETCH THE HIGHEST SID (MAY FAIL)
                 curs.execute("""SELECT max(sid) 
                                 FROM synset_ex 
-                                WHERE synset LIKE '%s' 
-                             """ % synset)
+                                WHERE synset LIKE ? 
+                             """, [synset])
                 try: # TRY ADDING 1 
                     sid = int(curs.fetchone()[0]) + 1
                 except: # ELSE THERE WERE NO EXAMPLES
@@ -914,7 +914,7 @@ try:
                     # FETCH THE HIGHEST SID (MAY FAIL)
                     curs.execute("""SELECT max(sid) 
                                     FROM synset_ex 
-                                    WHERE synset LIKE '%s' """ % synset)
+                                    WHERE synset LIKE ? """, [synset])
                     try: # TRY ADDING 1
                         sid = int(curs.fetchone()[0]) + 1
                     except: # ELSE THERE WERE NO EXAMPLES

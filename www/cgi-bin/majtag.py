@@ -34,7 +34,7 @@ a = conn_dba.cursor()
 sent = dict()
 a.execute( """SELECT sid, sent
               FROM  sent
-              WHERE sid >= %s AND sid <= %s""" % (sid_from, sid_to) )
+              WHERE sid >= ? AND sid <= ?""", [sid_from, sid_to] )
 for (sid, s) in a:
     sent[sid] = s
 
@@ -50,8 +50,8 @@ ag_scores = dd(lambda: dd(int))  # e.g. {sid: {'AvsS' : 0.8} }
 concept_query = """SELECT sid, cid, clemma, tag, tags, 
                           comment, ntag, usrname 
                    FROM concept 
-                   WHERE sid >= %s AND sid <= %s 
-                   ORDER BY sid, cid""" % (sid_from, sid_to)
+                   WHERE sid >= ? AND sid <= ?
+                   ORDER BY sid, cid"""
 
 word_query = """SELECT sid, wid, word, pos, lemma
                 FROM word
@@ -59,7 +59,7 @@ word_query = """SELECT sid, wid, word, pos, lemma
 
 
 # DATABASE A (connected on Sentences)
-a.execute(concept_query)
+a.execute(concept_query, [sid_from, sid_to])
 for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in a:
     data[sid][cid]['a']['tag'] = str(tag).strip()
     data[sid][cid]['a']['ntag'] = str(ntag).strip()
@@ -74,7 +74,7 @@ for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in a:
 # DATABASE B
 connb = sqlite3.connect(dbb)
 b = connb.cursor()
-b.execute(concept_query)
+b.execute(concept_query, [sid_from, sid_to])
 
 for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in b:
     data[sid][cid]['b']['tag'] = str(tag).strip()
@@ -90,7 +90,7 @@ for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in b:
 # DATABASE C
 connc = sqlite3.connect(dbc)
 c = connc.cursor()
-c.execute(concept_query)
+c.execute(concept_query, [sid_from, sid_to])
 
 for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in c:
     data[sid][cid]['c']['tag'] = str(tag).strip()
@@ -106,7 +106,7 @@ for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in c:
 # DATABASE D
 conng = sqlite3.connect(dbd)
 g = conng.cursor()
-g.execute(concept_query)
+g.execute(concept_query, [sid_from, sid_to])
 
 for (sid, cid, clemma, tag, tags, comment, ntag, usrname) in g:
     data[sid][cid]['g']['tag'] = str(tag).strip()

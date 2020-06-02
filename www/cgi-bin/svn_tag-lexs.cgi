@@ -246,7 +246,13 @@ for cd in cids.split(' '): ### prefer local ntag
 
     if tag: ### then local tag
         if tag != oldtag:
-            c.execute("update concept set tag=?, usrname=? where tag IS NOT ? and sid=? and cid=?", (tag, usrname, tag, sid, cid))
+            c.execute("""
+                UPDATE concept 
+                SET tag=?, usrname=? 
+                WHERE tag IS NOT ? 
+                    AND sid=? 
+                    AND cid=?
+                """, (tag, usrname, tag, sid, cid))
             # set_others_x (c, usrname, sid, cid,) # THIS WAS SERIOUSLY BUGGY!
             #jilog('im tagging tag=%s - sid=%s - cid=%s [TA1412_01]' % (tag, sid, cid))
         else:
@@ -262,7 +268,13 @@ for cd in cids.split(' '): ### prefer local ntag
     ### don't do anything otherwise
     ### always update the comment
     if com != oldcom:
-        c.execute("update concept set comment=?, usrname=? where comment IS NOT ? and sid=? and cid=?", (com, usrname, com, sid, cid))
+        c.execute("""
+            UPDATE concept 
+            SET comment=?, usrname=? 
+            WHERE comment IS NOT ? 
+                AND sid=? 
+                AND cid=?
+            """, (com, usrname, com, sid, cid))
         #jilog('im updating comment for com=%s - sid=%s - cid=%s [TA1412_01]' % (com, sid, cid))
     else:
         #jilog('im NOT updating comment for com=%s - sid=%s - cid=%s [TA1412_01] because it is NOT changed' % (com, sid, cid))
@@ -274,12 +286,22 @@ jilog("End processing all the tags --------------- [TA1412_01]")
 if addme:
     ### add this as a concept
     ls = re.split(r'( |_|∥)', addme)
-    c.execute("select distinct sid from word where lemma like ? or word like ?", ('%s' % ls[0],ls[0]))
-    sids = ",".join(str(s[0]) for s in c.fetchall())
+    c.execute("""
+        SELECT DISTINCT sid 
+        FROM word 
+        WHERE lemma LIKE ? 
+            OR word LIKE ?
+        """, ('%s' % ls[0], ls[0]))
+    sids = [str(row[0]) for row in c.fetchall()]
     ##print sids
     if sids:
         sents = dd(lambda:dd(list))
-        c.execute("select sid, wid, word, lemma from word where sid in (%s) order by sid, wid" % sids) 
+        c.execute("""
+            SELECT sid, wid, word, lemma 
+            FROM word 
+            WHERE sid IN (%s) 
+            ORDER BY sid, wid
+            """ % placeholders_for(sids), sids) 
         for (sid, wid, word, lem) in c:
             sents[sid][wid] = (word,lem)
             #print word
@@ -301,15 +323,16 @@ if addme:
                 ###
                 ### Add the concept
                 ###
-                c.execute("select max(cid) from concept where sid = ?", (int(sid),))
+                c.execute("""SELECT max(cid) FROM concept WHERE sid = ?""", (int(sid),))
                 (maxcid,) = c.fetchone()
                 newcid = maxcid + 1
-                c.execute("INSERT INTO concept(sid, cid, tag, clemma, comment, usrname) VALUES (?,?,?,?,?,?)",
-                          (sid, newcid, None, addme, None, usrname))
+                c.execute("""INSERT INTO concept(sid, cid, tag, clemma, comment, usrname)
+                             VALUES (?,?,?,?,?,?)
+                          """, (sid, newcid, None, addme, None, usrname))
                 for wid in wids:
                     c.execute("""INSERT INTO cwl(sid, wid, cid, usrname) 
-                                 VALUES (?,?,?,?)""",
-                              (sid, wid, newcid, usrname))
+                                 VALUES (?,?,?,?)
+                              """, (sid, wid, newcid, usrname))
 
 con.commit()
 

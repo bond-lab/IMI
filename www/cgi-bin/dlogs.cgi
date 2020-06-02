@@ -18,6 +18,7 @@ import re, sqlite3, collections
 from collections import defaultdict as dd
 import datetime
 from ntumc_webkit import *
+from ntumc_util import placeholders_for
 from lang_data_toolkit import *
 
 
@@ -149,7 +150,7 @@ for r in rows:
     ss_lang_defs[synset][l] += definition + "; "
 
 # Checking for tags
-ass = ",".join("'%s'" % s for s in ss_lang_defs.keys())
+ass = placeholders_for(ss_lang_defs.keys())
 
 synsetdates = """
 SELECT synset_new, date_update
@@ -157,7 +158,7 @@ FROM synset_log
 WHERE synset_new in (%s) 
 """ % ass
 
-wn.execute(synsetdates)
+wn.execute(synsetdates, list(ss_lang_defs.keys()))
 ss_dates = dd()
 rows = wn.fetchall()
 for r in rows:
@@ -211,7 +212,7 @@ if exclude_undated == "yes":
 
 
 # Get the list of updated synsets (after clean ups)
-ass = ",".join("'%s'" % s for s in ss_lang_defs.keys())
+ass = placeholders_for(ss_lang_defs.keys())
 
 
 
@@ -221,7 +222,7 @@ FROM sense
 WHERE synset IN (%s)
 GROUP BY synset""" % ass
 
-wn.execute(checksenses)
+wn.execute(checksenses, list(ss_lang_defs.keys()))
 ss_senses = dd() # number of senses per synset
 rows = wn.fetchall()
 for r in rows:
@@ -245,7 +246,7 @@ for valid_db in ["../db/eng.db","../db/cmn.db", "../db/ind.db"]:
     conc = sqlite3.connect(valid_db)
     cc = conc.cursor()
 
-    cc.execute(corpususage)
+    cc.execute(corpususage, list(ss_lang_defs.keys()))
     rows = cc.fetchall()
 
     for r in rows:
@@ -293,13 +294,13 @@ for r in rows:
 ################################################################################
 # Fetching Synset Names & Definitions
 ################################################################################
-ass = ",".join("'%s'" % s for s in synset_set)
+ass = placeholders_for(synset_set)
 
 wn.execute("""SELECT synset.synset, lang, def, sid, name
               FROM synset_def
               LEFT JOIN synset
               WHERE synset.synset = synset_def.synset 
-              AND synset_def.synset in (%s) """ % ass)
+              AND synset_def.synset in (%s) """, list(synset_set))
 
 rows = wn.fetchall()
 defs = dd(lambda: dd(set))

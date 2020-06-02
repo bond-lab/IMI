@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #import re, sqlite3, collections
-from ntumc_util import jilog
+from ntumc_util import jilog, placeholders_for
 
 ####################################################################
 # DATABASE ACCESS
@@ -27,89 +27,178 @@ def set_others_x(cursor, usrname, sid, cid):
 # totag query
 # lems = list(expandlem(lemma))
 def select_concept(cur, lems, lim, sid_from, sid_to):
-    query = """SELECT sid, cid, clemma, tag, tags, comment 
-               FROM concept WHERE clemma in (%s) 
-               AND sid >= %s AND sid <= %s
-               ORDER BY tag, sid, cid LIMIT ? 
-            """ % (','.join('?'*len(lems)), sid_from, sid_to)
-    #print query 
-    cur.execute(query, lems + [int(lim)])
+    """
+    cur - sqlite3.Cursor
+    lems - list
+    lim, sid_from, sid_to - int
+    """
+    query = """
+        SELECT sid, cid, clemma, tag, tags, comment 
+        FROM concept 
+        WHERE clemma IN (%s) 
+            AND sid >= %s AND sid <= %s
+        ORDER BY tag, sid, cid LIMIT ? 
+    """ % placeholders_for(lems)
+    #print query
+    limits = [int(sid_from), int(sid_to), int(lim)]
+    cur.execute(query, lems + limits)
     return cur.fetchall()
 
 def select_cwlink(cur, lems, lim):
-    return cur.execute("""
+    query = """
         SELECT sid, wid, cid 
         FROM cwl
-        WHERE sid in (select sid from concept where clemma in (%s) 
-                      order by tag, sid, cid LIMIT ?)"""% ','.join('?'*len(lems)), 
-                               lems + [int(lim)]).fetchall()
+        WHERE sid IN (
+            SELECT sid 
+            FROM concept 
+            WHERE clemma IN (%s) 
+            ORDER BY tag, sid, cid 
+            LIMIT ?)
+    """ % placeholders_for(lems)
+    cur.execute(query, lems + [int(lim)])
+    return cur.fetchall()
 
 def select_tag_distribution(cur, lems):
-        query = """SELECT count(tag), tag FROM concept WHERE clemma in (%s) group by tag order by count(tag) desc; """ % ','.join('?'*len(lems))
-        #jilog('Executing query: %s' % query)
-        #jilog('Values: %s' % str(lems))
-        cur.execute(query, lems)
-        return cur.fetchall()
+    query = """
+        SELECT count(tag), tag 
+        FROM concept
+        WHERE clemma in (%s)
+        GROUP BY tag 
+        ORDER BY count(tag) DESC;
+    """ % placeholders_for(lems)
+    #jilog('Executing query: %s' % query)
+    #jilog('Values: %s' % str(lems))
+    cur.execute(query, lems)
+    return cur.fetchall()
 
 def select_word(cur, lems, lim):
-    return cur.execute("""select wid, word, pos, lemma, sid 
-                               from word where sid in (select sid from concept 
-                               where clemma in (%s) 
-                               order by tag, sid, cid LIMIT ?) order by sid, wid""" % ','.join('?'*len(lems)),
-                            lems + [ int(lim)]).fetchall()
+    query = """
+        SELECT wid, word, pos, lemma, sid 
+        FROM word 
+        WHERE sid IN (
+           SELECT sid 
+           FROM concept 
+           WHERE clemma IN (%s) 
+           ORDER BY tag, sid, cid 
+           LIMIT ?
+        ) ORDER BY sid, wid
+    """ % placeholders_for(lems)
+    cur.execute(query, lems + [int(lim)])
+    return cur.fetchall()
 
 def select_sentence_id(cur,lemma):
-    return cur.execute("select distinct sid from word where lemma like ? or word like ?", (lemma, lemma)).fetchall()
+    query = """
+        SELECT DISTINCT sid 
+        FROM word 
+        WHERE lemma LIKE ? 
+            OR word LIKE ?
+    """
+    cur.execute(query, [lemma, lemma])
+    return cur.fetchall()
 
 def select_word_from_sentence(cur, sids):
-    return cur.execute("select sid, wid, word, lemma from word where sid in (%s) order by sid, wid" % ','.join(sids)).fetchall()
+    query = """
+        SELECT sid, wid, word, lemma
+        FROM word 
+        WHERE sid IN (%s)
+        ORDER BY sid, wid
+    """ % placeholders_for(sids)
+    cur.execute(query, list(sids))
+    return cur.fetchall()
 
 # 2014-06-30 [Tuan Anh]
 # fix 500 items limitation
 def select_other_concept(cur, lems, lim):
-    all_sids_query = """SELECT distinct sid FROM concept WHERE clemma in (%s) ORDER BY tag, sid, cid LIMIT %d""" % (','.join('?'*len(lems)), int(lim))
-    all_cids_query = """SELECT distinct cid FROM concept WHERE clemma in (%s) ORDER BY tag, sid, cid LIMIT %d""" % (','.join('?'*len(lems)), int(lim))
-    query="""SELECT b.cid, b.sid, b.wid, c.clemma, c.tag, c.tags, c.comment  
-                 FROM concept AS z
-                 JOIN cwl AS a ON  z.sid=a.sid and z.cid=a.cid 
-                 JOIN cwl AS b ON a.sid=b.sid and a.wid=b.wid 
-                 JOIN concept as c on b.sid=c.sid and b.cid=c.cid 
-                 WHERE z.sid in (%s) and z.cid in (%s) and z.clemma in (%s)"""  % (
-            all_sids_query,  all_cids_query, ','.join('?'*len(lems)))
+    lim = [int(lim)]
+    
+    all_sids_query = """
+        SELECT DISTINCT sid FROM concept
+        WHERE clemma IN (%s) 
+        ORDER BY tag, sid, cid LIMIT ?
+    """ % placeholders_for(lems)
+    
+    all_cids_query = """
+        SELECT DISTINCT cid FROM concept 
+        WHERE clemma in (%s) 
+        ORDER BY tag, sid, cid LIMIT ?
+    """ % placeholders_for(lems)
+    
+    query = """
+        SELECT b.cid, b.sid, b.wid, c.clemma, c.tag, c.tags, c.comment  
+        FROM concept AS z
+        JOIN cwl AS a ON  z.sid=a.sid AND z.cid=a.cid 
+        JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
+        JOIN concept AS c ON b.sid=c.sid AND b.cid=c.cid 
+        WHERE z.sid IN (%s) 
+            AND z.cid IN (%s)
+            AND z.clemma in (%s)
+    """ % (all_sids_query, all_cids_query, placeholders_for(lems))
+    
     jilog("Find other concept: %s [lemma = %s]" % (query, lems))
-    return cur.execute(query, lems + lems + lems).fetchall()
+    cur.execute(query, lems + lim + lems + lim + lems)
+    return cur.fetchall()
 
 ## 2014-07-01 [Tuan Anh]
 # Add filter
 def select_corpus(cur, lang):
     query = """SELECT * FROM corpus WHERE language=?;"""
-    results = cur.execute(query, (lang,)).fetchall()
+    cur.execute(query, [lang])
+    results = cur.fetchall()
     return results
     
 
 ## ACCESS [WORDNET]
 
 def select_wordnet_freq(wcur, all_synsets):
-    a_query = "select lemma, freq, synset from sense left join word on word.wordid = sense.wordid where synset in (%s) and sense.lang = ? ORDER BY synset, freq DESC" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT lemma, freq, synset 
+        FROM sense 
+        LEFT JOIN word ON word.wordid = sense.wordid 
+        WHERE synset IN (%s) 
+            AND sense.lang = ? 
+        ORDER BY synset, freq DESC
+    """ % placeholders_for(all_synsets)
+    
     jilog("I'm selecting %s" % a_query)
+    jilog("using values %s" % list(all_synsets))
+    
     #tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    wcur.execute(a_query, list(all_synsets) + ['eng'])
+    results = wcur.fetchall()
     #tm.stop().log("task = select word left join sense")
     return results
 
 def select_synset_def(wcur, all_synsets):
-    a_query = "SELECT def, synset FROM synset_def WHERE synset in (%s) and lang = ? order by synset, sid" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT def, synset 
+        FROM synset_def 
+        WHERE synset in (%s) 
+            AND lang = ? 
+        ORDER BY synset, sid
+    """ % placeholders_for(all_synsets)
+
     jilog("I'm selecting %s\n" % a_query)
+    jilog("using values %s" % list(all_synsets))
     #tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    wcur.execute(a_query, list(all_synsets) + ['eng'])
+    results = wcur.fetchall()
     #tm.stop().log("task = select synset_def")
     return results
 
 def select_synset_def_ex(wcur, all_synsets):
-    a_query = "SELECT def, synset FROM synset_ex WHERE synset in (%s) and lang = ? order by synset, sid" % ','.join(["'%s'" % x for x in all_synsets] )
+    a_query = """
+        SELECT def, synset 
+        FROM synset_ex 
+        WHERE synset IN (%s) 
+            AND lang = ? 
+        ORDER BY synset, sid
+    """ % placeholders_for(all_synsets)
+    
     jilog("I'm selecting %s\n" % a_query)
+    jilog("using values %s" % list(all_synsets))
     #tm.start()
-    results = wcur.execute(a_query, ('eng',)).fetchall()
+    wcur.execute(a_query, list(all_synsets) + ['eng'])
+    results = wcur.fetchall()
     #tm.stop().log("task = synset_ex")
     return results
 ####################################################################

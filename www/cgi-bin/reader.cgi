@@ -95,8 +95,8 @@ spid = dd(lambda: dd(str))
 if db != None:
     ############################################################################
     # FETCH THE DOC_ID FROM THE DOC_NAME
-    fetch_docID = """SELECT docid FROM doc WHERE doc='%s' """ % docName
-    curs_fl.execute(fetch_docID)
+    fetch_docID = """SELECT docid FROM doc WHERE doc=? """
+    curs_fl.execute(fetch_docID, [docName])
     rows = curs_fl.fetchall()
     for r in rows:
         fl_docID = r[0]
@@ -108,19 +108,18 @@ if db != None:
 
     ############################################################################
     fetch_sents_fl = """SELECT sid, pid, sent FROM sent 
-                        WHERE docID = %d """ % int(fl_docID)
+                        WHERE docID = ? """
     fetch_sents_tl = """SELECT sid, pid, sent FROM sent 
-                        WHERE docID = %d """ % int(tl_docID)
+                        WHERE docID = ? """
 
-    curs_fl.execute(fetch_sents_fl)
+    curs_fl.execute(fetch_sents_fl, [int(fl_docID)])
     rows = curs_fl.fetchall()
     for r in rows:
         (sid, pid, sent) = (r[0],r[1], r[2])
         sents[fl][sid] = sent 
         spid[fl][sid] = pid
-    fl_sids = ",".join("'%s'" % s for s in sents[fl].keys())
 
-    curs_tl.execute(fetch_sents_tl)
+    curs_tl.execute(fetch_sents_tl, [int(fl_docID)])
     rows = curs_tl.fetchall()
     for r in rows:
         (sid, pid, sent) = (r[0],r[1], r[2])
@@ -129,10 +128,11 @@ if db != None:
     ############################################################################
 
     ############################################################################
+    fl_sids = placeholders_for(sents[fl].keys())
     fetch_all = """SELECT slid, fsid, tsid
                    FROM slink
-                   WHERE fsid in (%s) """ % (fl_sids)
-    curs.execute(fetch_all)
+                   WHERE fsid in (%s) """ % fl_sids
+    curs.execute(fetch_all, list(sents[fl].keys()))
     rows = curs.fetchall()
     for r in rows:
         (slid, fsid, tsid) = (r[0],r[1],r[2])

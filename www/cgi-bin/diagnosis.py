@@ -5,6 +5,7 @@ import cgi, urllib
 import cgitb; cgitb.enable()  # for troubleshooting
 from collections import defaultdict as dd
 import sys  #, codecs
+from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
@@ -93,17 +94,17 @@ SELECT cl.sid, cl.cid, cl.tag
 FROM (SELECT c.sid, c.cid, wid, tag 
      FROM (SELECT sid, cid, tag 
            FROM concept WHERE 1 > 0 
-           AND sid >= {} 
-           AND sid <= {} ) c 
+           AND sid >= ? 
+           AND sid <= ? ) c 
      LEFT JOIN cwl 
      WHERE cwl.sid = c.sid 
      AND c.cid = cwl.cid) cl 
 LEFT JOIN word 
 WHERE word.sid = cl.sid 
 AND word.wid = cl.wid
-""".format(sid_from, sid_to)
+"""
 
-c.execute(showcorpus)
+c.execute(showcorpus, (sid_from, sid_to))
 rows = c.fetchall()
 
 sid_cid = dd(lambda: dd(lambda: str))
@@ -118,34 +119,34 @@ sids = ",".join("'%s'" % s for s in sid_cid.keys())
 fetch_concept_details = """
 SELECT sid, cid, clemma, tag 
 FROM concept
-WHERE sid >= {}
-AND sid <= {}
-ORDER BY sid""".format(sid_from, sid_to)
+WHERE sid >= ?
+AND sid <= ?
+ORDER BY sid"""
 
 
 fetch_sent_full_details = """
 SELECT w.sid, w.wid, w.word, w.lemma, w.pos, cwl.cid
 FROM (SELECT sid, wid, word, lemma, pos
       FROM word
-      WHERE sid >= {}
-      AND sid <= {} ) w
+      WHERE sid >= ?
+      AND sid <= ? ) w
 LEFT JOIN cwl
 WHERE w.wid = cwl.wid
 AND w.sid = cwl.sid
-ORDER BY w.sid""".format(sid_from, sid_to)
+ORDER BY w.sid"""
 
 
 fetch_sent = """
 SELECT sid, wid, word, lemma, pos
 FROM word
-WHERE  sid >= {}
-AND sid <= {}""".format(sid_from, sid_to)
+WHERE  sid >= ?
+AND sid <= ?"""
 
 fetch_fullsent = """
 SELECT sid, sent.sent
 FROM sent
-WHERE  sid >= {}
-AND sid <= {}""".format(sid_from, sid_to)
+WHERE  sid >= ?
+AND sid <= ?"""
 
 
 sid_wid = dd(lambda: dd(list))
@@ -163,7 +164,7 @@ sss = set() # holds the list of all tags (for sentiment)
 words_total = 0
 concepts_total = 0
 
-c.execute(fetch_concept_details)
+c.execute(fetch_concept_details, (sid_from, sid_to))
 rows = c.fetchall()
 for r in rows:
     (sid, cid, clemma, tag) = (r[0], r[1], r[2], r[3]) 
@@ -174,7 +175,7 @@ for r in rows:
     sss.add(tag)
 
 
-c.execute(fetch_sent_full_details)
+c.execute(fetch_sent_full_details, (sid_from, sid_to))
 rows = c.fetchall()
 for r in rows:
     (sid, wid, word, 
@@ -187,7 +188,7 @@ for r in rows:
     sid_wid_tag[sid][wid].append(sid_cid_tag[sid][cid])
 
 
-c.execute(fetch_fullsent)
+c.execute(fetch_fullsent, (sid_from, sid_to))
 rows = c.fetchall()
 for r in rows:
     (sid, fullsent) = (r[0], r[1])
@@ -195,7 +196,7 @@ for r in rows:
 
 
 
-c.execute(fetch_sent)
+c.execute(fetch_sent, (sid_from, sid_to))
 rows = c.fetchall()
 for r in rows:
     (sid, wid, word, lemma, pos) = (r[0], r[1], r[2], r[3], r[4])
@@ -417,21 +418,20 @@ print("<hr><br>")
 # CHECK TAGS / WORDNET CONSISTENCY
 ################################################################################
 wndb = "../db/wn-ntumc.db"
-ass = ",".join("'%s'" % s for s in sss)
 wn = """SELECT synset, s.lang, lemma, 
                freq, src, confidence 
          FROM ( SELECT synset, lang, wordid, freq, src, confidence 
                 FROM sense 
-                WHERE synset in ({}) 
-                AND lang = '{}' ) s
+                WHERE synset in (%s) 
+                AND lang = ? ) s
          LEFT JOIN word
          WHERE word.wordid = s.wordid
-         ORDER BY freq DESC """.format(ass, lang)
+         ORDER BY freq DESC """ % (placeholders_for(sss))
 
 con2 = sqlite3.connect(wndb)
 c2 = con2.cursor()
 
-c2.execute(wn)
+c2.execute(wn, (*sss, lang))
 words = dd(lambda: set())
 uwords = dd(lambda: set())
 for r in c2:

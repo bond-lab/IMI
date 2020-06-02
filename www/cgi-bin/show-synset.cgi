@@ -34,37 +34,37 @@ c = con.cursor()
 ##
 
 ss = dd(lambda: dd(str))
-c.execute("select sid, docID, sent from sent where sid >= ? and sid <= ?", 
+c.execute("""SELECT sid, docID, sent FROM sent WHERE sid >= ? AND sid <= ?""", 
           (sid - window, sid + window))
 sss =set() ### all the synsets
 for (s, d, sent) in c:
     sss.add(s)
     if lemma:
         for l in lemma.split():
-            sent=sent.replace(l,"<font color='green'>%s</font>" % l)
-    ss[d][s]=sent
+            sent = sent.replace(l,"<font color='green'>%s</font>" % l)
+    ss[d][s] = sent
 
-query="""select corpusID, docid, doc, title, url from doc  
-        where docid in (%s)""" % ','.join('?'*len(ss.keys()))
-c.execute(query, ss.keys())
+query = """SELECT corpusID, docid, doc, title, url FROM doc  
+           WHERE docid IN (%s)""" % placeholders_for(ss.keys())
+c.execute(query, list( ss.keys()))
 
-doc= dd(lambda: dd(list))
+doc = dd(lambda: dd(list))
 for (corpusID, docid, docname, title, url) in c:
     if url:
         if not url.startswith('http://'):
-            url = 'http://' +url
+            url = 'http://' + url
     else:
-        url=''
+        url = ''
     doc[int(corpusID)][int(docid)] = (url, title, docname)
 
-query="""select corpusID, corpus, title from corpus 
-         where corpusID in (%s)""" % ','.join('?'*len(doc.keys()))
+query = """SELECT corpusID, corpus, title FROM corpus 
+           WHERE corpusID IN (%s)""" % placeholders_for(doc.keys())
 c.execute(query, doc.keys())
 
 corp = dd(list)
 for (corpusID, corpus, title) in c:
     #print corpusID, corpus, title
-    corp[int(corpusID)]=(title, corpus)
+    corp[int(corpusID)] = (title, corpus)
 
 ###
 ### get links  ### FIXME -- how to tell which direction programatically?
@@ -74,23 +74,23 @@ ttt = dict()
 if os.path.isfile("../db/%s.db" % linkdb):
     lcon = sqlite3.connect("../db/%s.db" % linkdb)
     lc = lcon.cursor() 
-    query="""select fsid, tsid from slink  
-        where fsid in (%s)""" % ','.join('?'*len(sss))
+    query = """SELECT fsid, tsid FROM slink  
+               WHERE fsid IN (%s)""" % placeholders_for(sss)
     lc.execute(query, list(sss))
     for (fsid, tsid) in lc:
         links[int(fsid)].add(int(tsid))
-        ttt[tsid]=''
+        ttt[tsid] = ''
 ##
 ## Get translations
 ##
 if os.path.isfile("../db/%s.db" % corpus2):
     tcon = sqlite3.connect("../db/%s.db" % corpus2)
     tc = tcon.cursor() 
-    query="""select sid, sent from sent  
-        where sid in (%s)""" % ','.join('?'*len(ttt.keys()))
-    tc.execute(query, ttt.keys())
+    query = """SELECT sid, sent FROM sent  
+               WHERE sid IN (%s)""" % placeholders_for(ttt.keys())
+    tc.execute(query, list(ttt.keys()))
     for (sd, sent) in tc:
-        ttt[sd]=sent
+        ttt[sd] = sent
 
 
 # 2014-07-14 [Tuan Anh]

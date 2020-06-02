@@ -176,11 +176,12 @@ w = wn.cursor()
     
 ### get the words
 wds = dd(lambda: dd(tuple))
-query="""\
-SELECT sid, wid, word, pos, lemma  FROM word 
-WHERE sid IN (SELECT DISTINCT sid 
-              FROM word WHERE sid > ? limit ?) 
-ORDER BY sid, wid"""
+query = """
+    SELECT sid, wid, word, pos, lemma  FROM word 
+    WHERE sid IN (
+        SELECT DISTINCT sid 
+        FROM word WHERE sid > ? limit ?) 
+    ORDER BY sid, wid"""
 c.execute(query,  (tsid - window, 2 * window -1))
 for (sid, wid, word, pos, lemma) in c:
     wds[int(sid)][int(wid)] = (word, pos, lemma)
@@ -194,10 +195,11 @@ else: ## word !=lemma
                                                                wds[tsid][twid][0])
 
     ### get the concepts
-query = """\
-SELECT cwl.sid, cwl.wid,  cwl.cid, clemma, tag, tags, comment 
-FROM cwl LEFT JOIN concept ON concept.sid =cwl.sid AND concept.cid=cwl.cid
-WHERE cwl.sid in (%s)""" % ','.join('?'*len(wds.keys()))
+query = """
+    SELECT cwl.sid, cwl.wid,  cwl.cid, clemma, tag, tags, comment 
+    FROM cwl 
+    LEFT JOIN concept ON concept.sid =cwl.sid AND concept.cid=cwl.cid
+    WHERE cwl.sid in (%s)""" % placeholders_for(wds.keys())
 c.execute(query, wds.keys())
 tags = dd(lambda: dd(dict))
 for (sid, wid, cid, clemma, tag, tgs, comment) in c:

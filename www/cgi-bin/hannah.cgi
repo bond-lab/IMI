@@ -167,10 +167,10 @@ if corpusdb != None:
     fetch_sents = """SELECT sid, sent, doc.docID, doc.doc 
                      FROM sent 
                      JOIN doc 
-                     WHERE sid = %d 
-                     AND doc.docID = sent.docID """ % int(sid)
+                     WHERE sid = ?
+                     AND doc.docID = sent.docID """
 
-    curs.execute(fetch_sents)
+    curs.execute(fetch_sents, [int(sid)])
     rows = curs.fetchall()
     for r in rows:
         (sid, sent, doc_id, doc) = (r[0],r[1], r[2], r[3])
@@ -184,9 +184,9 @@ if corpusdb != None:
     ############################################################################
     fetch_words = """ SELECT sid, wid, word, pos, lemma
                       FROM word
-                      WHERE sid = %d""" % int(sid)
+                      WHERE sid = ?"""
 
-    curs.execute(fetch_words)
+    curs.execute(fetch_words, [int(sid)])
     rows = curs.fetchall()
     full_wid_set = set()
     for r in rows:
@@ -200,11 +200,11 @@ if corpusdb != None:
     ############################################################################
     # fetch_concepts = """ SELECT sid, cid, clemma, tag 
     #                      FROM concept
-    #                      WHERE sid =  %d """ % int(sid)
+    #                      WHERE sid =  ? """
 
 
 
-    # curs.execute(fetch_concepts)
+    # curs.execute(fetch_concepts, [int(sid)])
     # rows = curs.fetchall()
     # for r in rows:
     #     (sid, cid, clemma, tag) = (r[0],r[1],r[2],r[3])
@@ -216,11 +216,11 @@ if corpusdb != None:
     ############################################################################
     # fetch_cwls = """SELECT sid, wid, cid 
     #                 FROM cwl 
-    #                 WHERE sid = %d """ % int(sid)
+    #                 WHERE sid = ? """
 
 
 
-    # curs.execute(fetch_cwls)
+    # curs.execute(fetch_cwls, [int(sid)])
     # rows = curs.fetchall()
     # for r in rows:
     #     (sid, wid, cid) = (r[0],r[1],r[2])
@@ -239,14 +239,14 @@ if corpusdb != None:
                                  ewl.wid, e.comment
                        FROM error as e
                        LEFT JOIN ewl
-                       WHERE e.sid = %d
+                       WHERE e.sid = ?
                        AND e.sid = ewl.sid
                        AND e.eid = ewl.eid
-                    """ % int(sid)
+                    """
 
 
 
-        curs.execute(fetch_errors)
+        curs.execute(fetch_errors, [int(sid)])
         rows = curs.fetchall()
         for r in rows:
             (sid, eid, label, wid, comm) = (r[0],r[1],r[2],r[3],r[4])
@@ -281,8 +281,8 @@ if corpusdb != None:
     #                FROM sentiment 
     #                JOIN cwl WHERE sentiment.sid = cwl.sid 
     #                AND sentiment.cid = cwl.cid 
-    #                AND sentiment.sid = %s""" % sid
-    #     curs.execute(query)
+    #                AND sentiment.sid = ?"""
+    #     curs.execute(query, [int(sid)])
 
     #     # sentiment = {sid: {wid :  score}} 
     #     for (sid, wid, score) in curs:

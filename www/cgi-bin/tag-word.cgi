@@ -92,8 +92,8 @@ query = """SELECT cwl.sid, cwl.wid,  cwl.cid, clemma, tag, tags, comment
            FROM cwl 
            LEFT JOIN concept 
            ON concept.sid =cwl.sid AND concept.cid=cwl.cid
-           WHERE cwl.sid in (%s)""" % ','.join('?'*len(wds.keys()))
-c.execute(query, wds.keys())
+           WHERE cwl.sid in (%s)""" % placeholders_for(wds.keys())
+c.execute(query, list(wds.keys()))
 
 tags = dd(lambda: dd(dict))
 for (sid, wid, cid, clemma, tag, tgs, comment) in c:
@@ -119,8 +119,8 @@ try:
     query = """SELECT sentiment.sid, sentiment.cid, sentiment.score 
            FROM sentiment
            WHERE sentiment.sid in (%s)
-           """ % ','.join('?'*len(wds.keys()))
-    c.execute(query, wds.keys())
+           """ % placeholders_for(wds.keys())
+    c.execute(query, list(wds.keys()))
 
     # sentiment = {sid: {cid :  score}} 
     sentiment = dd(lambda: dd(int))

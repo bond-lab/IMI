@@ -123,8 +123,8 @@ if db != None:
     ############################################################################
     fetch_sent_links = """SELECT slid, fsid, tsid
                           FROM slink
-                          WHERE fsid in (%s) """ % (fl_sid)
-    curs.execute(fetch_sent_links)
+                          WHERE fsid in (?) """
+    curs.execute(fetch_sent_links, [fl_sid])
     rows = curs.fetchall()
     for r in rows:
         (slid, fsid, tsid) = (r[0],r[1],r[2])
@@ -140,8 +140,8 @@ if db != None:
     fetch_word_links = """SELECT wlid, fsid, fwid, tsid, twid,
                                  ltype, conf, comment, usrname
                           FROM wlink
-                          WHERE fsid in (%s) """ % (fl_sid)
-    curs.execute(fetch_word_links)
+                          WHERE fsid in (?) """
+    curs.execute(fetch_word_links, [fl_sid])
     rows = curs.fetchall()
 
     for r in rows:
@@ -159,9 +159,9 @@ if db != None:
 
     fetch_words = """SELECT sid, wid, word, pos, lemma  
                      FROM word
-                     WHERE sid in (%s) """ 
+                     WHERE sid in (?) """
 
-    curs_fl.execute(fetch_words % fl_sid)
+    curs_fl.execute(fetch_words, [fl_sid])
     rows = curs_fl.fetchall()
     for r in rows:
         (sid, wid, word, pos, lemma) = (r[0],r[1],r[2],r[3],r[4])
@@ -170,7 +170,7 @@ if db != None:
 
     for s in sents_links[fl][fl_sid]: # GET WORDS FOR EACH LINKED SENTENCE
         
-        curs_tl.execute(fetch_words % s)
+        curs_tl.execute(fetch_words, [fl_sid])
         rows = curs_tl.fetchall()
         for r in rows:
             (sid, wid, word, pos, lemma) = (r[0],r[1],r[2],r[3],r[4])

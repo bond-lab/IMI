@@ -52,11 +52,10 @@ SELECT sense.synset, lemma
 FROM sense 
 LEFT JOIN word 
 WHERE sense.wordid = word.wordid 
-AND word.lang = "%s" 
-AND lemma in (%s)""" % (searchlang,
-                        ",".join("'%s'" % sql_escape(s) for s in lemmalst))
+AND word.lang = ?
+AND lemma in (%s)""" % placeholders_for(lemmalst)
 
-wn.execute(fetch_ss_bylemma)
+wn.execute(fetch_ss_bylemma, [str(searchlang), *lemmalst])
 rows = wn.fetchall()
 synsets = set()
 ss_bylemmas = dd(lambda: set())

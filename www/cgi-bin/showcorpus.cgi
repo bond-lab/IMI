@@ -14,10 +14,9 @@ import cgitb; cgitb.enable()  # for troubleshooting
 from os import environ  # for cookies
 import re, sqlite3, collections
 from collections import defaultdict as dd
-
 import datetime
 
-
+from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
@@ -178,7 +177,7 @@ if len(pos_form[searchlang]) > 0:
     searchquery += "(POS:%s)+" % (" or ".join("'%s'" % s for s in pos_form[searchlang]),)
     # pos_t  = ",".join("'%s'" % s for s in pos_form[searchlang])
     # pos_q = """ AND pos in (%s) """ % pos_t
-    pos_t  = ",".join("?" for s in pos_form[searchlang])
+    pos_t = placeholders_for(pos_form[searchlang])
     pos_q = (" AND pos in (%s) " % pos_t, pos_form[searchlang])
 else:
     pos_q =  ('', False)
@@ -227,15 +226,15 @@ if mode == "wordview":
     con = sqlite3.connect(wndb)
     wn = con.cursor()
     fetch_ss_name_def = """
-    SELECT s.synset, name, src, lang, def, sid
-    FROM (SELECT synset, name, src
-          FROM synset
-          WHERE synset in (%s)) s
-    LEFT JOIN synset_def
-    WHERE synset_def.synset = s.synset
-    AND synset_def.lang in (?,'eng')
-    """ % (sss[0])
-    wn.execute(fetch_ss_name_def, sss[1]+[searchlang])
+        SELECT s.synset, name, src, lang, def, sid
+        FROM (SELECT synset, name, src
+              FROM synset
+              WHERE synset in (%s)) s
+        LEFT JOIN synset_def
+        WHERE synset_def.synset = s.synset
+        AND synset_def.lang in (?, 'eng')
+    """ % placeholders_for(sss[0])
+    wn.execute(fetch_ss_name_def, sss[0] + sss[1] + [searchlang])
     rows = wn.fetchall()
     ss_defs = dd(lambda: dd(lambda:  dd(lambda: str())))
     ss_names = dd(lambda: dd(lambda:list()))
