@@ -7,6 +7,10 @@ import re, sqlite3, collections
 import os, sys 
 import operator
 from collections import defaultdict as dd
+import warnings
+
+from databases import placeholders_for as _placeholders_for,\
+                      sql_escape as _sql_escape
 
 #############################################################
 # Configuration
@@ -327,105 +331,17 @@ def set_rest_x(c, usrname, sid, cid):
     c.execute(query, (usrname, sid,cid))
 
 
-
-def sql_escape(text):
-    """Duplicates instances of ' and " in the given text"""
-    quotes = [
-        '"',  # double quotes
-        "'"   # single quotes
-    ]
-    final = [
-        letter * 2 if (letter in quotes) else letter
-        for letter in text
-    ]
-    return ''.join(final)
-    # for letter in text:
-    #     if letter == "'" or letter == '"':
-    #         final += letter
-    #         final += letter
-    #     else:
-    #         final += letter
-    # return final
+def _deprecating(old, new):
+    """This would look cooler as a decorator..."""
+    warnings.warn(f'{old} has migrated to {new}', warnings.DeprecationWarning)
 
 
-def placeholders_for(iterable, paramstyle='qmark', startfrom=1, delim=','):
-    """Makes query placeholders for the input iterable: [1, 2, 3] => '?,?,?'
+def sql_escape(*args, **kwargs):
+    _deprecating('ntumc_util.sql_escape()', 'databases.sql_escape()')
+    return _sql_escape(*args, **kwargs)
 
-    Returns a string that can safely be formatted directly into your query.
-    If the type of object in the `iterable` argument is str, bytes, or 
-    does not implement the iterator protocol, the object will be coerced a 
-    list containing that one object.
-    This may have unintended consequences.
-    If iterable == [], then '' will be returned. 
-    If iterable == '', then '?' is returned instead.
-    
-    Only ordered paramstyles (qmark|numeric|format) are supported.
 
-    List of paramstyles - https://www.python.org/dev/peps/pep-0249/#paramstyle
-    
-    Examples:
-    assert placeholders_for(b'test') == '?'
-    assert placeholders_for([1, 2, 3]) == '?,?,?'
-    assert placeholders_for('spam', paramstyle='format') == '%s'
-    assert placeholders_for([1, 2, 3], 'numeric') == ':1,:2,:3'
-    assert placeholders_for(dict(A=1, B=2, C=3), 'numeric', 7, '_') == ':7_:8_:9'
-    assert placeholders_for([]) == ''   # Empty collection
-    assert placeholders_for('') == '?'  # NULL-like atomic value is truthy
-    assert placeholders_for([[], '']) == '?,?'  # Probably a bad idea
-    
-    Args:
-    iterable - any object. If a str, bytes, or non-iterable object is given,
-               this value is coerced into a list containing that one object.
-
-    paramstyle - str. Only (qmark|numeric|format) is supported.
-
-    delim - str. The token delimiting each placeholder.
-
-    startfrom - int. Sets the initial number to count from when using the 
-                'numeral' paramstyle.
-    """
-
-    # Guard against non-iterator values passed to the `iterable` param.
-    try:
-        # Coerce iterable literals into a list with just 1 element
-        if isinstance(iterable, str) or isinstance(iterable, bytes):
-            iterable = [iterable]
-        
-        # Try to trigger a TypeError
-        else:
-            iterable = iter(iterable)
-    
-    except TypeError as err:
-        # If raised due to non-iterable type, coerce to list with just 1 element
-        if 'object is not iterable' in str(err):
-            iterable = [iterable]
-        else:
-            raise
-
-    # paramstyle defaults to qmark
-    paramstyle = paramstyle or 'qmark'
-
-    # Refuse the temptation to guess the order of unordered paramstyles
-    if paramstyle in ('named', 'pyformat'):
-        err = ('cannot guess the order of placeholders for unordered '
-               'paramstyle "{}"')
-        raise NotImplementedError(err.format(paramstyle))
-
-    if paramstyle == 'numeric':
-        iterable = (':%d' % i + startfrom for i, _ in enumerate(iterable))
-    
-    elif paramstyle == 'format':
-        iterable = ('%s' for x in iterable)
-
-    # Unsupported paramstyles, see NotImplementedError above.
-    # elif paramstyle == 'named':
-    #     iterable = (':{}'.format(key) for key in iterable)
-
-    # elif paramstyle == 'pyformat':
-    #     iterable = ('%({})s'.format(key) for key in iterable)
-
-    # Handle the default qmark paramstyle
-    else:
-        iterable = ('?' for x in iterable)
-
-    return delim.join(iterable)
+def placeholders_for(*args, **kwargs):
+    """Depreciation wrapper for database._placeholders_for()"""
+    _deprecating('ntumc_util.placeholders_for()', 'databases.placeholders_for()')
+    return _placeholders_for(*args, **kwargs)
