@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# FIXME(Wilson): create_chunks_sql() was commented out and raises NameError at
+#   line 635 in the "MANAGE CGI MODES" section
+
 import cgi, urllib
 # import cgitb; cgitb.enable()  # for troubleshooting
 import sqlite3
@@ -35,6 +38,7 @@ else:
 
 redirect_sid = 0 # THIS SHOULD BE UPDATED 
 html_log = []
+
 
 
 
@@ -632,7 +636,7 @@ elif cgi_mode == "chunks":
     try: # Try to insert directly
         html_log = '<br>'.join(process_chunks(c))
     except: # Create structure and then insert
-        create_chunks_sql(c)  # FIXME(Wilson): This func was commented out...
+        create_chunks_sql(c)
         html_log = '<br>'.join(process_chunks(c))
 
 elif cgi_mode == "chunk_sentiment":

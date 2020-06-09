@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import cgi, urllib, Cookie, os
+# FIXME(Wilson): Undefined variable 'tagcgi' around line 287
+
+import cgi, urllib, os
 import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
 from collections import defaultdict as dd
@@ -85,7 +87,7 @@ if corpus:
     addme = addme.strip()
     tgs = dd(lambda: [None, None]) 
 
-    print (u"ERROR: %s" % unicode(cids))
+    print (u"ERROR: %s" % str(cids))
     
     for cd in cids.split(' '): ### prefer local ntag
         if not cd:
@@ -114,7 +116,7 @@ if corpus:
         c.execute("update concept set comment=?, usrname=? where comment IS NOT ? and sid=? and cid=?", (com, usrname, com, sid, cid))
     if addme:
         ### add this as a concept
-        ls = re.split(ur' |_|∥', addme)
+        ls = re.split(r' |_|∥', addme)
         c.execute("select distinct sid from word where lemma like ? or word like ?", ('%s' % ls[0],ls[0]))
         sids = ",".join(str(s[0]) for s in c.fetchall())
         ##print sids
@@ -188,8 +190,8 @@ print(user_cookie)
 print(u"""Content-type: text/html; charset=utf-8\n""")
 
 # empty lines so that the browser knows that the header is over
-print ""
-print ""
+print("")
+print("")
 print(u"""<html>
   <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
@@ -258,17 +260,17 @@ try:
 
     else:
         print("""<strong>NTUMC Annotation Tools</strong>""")
-        print """<br><strong>A valid user has not been defined or it has expired.</strong><br>"""
-        print """Please choose a valid username to continue!"""
-        print """<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
-                 <input type = "submit" value = "Change"> </form> """ % wncgi
+        print("""<br><strong>A valid user has not been defined or it has expired.</strong><br>""")
+        print("""Please choose a valid username to continue!""")
+        print("""<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
+                 <input type = "submit" value = "Change"> </form> """ % wncgi)
 
 except KeyError:
     print("""<strong>NTUMC Annotation Tools</strong>""")
-    print """<br><strong>I couldn't find a username in the cookie!</strong><br>"""
-    print """Please choose a valid username to continue!"""
-    print """<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
-                 <input type = "submit" value = "Change"> </form> """ % wncgi
+    print("""<br><strong>I couldn't find a username in the cookie!</strong><br>""")
+    print("""Please choose a valid username to continue!""")
+    print("""<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
+                 <input type = "submit" value = "Change"> </form> """ % wncgi)
 
 
 print(""" </td> </tr>""") # closes first row 
@@ -279,7 +281,7 @@ if usrname not in valid_usernames:
 
 else:
     # Print user status
-    print """<tr>""" + HTML.show_change_user_bttn(usrname)
+    print("""<tr>""" + HTML.show_change_user_bttn(usrname))
 
     print("""<td valign="top" style="width:55%; border-right: 1px solid black">""") # second row
     print("""<iframe name="tagging" src="%s?corpus=%s&lemma=%s&ss=%s&lang=%s&lim=%d&com_all=%s&lmss=%s&sfcorpus=%s&usrname=%s"
@@ -304,12 +306,12 @@ else:
 
 
 ### Footer
-print """<span style="text-align:right;">
+print("""<span style="text-align:right;">
          <p><a href='%s'>More detail about the %s (%s)</a>
-      """ % (wnurl, wnnam, wnver)
+      """ % (wnurl, wnnam, wnver))
 
-print """<p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a>
-         &lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;</span>"""
+print("""<p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a>
+         &lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;</span>""")
 
-print "  </body>"
-print "</html>"
+print("  </body>")
+print("</html>")

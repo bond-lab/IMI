@@ -214,7 +214,7 @@ def select_synset_def_ex(all_synsets):
             AND synset IN (%s) 
             AND lang = ? 
         ORDER BY synset, sid""" % placeholders_for(all_synsets)
-    params = ["str(x) for x in all_synsets] + ['eng']
+    params = [str(x) for x in all_synsets] + ['eng']
     jilog("I'm selecting %s\n" % a_query)
     jilog("with params %s" % params)
     tm.start()

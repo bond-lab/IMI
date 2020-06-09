@@ -1439,7 +1439,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      WHERE def GLOB '%s'  
                      AND lang = ?
                      LIMIT 200
-                  """, [str(lemma[5:]), [lang])
+                  """, [str(lemma[5:]), lang])
     else:
 
 

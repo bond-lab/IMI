@@ -8,6 +8,8 @@
 ### (http://creativecommons.org/licenses/by/3.0/)
 ### bugfixes and enhancements gratefuly received
 
+# FIXME(Wilson): Undefined variables: sid, window, lemma, linkdb, corpus2
+
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
@@ -15,7 +17,7 @@ import os
 import operator
 from collections import defaultdict as dd
 
-# FIXME(Wilson): Undefined variables: sid, window, lemma, linkdb, corpus2
+from ntumc_util import placeholders_for
 
 showsentcgi = "show-sent.cgi"
 

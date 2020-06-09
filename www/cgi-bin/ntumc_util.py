@@ -333,7 +333,7 @@ def set_rest_x(c, usrname, sid, cid):
 
 def _deprecating(old, new):
     """This would look cooler as a decorator..."""
-    warnings.warn(f'{old} has migrated to {new}', warnings.DeprecationWarning)
+    warnings.warn(f'{old} has migrated to {new}', DeprecationWarning)
 
 
 def sql_escape(*args, **kwargs):

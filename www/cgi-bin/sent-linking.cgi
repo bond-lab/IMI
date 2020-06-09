@@ -6,7 +6,7 @@ import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 import sqlite3, codecs
 from collections import defaultdict as dd
-from ntumc_utils import placeholders_for
+from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
 

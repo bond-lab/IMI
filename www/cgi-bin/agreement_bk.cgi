@@ -400,34 +400,34 @@ print(u"""Content-type: text/html; charset=utf-8\n
            <html>\n
            <head>
 
-	<!-- Add jQuery library -->
-	<script type="text/javascript" src="../fancybox/lib/jquery-1.10.1.min.js"></script>
+    <!-- Add jQuery library -->
+    <script type="text/javascript" src="../fancybox/lib/jquery-1.10.1.min.js"></script>
 
-	<!-- Add mousewheel plugin (this is optional) -->
-	<script type="text/javascript" src="../fancybox/lib/jquery.mousewheel-3.0.6.pack.js"></script>
+    <!-- Add mousewheel plugin (this is optional) -->
+    <script type="text/javascript" src="../fancybox/lib/jquery.mousewheel-3.0.6.pack.js"></script>
 
-	<!-- Add fancyBox main JS and CSS files -->
-	<script type="text/javascript" src="../fancybox/source/jquery.fancybox.js?v=2.1.5"></script>
-	<link rel="stylesheet" type="text/css" href="../fancybox/source/jquery.fancybox.css?v=2.1.5" media="screen" />
+    <!-- Add fancyBox main JS and CSS files -->
+    <script type="text/javascript" src="../fancybox/source/jquery.fancybox.js?v=2.1.5"></script>
+    <link rel="stylesheet" type="text/css" href="../fancybox/source/jquery.fancybox.css?v=2.1.5" media="screen" />
 
-	<!-- Add Button helper (this is optional) -->
-	<link rel="stylesheet" type="text/css" href="../fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" />
-	<script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+    <!-- Add Button helper (this is optional) -->
+    <link rel="stylesheet" type="text/css" href="../fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" />
+    <script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
 
-	<!-- Add Thumbnail helper (this is optional) -->
-	<link rel="stylesheet" type="text/css" href="../fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" />
-	<script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+    <!-- Add Thumbnail helper (this is optional) -->
+    <link rel="stylesheet" type="text/css" href="../fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" />
+    <script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
 
-	<!-- Add Media helper (this is optional) -->
-	<script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+    <!-- Add Media helper (this is optional) -->
+    <script type="text/javascript" src="../fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
 
-	<script type="text/javascript">
-		$(document).ready(function() {
-			/*
-			 *  Simple image gallery. Uses default settings
-			 */
+    <script type="text/javascript">
+        $(document).ready(function() {
+            /*
+             *  Simple image gallery. Uses default settings
+             */
 
-			$('.fancybox').fancybox();
+            $('.fancybox').fancybox();
 
                         $("a.lightbox").fancybox({
                             'showCloseButton': false,
@@ -455,139 +455,139 @@ print(u"""Content-type: text/html; charset=utf-8\n
                         });
 
 
-			/*
-			 *  Different effects
-			 */
+            /*
+             *  Different effects
+             */
 
-			// Change title type, overlay closing speed
-			$(".fancybox-effects-a").fancybox({
-				helpers: {
-					title : {
-						type : 'outside'
-					},
-					overlay : {
-						speedOut : 0
-					}
-				}
-			});
+            // Change title type, overlay closing speed
+            $(".fancybox-effects-a").fancybox({
+                helpers: {
+                    title : {
+                        type : 'outside'
+                    },
+                    overlay : {
+                        speedOut : 0
+                    }
+                }
+            });
 
-			// Disable opening and closing animations, change title type
-			$(".fancybox-effects-b").fancybox({
-				openEffect  : 'none',
-				closeEffect	: 'none',
+            // Disable opening and closing animations, change title type
+            $(".fancybox-effects-b").fancybox({
+                openEffect  : 'none',
+                closeEffect    : 'none',
 
-				helpers : {
-					title : {
-						type : 'over'
-					}
-				}
-			});
+                helpers : {
+                    title : {
+                        type : 'over'
+                    }
+                }
+            });
 
-			// Set custom style, close if clicked, change title type and overlay color
-			$(".fancybox-effects-c").fancybox({
-				wrapCSS    : 'fancybox-custom',
-				closeClick : true,
+            // Set custom style, close if clicked, change title type and overlay color
+            $(".fancybox-effects-c").fancybox({
+                wrapCSS    : 'fancybox-custom',
+                closeClick : true,
 
-				openEffect : 'none',
+                openEffect : 'none',
 
-				helpers : {
-					title : {
-						type : 'inside'
-					},
-					overlay : {
-						css : {
-							'background' : 'rgba(238,238,238,0.85)'
-						}
-					}
-				}
-			});
+                helpers : {
+                    title : {
+                        type : 'inside'
+                    },
+                    overlay : {
+                        css : {
+                            'background' : 'rgba(238,238,238,0.85)'
+                        }
+                    }
+                }
+            });
 
-			// Remove padding, set opening and closing animations, close if clicked and disable overlay
-			$(".fancybox-effects-d").fancybox({
-				padding: 0,
+            // Remove padding, set opening and closing animations, close if clicked and disable overlay
+            $(".fancybox-effects-d").fancybox({
+                padding: 0,
 
-				openEffect : 'elastic',
-				openSpeed  : 150,
+                openEffect : 'elastic',
+                openSpeed  : 150,
 
-				closeEffect : 'elastic',
-				closeSpeed  : 150,
+                closeEffect : 'elastic',
+                closeSpeed  : 150,
 
-				closeClick : true,
+                closeClick : true,
 
-				helpers : {
-					overlay : null
-				}
-			});
+                helpers : {
+                    overlay : null
+                }
+            });
 
-			/*
-			 *  Button helper. Disable animations, hide close button, change title type and content
-			 */
+            /*
+             *  Button helper. Disable animations, hide close button, change title type and content
+             */
 
-			$('.fancybox-buttons').fancybox({
-				openEffect  : 'none',
-				closeEffect : 'none',
+            $('.fancybox-buttons').fancybox({
+                openEffect  : 'none',
+                closeEffect : 'none',
 
-				prevEffect : 'none',
-				nextEffect : 'none',
+                prevEffect : 'none',
+                nextEffect : 'none',
 
-				closeBtn  : false,
+                closeBtn  : false,
 
-				helpers : {
-					title : {
-						type : 'inside'
-					},
-					buttons	: {}
-				},
+                helpers : {
+                    title : {
+                        type : 'inside'
+                    },
+                    buttons    : {}
+                },
 
-				afterLoad : function() {
-					this.title = 'Image ' + (this.index + 1) + ' of ' + this.group.length + (this.title ? ' - ' + this.title : '');
-				}
-			});
+                afterLoad : function() {
+                    this.title = 'Image ' + (this.index + 1) + ' of ' + this.group.length + (this.title ? ' - ' + this.title : '');
+                }
+            });
 
 
-			/*
-			 *  Thumbnail helper. Disable animations, hide close button, arrows and slide to next gallery item if clicked
-			 */
+            /*
+             *  Thumbnail helper. Disable animations, hide close button, arrows and slide to next gallery item if clicked
+             */
 
-			$('.fancybox-thumbs').fancybox({
-				prevEffect : 'none',
-				nextEffect : 'none',
+            $('.fancybox-thumbs').fancybox({
+                prevEffect : 'none',
+                nextEffect : 'none',
 
-				closeBtn  : false,
-				arrows    : false,
-				nextClick : true,
+                closeBtn  : false,
+                arrows    : false,
+                nextClick : true,
 
-				helpers : {
-					thumbs : {
-						width  : 50,
-						height : 50
-					}
-				}
-			});
+                helpers : {
+                    thumbs : {
+                        width  : 50,
+                        height : 50
+                    }
+                }
+            });
 
-			/*
-			 *  Media helper. Group items, disable animations, hide arrows, enable media and button helpers.
-			*/
-			$('.fancybox-media')
-				.attr('rel', 'media-gallery')
-				.fancybox({
-					openEffect : 'none',
-					closeEffect : 'none',
-					prevEffect : 'none',
-					nextEffect : 'none',
+            /*
+             *  Media helper. Group items, disable animations, hide arrows, enable media and button helpers.
+            */
+            $('.fancybox-media')
+                .attr('rel', 'media-gallery')
+                .fancybox({
+                    openEffect : 'none',
+                    closeEffect : 'none',
+                    prevEffect : 'none',
+                    nextEffect : 'none',
 
-					arrows : false,
-					helpers : {
-						media : {},
-						buttons : {}
-					}
-				});
+                    arrows : false,
+                    helpers : {
+                        media : {},
+                        buttons : {}
+                    }
+                });
 
-			/*
-			 *  Open manually
-			 */
+            /*
+             *  Open manually
+             */
 
-		});
+        });
 </script>
 </head>
 <body>\n""")
@@ -615,8 +615,8 @@ print("<p>Clicking on the sentence number or concept number will jump you to the
 
 
 # Global Agreements (using data for every sentence)
-print """<p> <strong> Global Agreement Scores: </strong>"""
-print """<div> 
+print("""<p> <strong> Global Agreement Scores: </strong>""")
+print("""<div> 
          <table style="background-color: #F0F0F0;border: 1px solid black;"> <tr> 
            <th></th><th>B</th><th>C</th><th>D</th><th>M</th>
          </tr> <tr>
@@ -632,7 +632,7 @@ print """<div>
              s_color(ag_scores['all']['AG']), s_color(ag_scores['all']['AS']), 
              s_color(ag_scores['all']['BC']), s_color(ag_scores['all']['BG']), 
              s_color(ag_scores['all']['BS']), s_color(ag_scores['all']['CG']), 
-             s_color(ag_scores['all']['CS']), s_color(ag_scores['all']['GS']))
+             s_color(ag_scores['all']['CS']), s_color(ag_scores['all']['GS'])))
 
 
 for sid in sorted(data.keys()):  # for sentence in selected range
@@ -693,7 +693,7 @@ for sid in sorted(data.keys()):  # for sentence in selected range
             try:
                 gcom = gcom.split("None; ")[1]
             except:
-		continue
+                continue
             gcom = "<b>D:</b>" + gcom + '; '
         else:
             gcom = ""
@@ -705,7 +705,7 @@ for sid in sorted(data.keys()):  # for sentence in selected range
               """ % (cid, lemma, atag, btag, ctag, gtag, majtag, comms) )
         print("</tr>")
  
-    print "</table>"
+    print("</table>")
 
 
 print("""</body></html>\n""")

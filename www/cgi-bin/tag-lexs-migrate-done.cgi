@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Wilson(FIXME): Undefined vars: user_cookie, valid_usernames, wncgi, HTML, 
+#   tagcgi, corpus, lemma, ss, lang, lim, com_all, lss, sfcorpus, omwcgi, ss,
+#   lang, lemma
 
 ########## HTML
 
@@ -26,17 +29,17 @@ try:
 
     else:
         print("""<strong>NTUMC Annotation Tools</strong>""")
-        print """<br><strong>A valid user has not been defined or it has expired.</strong><br>"""
-        print """Please choose a valid username to continue!"""
-        print """<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
-                 <input type = "submit" value = "Change"> </form> """ % wncgi
+        print("""<br><strong>A valid user has not been defined or it has expired.</strong><br>""")
+        print("""Please choose a valid username to continue!""")
+        print("""<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
+                 <input type = "submit" value = "Change"> </form> """ % wncgi)
 
 except KeyError:
     print("""<strong>NTUMC Annotation Tools</strong>""")
-    print """<br><strong>I couldn't find a username in the cookie!</strong><br>"""
-    print """Please choose a valid username to continue!"""
-    print """<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
-                 <input type = "submit" value = "Change"> </form> """ % wncgi
+    print("""<br><strong>I couldn't find a username in the cookie!</strong><br>""")
+    print("""Please choose a valid username to continue!""")
+    print("""<form method = post action = "%s"> username:<input type ="text" name="usrname_cgi"> 
+                 <input type = "submit" value = "Change"> </form> """ % wncgi)
 
 
 print(""" </td> </tr>""") # closes first row 
@@ -47,7 +50,7 @@ if usrname not in valid_usernames:
 
 else:
     # Print user status
-    print """<tr>""" + HTML.show_change_user_bttn(usrname)
+    print("""<tr>""" + HTML.show_change_user_bttn(usrname))
 
     print("""<td valign="top" style="width:55%; border-right: 1px solid black">""") # second row
     print("""<iframe name="tagging" src="%s?corpus=%s&lemma=%s&ss=%s&lang=%s&lim=%d&com_all=%s&lmss=%s&sfcorpus=%s&usrname=%s"

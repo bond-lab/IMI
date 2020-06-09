@@ -10,11 +10,12 @@
 ### (http://creativecommons.org/licenses/by/3.0/)
 ### bugfixes and enhancements gratefuly received
 
+# FIXME(Wilson): line 274: missing args for select_concept(): sid_from, sid_to
 
 # 2014-09-16 [Tuan Anh] I'm adding Jinja template engine support to 
 # NTU-MC tagging tool so this version won't work with previous tag-lex.cgi anymore
 
-import cgi, urllib, Cookie, os
+import cgi, urllib, os
 import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
 from collections import defaultdict as dd
@@ -145,7 +146,7 @@ def tagbox(sss, cid, wp, tag, ntag, com):
         show_text = mtags_short[tk] if tk in mtags_short else tk
         tagbox_text.append(" /><span title='%s'>%s</span></span>\n" % (tv, show_text))
     tagv=''
-    if unicode(tag) != unicode(ntag):
+    if str(tag) != str(ntag):
         tagv=ntag
     if tagv:
         tagbox_text.append("""<span style='background-color: #dddddd;white-space: nowrap;border: 1px solid black'>%s</span>""" % tagv)
@@ -208,7 +209,7 @@ for cd in cids.split(' '): ### prefer local ntag
     c.execute("update concept set comment=?, usrname=? where comment IS NOT ? and sid=? and cid=?", (com, usrname, com, sid, cid))
 if addme:
     ### add this as a concept
-    ls = re.split(ur' |_|∥', addme)
+    ls = re.split(r' |_|∥', addme)
     c.execute("select distinct sid from word where lemma like ? or word like ?", ('%s' % ls[0],ls[0]))
     sids = ",".join(str(s[0]) for s in c.fetchall())
     ##print sids
@@ -221,7 +222,7 @@ if addme:
         matches = dd(list)
         for sid in sents:
             matched = []
-            sentlengt=len(sents[sid])
+            sentlength=len(sents[sid])
             for i in sents[sid]:
                 if sents[sid][i][0] == ls[0] or sents[sid][i][1] == ls[0]:
                     matched = [i]
@@ -316,7 +317,7 @@ if totag:
         show[tag][sid][cid] = [cwl_map[(sid, cid)], clemma, ntag, tags, comment]
     ## store the concept ids 
     ## [Tuan Anh]: 2014-06-10 (to identify a concept, we need both sentence ID and concept ID)
-    cids = u" ".join(["%s|%s" % (unicode(r[0]), unicode(r[1])) for r in totag])  ### all the cids
+    cids = u" ".join(["%s|%s" % (str(r[0]), str(r[1])) for r in totag])  ### all the cids
     ## store the concepts (sid, cid) so we can check for other tags semi-efficiently
     cidsids = [(r[0], r[1]) for r in totag]
     others = dd(list)
@@ -356,7 +357,7 @@ if totag:
         display_text = t if not t in mtags_human else mtags_human[t]
         freq = '0%' if not t in tag_freqs else tag_freqs[t]
         item_text_by_tag[t] = u"""<span title='%s'>%d<sub><font color='DarkRed' size='-2'>%s</font></sub></span>""" % (display_text, i+1, t[-1])
-        if unicode(t) in all_synset_group:
+        if str(t) in all_synset_group:
             #jilog("%s is IN %s" % (t, all_synset_group))
             text_items.append("<a href='bookmark_%s'>%s <font size='-1'>(%s)</font></a>" % (t, item_text_by_tag[t], freq))
             pass
@@ -367,7 +368,7 @@ if totag:
         display_text = t if not t in mtags_human else mtags_human[t]
         item_text_by_tag[t] = display_text
         freq = '0%' if not t in tag_freqs else tag_freqs[t]
-        if unicode(t) in all_synset_group:
+        if str(t) in all_synset_group:
             #jilog("%s is IN %s" % (t, all_synset_group))
             text_items.append (u"""<a href='bookmark_%s'>%s <font size='-1'>(%s)</font></a>"""%(t, t, freq) )
             pass
@@ -388,7 +389,7 @@ if totag:
     template_data['comment_summary'] = ''
     if len(all_comments) > 0:
         all_comments_text = ''
-        for a_pair in reversed(sorted(all_comments.iteritems(), key=operator.itemgetter(1, 0))):
+        for a_pair in reversed(sorted(all_comments.items(), key=operator.itemgetter(1, 0))):
             all_comments_text += "<tr> <td>%s</td> <td>%s</td> </tr>" % a_pair
         # 2014-06-11 [Tuan Anh]
         # Make the synsets clickable
@@ -549,7 +550,7 @@ else:
     ### We have lemma but no totag => No concept!  
     ### let's add it, first we need to find the 
     ### 
-    ls = re.split(ur' |_|∥', lemma) if lemma else ''
+    ls = re.split(r' |_|∥', lemma) if lemma else ''
     sids = [str(s[0]) for s in select_sentence_id(cur, ls[0])] if ls else []
     # The list of Sentence structure will be stored here and passed to template_data to render
     matched_sentences = [] 

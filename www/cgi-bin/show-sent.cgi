@@ -96,7 +96,7 @@ if os.path.isfile("../db/%s.db" % corpus2):
     tcon = sqlite3.connect("../db/%s.db" % corpus2)
     tc = tcon.cursor()
     query = """SELECT sid, sent FROM sent
-               WHERE sid IN (%s)""" placeholders_for(ttt.keys())
+               WHERE sid IN (%s)""" % placeholders_for(ttt.keys())
     tc.execute(query, list(ttt.keys()))
     for (sd, sent) in tc:
         ttt[sd] = sent

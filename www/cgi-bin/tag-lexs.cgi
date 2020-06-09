@@ -10,8 +10,7 @@
 ### (http://creativecommons.org/licenses/by/3.0/)
 ### bugfixes and enhancements gratefuly received
 
-# FIXME(Wilson): lines 545/568-ish: No value for argument 'com' in tbox() call
-#    Possibly due to changed func sig from ntumc_util or ntumc_webkit
+# FIXME(Wilson): line 543-ish, undefined variable 'ma' leftover from legacy code
 
 
 # 2014-09-16 [Tuan Anh] I'm adding Jinja template engine support to 
@@ -537,6 +536,7 @@ if totag:
                                  """ % (ttt, tt, word, wp))
 
                     else: # OTHER WORDS 
+                        # FIXME(Wilson): Undefined variable 'ma'
                         tmp_lex_group.append("""<span 
                                                 title='%d:%s:%s'>%s</span>
                                              """ % (wid, pos, ma, word))
