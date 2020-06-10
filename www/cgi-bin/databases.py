@@ -41,7 +41,7 @@ def get_file(dirs, files):
 
 
 def connect(dbfile, *fallback, in_dirs=None):
-    """Opens a cursor to the given database.
+    """Opens a connection to the given database.
 
     TODO(Wilson): integrate with ntumc_util.check_corpusdb()?
 
@@ -52,33 +52,34 @@ def connect(dbfile, *fallback, in_dirs=None):
     in_dirs - list[str]. Directories to search for the dbfiles. Paths must be
               absolute if passed in this manner.
 
-    Returns: sqlite3 Cursor object
+    Returns: sqlite3 Connection object
 
-    Raises: FileNotFoundError
+    Raises: FileNotFoundError if the dbfile and fallbacks could not be found
+            within in_dirs, or the default locations defined in DATABASE_DIRS.
     """
     in_dirs = in_dirs or DATABASE_DIRS
 
     dbfiles = [file if file.endswith('.db') else file + '.db'
-               for file in [dbfile] + fallback]
+               for file in [dbfile] + list(fallback)]
 
     dbpath = get_file(in_dirs, dbfiles)
 
-    if not exists(dbpath):
+    if not (dbpath and exists(dbpath)):
         files = '|'.join(dbfiles)
         dirs = '|'.join(in_dirs)
         raise FileNotFoundError(f'could not find {files} in {dirs}')
 
-    conn = sqlite3.connect(dbpath)
+    return sqlite3.connect(dbpath)
+
+
+def cursor(*args, **kwargs):
+    """Shortcut to return cursor from connect()"""
+    conn = connect(*args, **kwargs)
     return conn.cursor()
 
 
 def sql_escape(text):
-    """Duplicates occurrences of ' and " in the given text
-
-    (Wilson) Honestly this doesn't properly protect against injection (e.g. 
-    something like \' would become \'' and you end up with an injection still
-    but this is just some legacy code that isn't used anywhere.
-    """
+    """Duplicates occurrences of ' and " in the given text"""
     quotes = [
         '"',  # double quotes
         "'"   # single quotes
@@ -157,7 +158,7 @@ def placeholders_for(iterable, paramstyle='qmark', startfrom=1, delim=','):
         raise NotImplementedError(err.format(paramstyle))
 
     if paramstyle == 'numeric':
-        iterable = (':%d' % i + startfrom for i, _ in enumerate(iterable))
+        iterable = (':{}'.format(i + startfrom) for i, _ in enumerate(iterable))
 
     elif paramstyle == 'format':
         iterable = ('%s' for x in iterable)
