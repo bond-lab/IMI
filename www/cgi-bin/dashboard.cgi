@@ -32,6 +32,7 @@ selfcgi = "dashboard.cgi"
 admindb = "../db/admin.db"
 
 logged = False
+#user='fcbond'
 
 message_log = ""
 hashed_pw = ""
@@ -96,8 +97,8 @@ if cgi_mode == "update_pw":
             # Create & update hash in the database
             hashpw = pbkdf2_sha256.encrypt(new_pw, rounds=20000,
                               salt_size=16)
-            admin.execute("""UPDATE users SET password = "?"
-              WHERE username = "?" """,  [hashpw, user])
+            admin.execute("""UPDATE users SET password = ?
+              WHERE username = ? """,  [hashpw, user])
 
             conn_admin.commit()  # Save changes to database
             message_log += "Your password was updated!" 
@@ -118,15 +119,16 @@ if user != "logout":
 
     query = """SELECT username, password
                FROM  users
-               WHERE username = '?' """
-    admin.execute(query, [user])
-    # message_log += """<br>Queried: '%s' """ % query  #TEST
+               WHERE username = ? """
+    #print(query, user)
+    admin.execute(query, (user,))
+    #message_log += """<br>Queried: '%s' """ % query  #TEST
 
 
     pws = dict()
     for username, password in admin:
         pws[username] = password
-    # message_log += """<br>PWS(dict): '%s' """ % pws  #TEST
+    #message_log += """<br>PWS(dict): '%s' """ % pws  #TEST
 
 
 

@@ -52,7 +52,7 @@ if "MainLang" in C:
     else:
         lang = langselect[0]
 
-if C['BackoffLang'].value in langselect:
+if 'BackoffLang' in langselect and C['BackoffLang'].value in langselect:
     lang2 = C['BackoffLang'].value 
 else:
     lang2 = langselect[0]

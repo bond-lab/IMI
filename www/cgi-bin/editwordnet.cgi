@@ -118,7 +118,7 @@ try:
     # relations are inserted with their oposites 
     # (e.g if X is hypo of Y, then Y is hype of X ) 
     relopp = {}
-    for x in xrange(0, len(synlinks)):
+    for x in range(0, len(synlinks)):
         relopp[synlinks[x]] = synlinksopp[x]
     
 
@@ -782,7 +782,7 @@ try:
             ness = ['00031264-n','00027167-n','00007846-n',
                     '15113229-n','00001740-n','13576101-n', '09587565-n']
             nesynset = {}
-            for i in xrange(0, len(ne)):
+            for i in range(0, len(ne)):
                 nesynset[ne[i]] = ness[i]
 
             pos = "n"
@@ -1057,7 +1057,7 @@ except:
                   <title>Open Multilingual Wordnet Editor</title>
               </head>
               <body bgcolor="#F5F5F5">
-                  <b>CGI Error, please report to the mantainers.</b>
+                  <b>CGI Error, please report to the maintainers.</b>
                   <br> %s
               </body>
             </html>

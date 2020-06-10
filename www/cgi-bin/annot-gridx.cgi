@@ -27,7 +27,7 @@ from lang_data_toolkit import * # imports langs & dicts
 ################################################################################
 form = cgi.FieldStorage()
 ss = form.getfirst("ss", ())
-synset = form.getfirst("synset", "")
+synset = form.getfirst("synset", "00001740-n")
 lemma = form.getfirst("lemma", "")
 lang = form.getfirst("lang", "eng")
 gridmode = form.getvalue("gridmode", "ntumcgrid")

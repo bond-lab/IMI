@@ -34,9 +34,9 @@ mtags_human = { "e":"e",
               None : 'Not tagged'
 }
 
-valid_usernames = ['fcbond','lmorgado', 'wangwenjie','hannahchoi','davidmoeljadi',
+valid_usernames = ['fcbond','lmorgado', 'wangwenjie','hannahchoi','davidmoeljadi', 'jojo',
 
-
+                   'andrew', 'melissa', 'merrick', 'jinghui', 'wilson', 
 
 'uinsuka01','uinsuka02','uinsuka03','uinsuka04','uinsuka05','uinsuka06','uinsuka07',
 'uinsuka08','uinsuka09','uinsuka10','uinsuka11','uinsuka12','uinsuka13','uinsuka14',

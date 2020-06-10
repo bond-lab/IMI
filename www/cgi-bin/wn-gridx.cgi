@@ -10,6 +10,7 @@ from collections import defaultdict as dd
 from ntumc_webkit import * 
 from ntumc_util import * 
 from lang_data_toolkit import *
+from html import escape
 
 start_time = time.time() # TIME
 
@@ -19,16 +20,16 @@ start_time = time.time() # TIME
 # langselect = Language updates. If empty, langs in cookie  will be used;
 ################################################################################
 form = cgi.FieldStorage()
-lang = cgi.escape(form.getfirst("lang", ""))
-lang2 = cgi.escape(form.getfirst("lang2", "eng"))
-ss = cgi.escape(form.getfirst("ss", ""))
-synset = cgi.escape(form.getfirst("synset", ""))
-lemma = cgi.escape(form.getfirst("lemma", ""))
-lemma = cgi.escape(lemma.strip())
-pos = cgi.escape(form.getfirst("pos", ""))
-gridmode = cgi.escape(form.getvalue("gridmode", "grid"))
+lang = escape(form.getfirst("lang", ""))
+lang2 = escape(form.getfirst("lang2", "eng"))
+ss = escape(form.getfirst("ss", ""))
+synset = escape(form.getfirst("synset", ""))
+lemma = escape(form.getfirst("lemma", ""))
+lemma = escape(lemma.strip())
+pos = escape(form.getfirst("pos", ""))
+gridmode = escape(form.getvalue("gridmode", "ntumcgrid"))
 # langselect = form.getlist("langselect[]")
-langselect = [cgi.escape(l) for l in form.getlist("langselect[]")]
+langselect = [escape(l) for l in form.getlist("langselect[]")]
 
 
 ################################################################################
@@ -46,7 +47,7 @@ scaling = 100
 
 if gridmode not in ('ntumcgrid', 'ntumcgridA', 'ntumcgridB', 'grid', 'gridx', 'cow', 'wnbahasa', 
                     'wnja', 'ntumc-noedit'):
-    gridmode = 'grid'
+    gridmode = 'ntumcgrid'
 
 if gridmode == "ntumcgrid":
     langs = omwlang.ntumclist()
@@ -143,6 +144,7 @@ relnam= {'ants':u'⇔', 'derv':u'⊳', 'pert':u'⊞'}
 
 
 ### Connect to the database
+#print('wndb_path', wndb_path)
 con = sqlite3.connect(wndb_path)
 c = con.cursor()
 
@@ -174,11 +176,11 @@ def hword(word, words, src, conf):
          style.add('opacity: %f;' % (conf-0.3) if conf != 1.0 else '')
     titlestr= ''
     if title:
-        titlestr= "title = '%s'" % '&#xA;'.join([cgi.escape(t) for t in title])
+        titlestr= "title = '%s'" % '&#xA;'.join([escape(t) for t in title])
     if word in words:
         style.add('color:DarkGreen;')
     return "<span style='%s'%s>%s</span>" % (" ".join(style), titlestr, 
-                                             cgi.escape(word))
+                                             escape(word))
 ################################################################################
 
 
@@ -654,7 +656,7 @@ if (ss):
                      ORDER BY t""" % ass, [*sss])
         rows = c.fetchall()
         for r in rows:
-            comment = cgi.escape(r[1],True)
+            comment = escape(r[1],True)
             user = r[2]
             time = r[3]
 
@@ -764,7 +766,7 @@ if (ss):
                 (comment, user, time) = com
                 tip += "<p>"
                 tip += """%s (%s): %s<p>
-                       """ % (user, time, cgi.escape(comment,True))
+                       """ % (user, time, escape(comment,True))
             print("""<span style="color:#999999;" class='tooltip' title='%s'><i class="icon-comments"></i></span>""" % tip)
 
         print("</td>")
@@ -913,7 +915,7 @@ elif (synset):
                      ORDER BY t""", [synset])
         rows = c.fetchall()
         for r in rows:
-            coms.append((cgi.escape(r[0],True),r[1],r[2]))
+            coms.append((escape(r[0],True),r[1],r[2]))
 
 
     # Check if it's part of Core
@@ -935,13 +937,10 @@ elif (synset):
               """, (synset,))
     rows = c.fetchall()
     defs = dd(lambda: dd(str))
+  
     for r in rows:
-        if r[3]:
-            def_with_usr= str(r[3]) + ": " + str(r[2])
-        else:
-            def_with_usr= "Original" + ": " + str(r[2])
-            
-        defs[r[0]][int(r[1])] = def_with_usr
+        defs[r[0]][int(r[1])] = "{} <sub>({})</sub>".format(escape(r[2]),
+                                                    escape(r[3]) if r[3] else 'PWN')
 
     # Fetch the highest definition ID
     # (in case the def sid is not 0 - e.g. was deleted)
@@ -1232,16 +1231,16 @@ elif (synset):
     #############################################
     # print "<div id='line'><span>Definitions</span></div>\n"
 
-    if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
-        # Edit Synset and Add New Synset buttons
-        print("<div id='line'><span>Definitions " + HTML.newdef_bttn(synset,wndb) + "</span></div>\n")
-    else:
-        print("<div id='line'><span>Definitions</span></div>\n")
-
+    # if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
+    #     # Edit Synset and Add New Synset buttons
+    #     print("<div id='line'><span>Definitions " + HTML.newdef_bttn(synset,wndb) + "</span></div>\n")
+    # else:
+    print("<div id='line'><span>Definitions</span></div>\n")
+        
     print("<dl>")
     # intersection between (existing langs in defs and examples) 
     # and (langs allowed by the gridmode)
-    for l in list(set(defs.keys() + exes.keys()).intersection(langselect)):   
+    for l in list(set(list(defs.keys()) + list(exes.keys())).intersection(langselect)):   
         if l == 'img':
             continue
         print("<dt><strong>%s</strong>" % omwlang.trans(l, lang))
@@ -1457,6 +1456,10 @@ elif (lemma):   ## Show all the entries for this lemma in language
         else: # ('gridx','ntumcgrid')
             sense_conf = ""
 
+        qparams =  lems
+        if glob:
+            qparams +=  lems
+        qparams.append(lang)
         c.execute("""SELECT DISTINCT synset
                      FROM word 
                      LEFT JOIN sense
@@ -1466,9 +1469,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      AND sense.lang = ?
                      LIMIT 200
                   """ % (lemma_q, sense_conf), 
-                  (lems  # consumed in "lemma IN (...)"
-                   + [lemma] if glob else []  # consumed by "OR lemma GLOB ?"
-                   + [lang]))  # consumed by sense.leng = ?
+                  qparams)  # consumed by sense.leng = ?
 
     row = c.fetchall()
 
@@ -1581,7 +1582,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
             print("<tr>\n")
 
             # Synset
-            print("""<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>)
+            print("""<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>
                      <nobr>%s""" %  (wncgi, s, lang, lang2, s))
             if freq[s] > 0: ### frequency
                 print("<font size='-1'>(%d)</font>" % (freq[s]))
