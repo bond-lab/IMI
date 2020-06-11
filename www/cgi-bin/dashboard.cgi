@@ -319,6 +319,8 @@ if logged:
 
                <li><a href="showcorpus.cgi">Corpus Browser</a></li>
 
+               <li><a href="corpus-sum.cgi">Corpus Summary</a></li>
+
 
                <li><a href="tag-status.cgi">Tagging Status</a>
                <ul><li><a>English</a>

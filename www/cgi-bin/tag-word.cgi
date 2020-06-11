@@ -8,7 +8,7 @@ from collections import defaultdict as dd
 from ntumc_util import *
 from ntumc_webkit import *
 from lang_data_toolkit import *
-
+from html import escape
 
 ################################################################################
 # CGI FIELD STORAGE & CONSTANTS
@@ -85,7 +85,7 @@ if tlemma ==  wds[tsid][twid][0]:
 else: ## word !=lemma
     html =  "<h3>Tagging %s " % (tlemma)
     html += """(%d:%d %s --- %s)</h3>""" % (sid,wid,corpus,
-                                            cgi.escape(wds[tsid][twid][0]))
+                                            escape(wds[tsid][twid][0]))
 
 # GET CONCEPTS
 query = """SELECT cwl.sid, cwl.wid,  cwl.cid, clemma, tag, tags, comment 
@@ -104,7 +104,7 @@ tcid=0
 clem=''
 #print "<br>tags", tags[tsid][twid].keys(), tags[tsid][twid].keys()[0], tags[tsid][twid][4]
 if tags[tsid][twid]:
-    tcid = tags[tsid][twid].keys()[0]
+    tcid = list(tags[tsid][twid].keys())[0]
     clem = tags[tsid][twid][tcid][0]
     tsss= ' '.join(lem2ss(w, clem,lang))
 ### FIXME screwing up tagging
@@ -139,7 +139,7 @@ except:
 # HTML FUNCTIONAL BLOCKS
 ################################################################################
 def tag_head(ver,typ):
-    return u"""<html>
+    return """<html>
   <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
     <link href="../common.css" rel="stylesheet" type="text/css">
@@ -376,7 +376,7 @@ def show_sents(c, tsid, twid):
         for wid in sorted(wds[sid].keys()):
             cids = ['c%s_%s' % (sid,cd) for cd in tags[sid][wid]]
             # sid:wid:pos:lemma
-            title= cgi.escape("%d:%d:%s:%s" % (sid, wid, 
+            title= escape("%d:%d:%s:%s" % (sid, wid, 
                                                wds[sid][wid][1], 
                                                wds[sid][wid][2]))
 
@@ -434,7 +434,7 @@ def show_sents(c, tsid, twid):
                         title +='&#013;%s: %s (%s)' % (
                             tags[sid][wid][cid][0],
                             tags[sid][wid][cid][1],
-                            cgi.escape(tags[sid][wid][cid][3],quote=True))
+                            escape(tags[sid][wid][cid][3],quote=True))
 
                     else:
                         title +='&#013;%s: %s' % (tags[sid][wid][cid][0],
@@ -521,7 +521,7 @@ def show_sents(c, tsid, twid):
                 """ % (clem, sentiment[tsid][cid], unique_id, 'edit-corpus.cgi',  corpus, 
                        lang, clem, tsid, cid, userID)
                 tag = tags[tsid][twid][cid][1]
-                sentihtml += u"""<br><input name="senti_score" type="range" 
+                sentihtml += """<br><input name="senti_score" type="range" 
                 style="width:200px" min="-100" max="100" value="%d"
                 onchange="document.getElementById('senti%s').submit();">
 
@@ -641,7 +641,7 @@ style="display:inline-block; vertical-align:middle" target='_parent'>
 ###
 
 ########## HTML
-print(u"""Content-type: text/html; charset=utf-8\n\n""")
+print("""Content-type: text/html; charset=utf-8\n\n""")
 
 # Header
 print(tag_head(version,'sequential'))
@@ -658,7 +658,7 @@ if userID not in valid_usernames:
 ##
 else:
 
-    print( u""" <table style="width:100%%">
+    print(""" <table style="width:100%%">
     <tr> <td valign="top" style="width:55%%;
              border-right: 1px solid black">%s</td>
 

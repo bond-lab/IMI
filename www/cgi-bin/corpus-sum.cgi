@@ -50,7 +50,7 @@ print("""<h1>Summary of the NTU-MC</h1>\n """)  ## add date?
 # <input type="submit" value="Search"/></form>""" % (sid_from, sid_to))
 print("""<h2>Genres</h2>\n """)
 dbdir='../db'
-langs =  ['eng', 'cmn', 'ind', 'jpn', 'ita']
+langs =  ['eng', 'cmn', 'ind', 'jpn', 'ita', 'zsm']
 for lang in langs:
     dbfile = "%s/%s.db" % (dbdir, lang)
     if not os.path.isfile(dbfile):
@@ -105,8 +105,8 @@ where (docid in (select docid from doc where corpusID=?)))""", (corpusID,))
         nconcepts=c.fetchone()[0]
 
 
-        
-        print("""<tr>
+        if sents > 0:
+            print("""<tr>
   <td>{}</td>
   <td>{}</td>
   <td align='right'>{:,d}</td>
@@ -128,14 +128,17 @@ where (docid in (select docid from doc where corpusID=?)))""", (corpusID,))
 
 print("""<h4>Current known Issues</h4>
 <p>not all the data is up
+<p>Missing a lot of Japanese and English catb!
 <p>yoursing is from ver 3, ver 5 (with headers) is available)
 <hr>
 <p><a href="http://compling.hss.ntu.edu.sg/ntumc/">More Information about the Corpus</a>
+<hr>
 """)
 
 
 def get_doc_stats(langs):
     doc_stats=dict()
+    id2doc=dd(dict) # id2doc[docID][lang] = doc
     for lang in langs:
         dbfile = "%s/%s.db" % (dbdir, lang)
         if not os.path.isfile(dbfile):
@@ -146,13 +149,15 @@ def get_doc_stats(langs):
         c.execute('select docID, doc, title from doc')
         corpora = c.fetchall()
         for (docID, doc, title) in corpora:
-            if docID not in doc_stats:
-                doc_stats[docID]=dict()
-            doc_stats[docID][lang] = dict()
-            doc_stats[docID][lang]['title'] = title
-            doc_stats[docID]['doc']   = doc
-            c.execute('select count(sent) from sent where docID=?', (docID,))
-            doc_stats[docID][lang]['sents'] = c.fetchone()[0]
+            id2doc[docID][lang] = doc
+            if doc not in doc_stats:
+                doc_stats[doc]=dict()
+            doc_stats[doc][lang] = dict()
+            doc_stats[doc][lang]['title'] = title
+            doc_stats[doc]['ID']   = docID
+        c.execute('select docID, count(sent) from sent group by docID')
+        for (docID, count) in c.fetchall():
+            doc_stats[id2doc[docID][lang]][lang]['sents'] = count
 
             
     return doc_stats
@@ -162,15 +167,25 @@ print("""<h2>Documents</h2>\n """)
 doc_stats = get_doc_stats(langs)
 
 print("<table>")
-for docID in doc_stats:
+print("<tr>")
+print("<td>Document</td>")
+colspan='1'
+for lang in langs:
+    print(f"<td colspan='{colspan}'>{lang}</td>")
+print("</tr>")
+
+for doc in doc_stats:
     print("<tr>")
-    print("<th>{}</th><td>{}</td>".format(docID, doc_stats[docID].get('doc', '???')))
+    #print("<th>{}</th><td>{}</td>".format(docID, doc_stats[docID].get('doc', '???')))
     for lang in langs:
-        if lang in doc_stats[docID]:
-            print("<td>{}</td>".format(doc_stats[docID][lang].get('title', '?')))
-            print("<td>{}</td>".format(doc_stats[docID][lang].get('sents', 0)))
+        if lang == 'eng':
+            if lang in doc_stats[doc]:
+                print("<td><a title='{}'>{}</a></td>".format(doc,doc_stats[doc][lang].get('title', '?')))
+            else:
+                print("<td><a title='{}'>{}</a></td>".format(doc,doc))
+        if lang in doc_stats[doc]:
+            print("<td>{}</td>".format(doc_stats[doc][lang].get('sents', 0)))
         else:
-            print("<td><br></td>")
             print("<td><br></td>")
     print("</tr>")
 print("</table>")

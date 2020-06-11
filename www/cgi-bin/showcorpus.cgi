@@ -19,6 +19,7 @@ import datetime
 from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
+from html import escape
 
 # create the error log for the cgi errors
 errlog = open('cgi_err.log', 'w+', encoding="utf-8")
@@ -32,12 +33,12 @@ url = "http://compling.hss.ntu.edu.sg/"
 
 form = cgi.FieldStorage()
 
-mode = cgi.escape(form.getfirst('mode',''))
-postag = cgi.escape(form.getfirst("postag",'')) # FOR WORDVIEW
+mode = escape(form.getfirst('mode',''))
+postag = escape(form.getfirst("postag",'')) # FOR WORDVIEW
 # wordtag = form.getlist("wordtag[]") # FOR WORDVIEW
-wordtag = [cgi.escape(t) for t in form.getlist("wordtag[]")]
+wordtag = [escape(t) for t in form.getlist("wordtag[]")]
 # wordclemma = form.getlist("wordclemma[]") # FOR WORDVIEW
-wordclemma = [cgi.escape(c) for c in form.getlist("wordclemma[]")]
+wordclemma = [escape(c) for c in form.getlist("wordclemma[]")]
 
 ################################################################################
 # LANGUAGE CHOICES: it allows the choice of a main
@@ -46,42 +47,42 @@ wordclemma = [cgi.escape(c) for c in form.getlist("wordclemma[]")]
 # The same language as the search language cannot
 # be chosen as a "see also language"
 ################################################################################
-searchlang = cgi.escape(form.getfirst("searchlang", "eng"))
+searchlang = escape(form.getfirst("searchlang", "eng"))
 # langs2 = form.getlist("langs2")
-langs2 = [cgi.escape(l) for l in form.getlist("langs2")]
+langs2 = [escape(l) for l in form.getlist("langs2")]
 if searchlang in langs2:
     langs2.remove(searchlang)
 
 
 # senti = form.getlist("senti[]") # receives either 'mlsenticon', 'sentiwn', both or none! 
-senti = [cgi.escape(s) for s in form.getlist("senti[]")]
+senti = [escape(s) for s in form.getlist("senti[]")]
 if 'mlsenticon' in senti and 'sentiwn' in senti:
     senti = 'comp' # then it will compile both sentiment scores
 
-concept = cgi.escape(form.getfirst('concept','')) # receives a synset
+concept = escape(form.getfirst('concept','')) # receives a synset
 ph_concept = concept if concept != None else ""
-clemma = cgi.escape(form.getfirst('clemma','')) # receives a lemmatized concept 
+clemma = escape(form.getfirst('clemma','')) # receives a lemmatized concept 
 ph_clemma = clemma if clemma != None else ""
-word = cgi.escape(form.getfirst('word','')) # receives a surface form
+word = escape(form.getfirst('word','')) # receives a surface form
 ph_word = word if word != None else ""
-lemma = cgi.escape(form.getfirst('lemma','')) # receives a lemmatized word
+lemma = escape(form.getfirst('lemma','')) # receives a lemmatized word
 ph_lemma = lemma if lemma != None else ""
-limit = cgi.escape(form.getfirst("limit", "10")) # limit number os sentences to show
+limit = escape(form.getfirst("limit", "10")) # limit number os sentences to show
 
 
-sentlike = cgi.escape(form.getfirst('sentlike','')) # try to match pattern to sentence
+sentlike = escape(form.getfirst('sentlike','')) # try to match pattern to sentence
 ph_sentlike = sentlike if sentlike != None else ""
 
 
 
 #########################################
 # SIDS FROM TO
-sid_from = cgi.escape(form.getfirst("sid_from", '0'))
+sid_from = escape(form.getfirst("sid_from", '0'))
 try:
     sid_from = int(sid_from)
 except:
     sid_from = 0
-sid_to = cgi.escape(form.getfirst("sid_to", '1000000'))
+sid_to = escape(form.getfirst("sid_to", '1000000'))
 
 try:
     sid_to = int(sid_to)
@@ -95,11 +96,11 @@ except:
 # pos_jpn = form.getlist("selectpos-jpn")
 # pos_ind = form.getlist("selectpos-ind")
 # pos_ita = form.getlist("selectpos-ita")
-pos_eng = [cgi.escape(pos) for pos in form.getlist("selectpos-eng")]
-pos_cmn = [cgi.escape(pos) for pos in form.getlist("selectpos-cmn")]
-pos_jpn = [cgi.escape(pos) for pos in form.getlist("selectpos-jpn")]
-pos_ind = [cgi.escape(pos) for pos in form.getlist("selectpos-ind")]
-pos_ita = [cgi.escape(pos) for pos in form.getlist("selectpos-ita")]
+pos_eng = [escape(pos) for pos in form.getlist("selectpos-eng")]
+pos_cmn = [escape(pos) for pos in form.getlist("selectpos-cmn")]
+pos_jpn = [escape(pos) for pos in form.getlist("selectpos-jpn")]
+pos_ind = [escape(pos) for pos in form.getlist("selectpos-ind")]
+pos_ita = [escape(pos) for pos in form.getlist("selectpos-ita")]
 
 pos_form = dd(lambda: list())
 pos_form['eng'] = pos_eng
@@ -113,10 +114,10 @@ corpusdb = "../db/%s.db" % searchlang
 
 
 
-usr = cgi.escape(form.getfirst('usr', '')) # should be fetched by cookie!
-userid = cgi.escape(form.getfirst('userid', 'all')) # defaults to every user
-mode = cgi.escape(form.getfirst('mode','')) # viewing mode
-source = cgi.escape(form.getfirst('source[]','')) # choose source, default is ntmuc
+usr = escape(form.getfirst('usr', '')) # should be fetched by cookie!
+userid = escape(form.getfirst('userid', 'all')) # defaults to every user
+mode = escape(form.getfirst('mode','')) # viewing mode
+source = escape(form.getfirst('source[]','')) # choose source, default is ntmuc
 
 
 ### reference to self (.cgi)
@@ -245,14 +246,14 @@ if mode == "wordview":
         ss_names[synset] = [name, src]
         ss_defs[synset][lang][sid] = ss_def
     try:
-        html_word = cgi.escape(word, quote=True)
+        html_word = escape(word, quote=True)
     except:
         html_word = '' # The forms fails to read ; as the argument for word!
     try:
-        html_lemma = cgi.escape(lemma, quote=True)
+        html_lemma = escape(lemma, quote=True)
     except:
         html_lemma = '' # The forms fails to read ; as the argument for lemma!
-    html_pos = cgi.escape(postag, quote=True)
+    html_pos = escape(postag, quote=True)
 
     lemma_href = """<a class='fancybox fancybox.iframe' 
                     href='%s%s'>%s</a>
@@ -1051,7 +1052,7 @@ print("""<title>%s</title>
 
 try:
 # if 1 > 0: #TEST
-    # print cgi.escape(showcorpus, quote=True) #TEST
+    # print escape(showcorpus, quote=True) #TEST
     # print langs2  #TEST
     # print lang2_sids  #TEST
     # print l_sid_fullsent['eng']
@@ -1087,7 +1088,7 @@ try:
         for sid in sid_cid.keys():
             count += len(sid_cid[sid])
         print("<b>%d Results for: </b>" % count)
-        print(cgi.escape(searchquery[:-1], quote=True))
+        print(escape(searchquery[:-1], quote=True))
 
         print("""<table class="striped tight">""")
         print("""<thead><tr><th>Sid</th><th>Sentence</th></tr></thead>""")
@@ -1158,7 +1159,7 @@ try:
 
                             score += SentiWN
 
-                        sentitooltip = cgi.escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
+                        sentitooltip = escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
 
                     else:
                         sentitooltip = ""
@@ -1166,9 +1167,9 @@ try:
                     # END OF SENTIMENT (PRINTING BELOW)
                     #########################################################
 
-                    html_word = cgi.escape(wid_info[0], quote=True)
-                    html_lemma = cgi.escape(wid_info[1], quote=True)
-                    html_pos = cgi.escape(wid_info[2], quote=True)
+                    html_word = escape(wid_info[0], quote=True)
+                    html_lemma = escape(wid_info[1], quote=True)
+                    html_pos = escape(wid_info[2], quote=True)
 
                     tags_tooltip = ""
                     if len(sid_wid_tag[sid][wid]) > 0:
@@ -1186,7 +1187,7 @@ try:
                         for i, tag in enumerate(sid_wid_tag[sid][wid]):
                             href_word += "&wordtag[]=%s" % (tag,)
                             wordcid = sid_wid_cid[sid][wid][i]
-                            html_wordclemma = cgi.escape(sid_cid_clemma[sid][wordcid],quote=True)
+                            html_wordclemma = escape(sid_cid_clemma[sid][wordcid],quote=True)
                             href_word += "&wordclemma[]=%s" % (html_wordclemma,)
                     href_word += '"'
 
@@ -1298,7 +1299,7 @@ try:
 
                                     score += SentiWN
 
-                                sentitooltip = cgi.escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
+                                sentitooltip = escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
 
                             else:
                                 sentitooltip = ""
@@ -1309,9 +1310,9 @@ try:
 
 
 
-                            html_word = cgi.escape(wid_info[0], quote=True)
-                            html_lemma = cgi.escape(wid_info[1], quote=True)
-                            html_pos = cgi.escape(wid_info[2], quote=True)
+                            html_word = escape(wid_info[0], quote=True)
+                            html_lemma = escape(wid_info[1], quote=True)
+                            html_pos = escape(wid_info[2], quote=True)
 
                             tags_tooltip = ""
                             if len(l_sid_wid_tag[lang2][lsid][wid]) > 0:
@@ -1461,7 +1462,7 @@ try:
 
                         score += SentiWN
 
-                    sentitooltip = cgi.escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
+                    sentitooltip = escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
 
                 else:
                     sentitooltip = ""
@@ -1470,9 +1471,9 @@ try:
                 #########################################################
 
 
-                html_word = cgi.escape(wid_info[0], quote=True)
-                html_lemma = cgi.escape(wid_info[1], quote=True)
-                html_pos = cgi.escape(wid_info[2], quote=True)
+                html_word = escape(wid_info[0], quote=True)
+                html_lemma = escape(wid_info[1], quote=True)
+                html_pos = escape(wid_info[2], quote=True)
 
                 tags_tooltip = ""
                 if len(sid_wid_tag[sid][wid]) > 0:
@@ -1605,7 +1606,7 @@ try:
 
                                 score += SentiWN
 
-                            sentitooltip = cgi.escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
+                            sentitooltip = escape(" SentiWN: %0.3f; " % SentiWN, quote=True)
 
                         else:
                             sentitooltip = ""
@@ -1614,9 +1615,9 @@ try:
                         # END OF SENTIMENT (PRINTING BELOW)
                         #########################################################
 
-                        html_word = cgi.escape(wid_info[0], quote=True)
-                        html_lemma = cgi.escape(wid_info[1], quote=True)
-                        html_pos = cgi.escape(wid_info[2], quote=True)
+                        html_word = escape(wid_info[0], quote=True)
+                        html_lemma = escape(wid_info[1], quote=True)
+                        html_pos = escape(wid_info[2], quote=True)
 
                         tags_tooltip = ""
                         if len(l_sid_wid_tag[lang2][lsid][wid]) > 0:
@@ -1810,10 +1811,10 @@ for l in corpuslangs:
 
         if p in pos_form[searchlang]:
             print("""<option value ='%s' selected>%s</option>
-              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True)))
+              """ % (escape(p, quote=True), escape(p, quote=True)))
         else:
             print("""<option value ='%s'>%s</option>
-              """ % (cgi.escape(p, quote=True), cgi.escape(p, quote=True)))
+              """ % (escape(p, quote=True), escape(p, quote=True)))
 
     print("""</select>
         <script>
