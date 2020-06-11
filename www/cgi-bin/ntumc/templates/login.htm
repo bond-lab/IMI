@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>{{title}}</title>
+    <script src='../jquery.js' language='javascript'></script>
+    <script src='../jquery-ui.js' language='javascript'></script>
+    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>
+    <link rel='stylesheet' type='text/css' href='../common.css'>
+	</head>
+	<body>
+	  <table style="width:100%;">
+	    <tr>
+	      <td valign="top" style="width:50%"></td> 
+	      <td align="right" style="width:50%">
+		<strong>NTUMC Annotation Tools</strong>
+	{% if message %}
+		<div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
+		<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>{{message}}</p>
+	</div>
+	{% endif %}
+		<br/>
+		{% if logged_in %}
+		<form method='post' action = "{{logincgi}}"> 
+		      <input type="hidden" name="action" value="logout"/>
+			<input type = "submit" value = "Logout"/> 
+		</form>
+		<br/>
+		<a href='{{taglcgi}}'>Lexical tagging</a>
+		{% else %}
+		    <form method='post' action = "{{logincgi}}"> 
+		      Username: <input type ="text" name="usrname_cgi"/> 
+		      <input type="hidden" name="target" value="{{target}}"/>
+			<input type = "submit" value = "Change"/> 
+		    </form>
+		    {% endif %}
+	      </td>
+	    </tr>
+	</body>
+</html>

@@ -1,0 +1,153 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <meta http-equiv='content-language' content='zh'>
+    <title>'NTUMC Annotation Tool ({{version}}: {{type}})</title>
+    <link href="../tag-wn.css" rel="stylesheet" type="text/css">
+    <script src="../tag-wn.js" language="javascript"></script>
+    <script src='../jquery.js' language='javascript'></script>
+    <script src='../js/scrolltotop.js' language='javascript'></script>
+    <script src='../js/showex.js' language='javascript'></script>
+    <script src='../tag-wid.js' language='javascript'></script>
+    <script src='../jquery-ui.js' language='javascript'></script>
+    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>
+    <link rel='stylesheet' type='text/css' href='../common.css'>
+    <script src='../tag_lex.js' language='javascript'></script>
+
+
+    {# FOR KICKSTART: #} 
+    {#  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>  THIS WAS IN CONFLICT WITH JQUERY UI ABOVE #}
+    <script src="../HTML-KickStart-master/js/kickstart.js"></script> 
+    <link rel="stylesheet" href="../HTML-KickStart-master/css/kickstart.css" media="all" />
+      
+
+
+    <script>
+    function sizeFrame(framename) {
+        var F = document.getElementById(framename);
+        F.height = 0;
+        if(F.contentDocument) {
+            F.height = F.contentDocument.documentElement.scrollHeight+30; //FF 3.0.11, Opera 9.63, and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        } else {
+            F.height = F.contentWindow.document.body.scrollHeight+30; //IE6, IE7 and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        }
+    }
+    function resizeAllFrames(){
+        var frames2resize = ["omwiframe", "logiframe"];
+        for (i = 0; i < frames2resize.length; i++) {
+        var framename = frames2resize[i];
+        // alert(framename);
+        sizeFrame(framename);
+        }
+    }
+       $( document ).ready(function(){
+           resizeAllFrames(); 
+           page_init();
+       });
+    </script>
+
+    <style>
+      hr{
+        padding: 0px;
+        margin: 10px;    
+      }
+    </style>
+
+
+ </head>
+ <body>
+   <script type="text/javascript">
+     $(document).ready(function() {
+     $(".c60639_21").on('mouseover', function() {
+     $(".c60639_21").addClass("match");
+     });
+
+     $(".c60639_21").on('mouseout', function() {
+     $(".c60639_21").removeClass("match");
+     });
+     });
+   </script>
+   <table style="width:100%"> 
+    <tr> <td valign="top" style="width:55%; 
+             border-right: 1px solid black; padding: 5px">
+	<!--{# MAIN FRAME #}-->
+	<!-- Top toolbar -->
+
+	{{status_bar}}
+
+	<h6>«&#8239;{{lemma}}&#8239;» is not stored as a concept 
+	  in the corpus</h6>
+
+        <form method="get" action="{{taglcgi}}" target='_parent'>   
+          <button type="submit" name="Query" class="small">Add</button>
+	  «&#8239;{{lemma}}&#8239;» to {{corpus}}?
+	  <input type='hidden' name='addme' value='{{lemma}}'>
+	  <input type='hidden' name='lemma' value='{{lemma}}'>          
+          <input type='hidden' name='corpus' value='{{corpus}}'>
+          <input type='hidden' name='lang' value='{{lang}}'>
+	  <input type=hidden name="lim" value ='{{lim}}'> 
+	  </form>
+
+	<!--{# SAMPLE SENTENCES HERE #}-->
+	{% if matched_sentences %}
+	<p>It appears in the following sentences:
+	  {% for sentence in matched_sentences %}
+	  <br><b>{{sentence.sid}}</b>: 
+	      {% for word in sentence.words %}
+	          {{word}}
+	      {% endfor %}
+	  {% endfor %}
+	</p>
+	{% endif %}
+
+	<!--{# Search form #}-->
+	<form method="get" action="{{taglcgi}}" target='_self'>   
+	  <strong>«&#8239;{{lemma}}&#8239;» in {{corpus}} ({{lang}})</strong>: 
+	  <input type='hidden' name='corpus' value='{{corpus}}'>
+	  <input type='hidden' name='lang' value='{{lang}}'>
+	  <input type="text" style='font-size:14px;' name="lemma" value="{{lemma}}" size=8 maxlength=30>
+          <button type="submit" name="Query" class="small">Search</button>
+	  <select name="lim">
+	    {% for key,value in lims|dictsort %}
+	    <option value='{{key}}' {% if key == lim %}selected{% endif %}>{{value}}</option>
+	    {% endfor %}
+	  </select>
+
+
+
+	  <a href='../tagdoc.html' target='_blank'>
+	    <button type="button" class="small">?</button>
+	  </a>
+
+
+	</form>
+	<!--{# END OF MAIN FRAME #}-->
+      </td>
+
+         <td valign="top" style="width:45%">
+         <table style="width:100%">
+           <tr> <td valign="top" style="width:45%"> 
+           <iframe name="wn" id="omwiframe" src="{{wn_src}}" 
+                   frameborder="0" width="100%"
+                   onload="resizeAllFrames()">wordnet
+           </iframe></td></tr>
+           <tr> <td> <hr>
+           <iframe name="log" id="logiframe" frameborder="0"
+                   width="100%" onload="resizeAllFrames()">
+           </iframe> </td> </tr>
+         </table>
+     </tr>
+   </table>
+<span style="text-align:right;">
+         <p><a href='{{wnurl}}'>More detail about the {{wnnam}} ({{wnver}})</a>
+      
+<p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a>
+         &lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;</span>   
+ </body>
+</html>

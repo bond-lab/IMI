@@ -1,0 +1,275 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <meta http-equiv='content-language' content='zh'>
+    <title>'NTUMC Annotation Tool ({{version}}: {{type}})</title>
+    <link href="../tag-wn.css" rel="stylesheet" type="text/css">
+    <script src="../tag-wn.js" language="javascript"></script>
+    <script src='../jquery.js' language='javascript'></script> 
+    <script src='../js/scrolltotop.js' language='javascript'></script>
+    <script src='../js/showex.js' language='javascript'></script>
+    <script src='../tag-wid.js' language='javascript'></script>
+    <script src='../jquery-ui.js' language='javascript'></script>
+    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>
+    <link rel='stylesheet' type='text/css' href='../common.css'>
+    <script src='../tag_lex.js' language='javascript'></script>
+
+
+    {# FOR KICKSTART: #} 
+    {#  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>  THIS WAS IN CONFLICT WITH JQUERY UI ABOVE #}
+    <script src="../HTML-KickStart-master/js/kickstart.js"></script> 
+    <link rel="stylesheet" href="../HTML-KickStart-master/css/kickstart.css" media="all" />
+
+
+    <!-- FANCYBOX -->
+    <!-- Needs JQuery -->
+    <!-- Add FancyBox main JS and CSS files -->
+    <script type="text/javascript" 
+     src="../fancybox/source/jquery.fancybox.js?v=2.1.5"></script>
+    <link rel="stylesheet" type="text/css" 
+     href="../fancybox/source/jquery.fancybox.css?v=2.1.5" 
+     media="screen" />
+    <!-- Make FancyBox Ready on page load (adds Classes) -->
+    <script type="text/javascript" 
+     src="../fancybox-ready.js"></script>
+      
+
+    <script>
+    function sizeFrame(framename) {
+        var F = document.getElementById(framename);
+        F.height = 0;
+        if(F.contentDocument) {
+            F.height = F.contentDocument.documentElement.scrollHeight+30; //FF 3.0.11, Opera 9.63, and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        } else {
+            F.height = F.contentWindow.document.body.scrollHeight+30; //IE6, IE7 and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        }
+    }
+    function resizeAllFrames(){
+        var frames2resize = ["omwiframe", "logiframe"];
+        for (i = 0; i < frames2resize.length; i++) {
+        var framename = frames2resize[i];
+        // alert(framename);
+        sizeFrame(framename);
+        }
+    }
+       $( document ).ready(function(){
+           resizeAllFrames(); 
+           page_init();
+       });
+    </script>
+
+    <style>
+      hr{
+        padding: 0px;
+        margin: 10px;    
+      }
+    </style>
+
+
+  <script>  // THIS SNIPPET IS USED TO CHECK KEYS PRESSED
+  window.addEventListener("keydown", keysPressed, false);
+  window.addEventListener("keyup", keysReleased, false);
+  var keys = [];
+  function keysPressed(e) {
+      // store an entry for every key pressed
+      keys[e.keyCode] = true;
+
+      // Ctrl + Shift + 5
+      if (keys[17] && keys[16] && keys[53]) {
+          // do something
+      }
+
+      // Ctrl + f
+      if (keys[17] && keys[70]) {
+          // do something
+          // prevent default browser behavior
+          e.preventDefault(); 
+      }
+  }
+  function keysReleased(e) {
+      // mark keys that were released
+      keys[e.keyCode] = false;
+  }
+  function isZKeyPressed(sid) {
+      if (keys[90]) { // The Z key!
+          var url = "fix-corpus.cgi?db_edit=../db/{{lang}}.db&sid_edit=" + sid
+          window.open(url, "_blank");
+          window.location.reload();
+      } else {
+          //  alert("The Z key was NOT pressed!" + sid);
+      }
+  }
+  </script>
+
+
+
+ </head>
+ <body>
+   <script type="text/javascript">
+     $(document).ready(function() {
+     $(".c60639_21").on('mouseover', function() {
+     $(".c60639_21").addClass("match");
+     });
+
+     $(".c60639_21").on('mouseout', function() {
+     $(".c60639_21").removeClass("match");
+     });
+     });
+   </script>
+   <table style="width:100%">
+    <tr> <td valign="top" style="width:55%; 
+             border-right: 1px solid black; padding: 5px">
+
+	<!-- Top toolbar -->
+        <form method="get" action="{{taglcgi}}"  target='_parent'>
+          <strong>«&#8239;{{lemma}}&#8239;» in {{corpus}} ({{lang}})</strong>: 
+          <input type='hidden' name='corpus' value='{{corpus}}'>
+          <input type='hidden' name='lang' value='{{lang}}'>
+          <input type="text" style='font-size:14px;' name="lemma" 
+		 value="{{lemma}}" size=8 maxlength=30>
+          <button type="submit" name="Query" class="small">Search</button>
+
+
+          <input type="text" style='font-size:14px;' name="sid_from" 
+		 value="{{sid_from}}" size=2 maxlength=30>
+	  <b>&le;SID&ge;</b>
+          <input type="text" style='font-size:14px;' name="sid_to" 
+		 value="{{sid_to}}" size=2 maxlength=30>
+
+
+          <select name="lim">
+	    {% for key,value in lims|dictsort %}
+	    <option value='{{key}}' 
+		    {% if key == lim %}selected
+		    {% endif %}>{{value}}
+	    </option>
+	    {% endfor %}
+	  </select>
+
+
+	  {# MULTIDICT IS PART OF THE WN SIDE
+	  <a href="multidict.cgi?lg1={{lang}}&amp;lemma1={{lemma}}" 
+	     target="_blank"><button type="button">Multidict</button>
+	  </a>
+	  #}
+
+	  {{status_bar}}
+
+	  <a href='../tagdoc.html' target='_blank'>
+	    <button type="button" class="small">?</button>
+	  </a>
+
+	  {# >>>REPLACED BY STATUS_BAR<<<
+          <strong>Current user:</strong>
+          <font color="#3EA055">{{usrname_logout}}</font>
+	  <a href="login.cgi?action=logout&target={{taglcgi}}">
+	    <button type="button">Logout</button>
+	  </a> #}
+	  </form>
+
+
+	{% if message %}
+        <div class="ui-state-highlight ui-corner-all" 
+	     style="margin-top: 20px; padding: 0 .7em;">
+	  <p>
+	    <span class="ui-icon ui-icon-info" 
+		   style="float: left; margin-right: .3em;">
+	    </span>{{message}}
+	  </p>
+	</div>
+	{% endif %}
+
+
+	<form name='tag' method='post' action='edit-corpus.cgi' 
+              id='tagword' target='log'>   
+          <input type='hidden' name='cgi_mode' value='taglex'>
+	  <input type='hidden' name='corpus' value='{{corpus}}'>
+	  <input type='hidden' name='lang' value='{{lang}}'>
+	  <input type='hidden' name='lemma' value='{{lemma}}'>
+	  <input type='hidden' name='cids' value='{{cids}}'>
+	  <input type='hidden' name='lim' value='{{lim}}'>
+
+	  <a id='bookmark_PAGE_TOP'></a>
+
+	  {# >>>>DEPRICATED DEFAULT TAGGER<<<<< 
+	  <p><strong>Default</strong>:<!--default tag box here-->
+	    {{tagbox_default}}
+	  <input type='submit' name='Query' value='tag'>
+	   #}
+
+	  <hr/>
+	  {% if comment_summary %}
+          <button id="btnToggle" type="button" class="small">
+            All Comments
+          </button>
+          <div id="CommentSummary" class="CommentSummary">
+            <table border='1'>
+              <tr><td>Comment</td>
+                <td>freq</td></tr>{{comment_summary}}
+            </table>
+          </div>
+	  {% endif %}
+
+	  <span style="display:in-block"> 
+	    Distribution ({{tag_count}}): {{distribution_text}}    
+	  </span>
+
+
+	   <!-- Lex groups-->
+	   {% for lex_group in lex_groups %}
+	   <hr/>
+	   <p>{{lex_group}}
+	   </p>
+	   {% endfor%}
+	   <!-- end of lex groups-->
+	  <!-- other stuff -->
+	  <a id='bookmark_PAGE_BOTTOM'></a>
+	  <div align='right'>
+	    {# We no longer need a submit butotn
+	    <input type="submit" name="Query" value="tag">
+	    #}
+	  </div>
+	</form>
+
+        <hr>
+	<span>
+         <p><a href='{{wnurl}}'>More detail about the {{wnnam}} ({{wnver}})</a>
+	 <p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">
+	     Francis Bond</a>&lt;<a href="mailto:bond@ieee.org">
+	     bond@ieee.org</a>&gt;
+	</span>
+      </td>
+
+         <td valign="top" style="width:45%">
+         <table style="width:100%">
+           <tr> <td valign="top" style="width:45%"><br><br>
+           <iframe name="wn" id="omwiframe" src="{{wn_src}}" 
+                   frameborder="0" width="100%"
+                   onload="resizeAllFrames()"
+                    style="position:fixed; top:55px; right:10px;width:44%;height:90%">wordnet
+           </iframe><br><br><br><br><br><br></td></tr>
+           <tr> <td> {#<hr>
+           <iframe name="log" id="logiframe" frameborder="0"
+                   width="100%" onload="resizeAllFrames()">
+           </iframe> </td> #}</tr>
+         </table>
+     </tr>
+   </table>
+
+
+<span style="position:fixed; top:3px; right:20px;width:43%;">
+  <iframe name="log" id="logiframe" frameborder="0" style="display:block;
+    width:100%;height:43px"  >
+  </iframe>
+  <hr>
+</span>
+
+
+ </body>
+</html>
