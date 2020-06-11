@@ -40,7 +40,7 @@ form = cgi.FieldStorage()
 
 sid_edit = form.getfirst("sid_edit", "11000")
 
-corpusdb = form.getfirst("corpusdb", "eng")
+corpusdb = form.getfirst("corpus", "eng")
 (dbexists, dbversion, dbmaster, dblang, dbpath) = check_corpusdb(corpusdb)
 
 

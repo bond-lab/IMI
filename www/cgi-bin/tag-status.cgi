@@ -42,7 +42,7 @@ wncgi_noedit = "wn-gridx.cgi?gridmode=ntumc-noedit&lang=%s&lemma=%s"
 wncgi_edit = "wn-gridx.cgi?usrname=%s&gridmode=ntumcgrid&lang=%s&lemma=%s"
 taglexscgi = "tag-lexs.cgi?corpus=%s&lang=%s&usrname_cgi=%s&lemma=%s&Query=Search&lim=-1&sid_from=%s&sid_to=%s"
 
-fix_corpus = "fix-corpus.cgi?db_edit=%s&sid_edit=%s" # db, user, sid
+fix_corpus = "fix-corpus.cgi?corpus=%s&sid_edit=%s" # lang, user, sid
 tag_word = "tag-word.cgi?corpus=%s&lang=%s&usrname_cgi=%s&gridmode=%s&sid=%s" # lang, lang, usr, gridmode, sid
 
 
@@ -270,7 +270,7 @@ for tag in lemma_tags.keys():
         bysid =[]
         if tag =='e':
             for sid in all_dict[clemma]:
-                fix_corpus_url = fix_corpus % (db, sid)
+                fix_corpus_url = fix_corpus % (lang, sid)
                 bysid.append("<a href='%s'>%s</a>" % (fix_corpus_url,sid))
         bysidstr = ', '.join(bysid)
         print("""<tr><td><nobr>%s</nobr>
@@ -311,7 +311,7 @@ for tag in sid_tags.keys():
 
     for sid, count in sid_tags[tag].items():
 
-        fix_corpus_url = fix_corpus % (db, sid)
+        fix_corpus_url = fix_corpus % (lang, sid)
         tag_word_url = tag_word % (lang,lang,userID,"ntumcgrid",sid) 
 
         print("""<tr><td><nobr>%s</nobr>
