@@ -28,7 +28,7 @@ from ntumc_webkit import *
 from lang_data_toolkit import *
 from ntumc_tagdb import *
 import time
-
+from html import escape
 
 ##########################################################################
 # CONSTANTS
@@ -328,7 +328,7 @@ if totag:
             tag_freqs[tag] = '%d%%' % ((tag_freqs[tag] * 100) / tag_count)
 
     template_data['tag_count'] = tag_count
-    all_synset_group = sorted(show.keys())
+    all_synset_group = sorted(list(show.keys()),key=str)
 
     # 2014-06-21 [Tuan Anh]
     text_items = []
@@ -486,7 +486,7 @@ if totag:
             tmp_lex_group.append(navigator_bar_html)
             tmp_lex_group.append("<strong>%s</strong>" %(ltag))
 
-        for lsid in sorted(show[ltag].keys()):
+        for lsid in sorted(list(show[ltag].keys())):
             for lcid in show[ltag][lsid]:
                 ## Concepts, grouped by sentence
                 tmp_lex_group.append("<p>")
@@ -512,7 +512,7 @@ if totag:
                     jilog("""It seems that I can't really find %s 
                              all_sids=%s, sentences_words=%s...\n
                           """ % (lsid, repr(sorted(all_sids)),
-                                 repr(sorted(sentences_words.keys()))))
+                                 repr(sorted(list(sentences_words.keys())))))
 
                 # PRINT SENTENCE (BY WORD)
                 tmp_lex_group.append("""<span style="font-size:120%">""")
@@ -528,7 +528,7 @@ if totag:
                         tt += """&gridmode=%s&sid=%d&wid=%d""" 
                         tt = tt % ("tag-word.cgi", lemma,  corpus, 
                                    lang, gridmode, lsid, wid)
-                        ttt = cgi.escape("""%d:%s:%s&#013;%s""" % (wid, 
+                        ttt = escape("""%d:%s:%s&#013;%s""" % (wid, 
                                     pos, lemma, com), quote = True)
                         tmp_lex_group.append("""<a style='color: Green;' 
                                  title = '%s' href='%s' target='_parent'
@@ -539,7 +539,7 @@ if totag:
                         # FIXME(Wilson): Undefined variable 'ma'
                         tmp_lex_group.append("""<span 
                                                 title='%d:%s:%s'>%s</span>
-                                             """ % (wid, pos, ma, word))
+                                             """ % (wid, pos, lemma, word))
 
                 tmp_lex_group.append("""</span>""")
 
@@ -557,7 +557,7 @@ if totag:
                     for (clemma, tag, tags, com, cwid) in oth:
                         t = ''
                         if com:
-                            t = "title='%s'" % cgi.escape(com)
+                            t = "title='%s'" % escape(com)
                         tmp_lex_group.append("""
 <a style='color: Green;' %s
 href='%s?corpus=%s&lang=%s&lemma=%s&lim=%d' 
