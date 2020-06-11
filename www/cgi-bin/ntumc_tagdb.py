@@ -36,7 +36,7 @@ def select_concept(cur, lems, lim, sid_from, sid_to):
         SELECT sid, cid, clemma, tag, tags, comment 
         FROM concept 
         WHERE clemma IN (%s) 
-            AND sid >= %s AND sid <= %s
+            AND sid >= ? AND sid <= ?
         ORDER BY tag, sid, cid LIMIT ? 
     """ % placeholders_for(lems)
     #print query

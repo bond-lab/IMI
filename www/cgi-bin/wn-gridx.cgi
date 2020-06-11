@@ -1153,11 +1153,11 @@ elif (synset):
             if senslinks[(l,w)]:
                 sls = []
                 for (lnk, l2, s2) in senslinks[(l,w)]:
-                     sls.append("<a title='%s: %s (%s)' \
-                                    href='%s&synset=%s&lang=%s'>%s</a>" % \
-                                    (lnk, l2, s2,
-                                     wncgi, s2, l,
-                                     relnam[lnk]))
+                    sls.append("""
+                        <a title='%s: %s (%s)'
+                        href='%s&synset=%s&lang=%s'>%s</a>
+                        """ % (lnk, l2, s2, wncgi, s2, l, relnam[lnk])
+                    )
                      
                 deriv += "<font size='-1'>(%s)</font>" % " ".join(sls)
 
