@@ -40,7 +40,7 @@ form = cgi.FieldStorage()
 
 sid_edit = form.getfirst("sid_edit", "11000")
 
-corpusdb = form.getfirst("corpusdb", "eng")
+corpusdb = form.getfirst("corpus", "eng")
 (dbexists, dbversion, dbmaster, dblang, dbpath) = check_corpusdb(corpusdb)
 
 
@@ -765,7 +765,7 @@ if userID in valid_usrs:
                   """ % (sid, corpusdb))
 
             # SENTENCE TEXTAREA
-            retag_url= "http://compling.hss.ntu.edu.sg/ntumc-unipi/cgi-bin/tag-word.cgi?gridmode=ntumcgrid&corpus=eng&lang=eng&sid=%s" % (sid)
+            retag_url= "tag-word.cgi?gridmode=ntumcgrid&corpus=eng&lang=eng&sid={}".format(sid)
             print("""<h3>Edit sentence (%s): <a href='%s'>(retag)</a></h3> """ % (sid, retag_url))
             print("""<table cellpadding="3" bgcolor="#E0E0E0"
                      style="width: 700px;border-collapse:collapse; 

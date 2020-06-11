@@ -239,7 +239,8 @@ WHERE tag in (%s) """ % ass
 
 tagsdict = dd(lambda: dd(list)) # tags by synset tagsdict[synset]=[sid,cid]
 for valid_db in ["../db/eng.db","../db/cmn.db", "../db/ind.db"]:
-
+    if not os.path.isfile(valid_db):
+        continue
     ###########################
     # Connect to corpus.db
     ###########################
@@ -300,7 +301,8 @@ wn.execute("""SELECT synset.synset, lang, def, sid, name
               FROM synset_def
               LEFT JOIN synset
               WHERE synset.synset = synset_def.synset 
-              AND synset_def.synset in (%s) """, list(synset_set))
+              AND synset_def.synset in ({}) """.format(ass),
+           list(synset_set))
 
 rows = wn.fetchall()
 defs = dd(lambda: dd(set))
@@ -327,7 +329,8 @@ changed_tags_sql = """ SELECT sid_new, clemma_new, tag_new, tag_old,
                        FROM concept_log"""
 
 for db in ["../db/eng.db","../db/cmn.db", "../db/ind.db"]:
-
+    if not os.path.isfile(db):
+        continue
     ###########################
     # Connect to corpus.db
     ###########################
@@ -778,7 +781,7 @@ elif mode == "tagsview":
                                                   userID, sid)
 
                         print("""<tr>""")
-                        print("""<td>%s (%s)</td>""") % (date, time)
+                        print("""<td>{} ({})</td>""".format(date, time))
 
                         print("""<td><a target="_blank")
                                href='%s'>%s</td>""" % (tagword_url, sid))
@@ -788,8 +791,8 @@ elif mode == "tagsview":
 
 
                         print("""<td><a target="_blank" href='%s'>""" % (omw_old_tag,) + tag_old + """</a> %s """ % user_old + " >> " + """<a target="_blank" href='%s'>""" % (omw_new_tag,) + tag_new + " </td>")
-
-                        print("<td>%s</td>") % comment
+                        
+                        print("<td>{}</td>".format(comment if comment else ''))
                         print("</tr>")
 
             print("""</table>""")

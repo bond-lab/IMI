@@ -158,7 +158,11 @@ def get_doc_stats(langs):
         c.execute('select docID, count(sent) from sent group by docID')
         for (docID, count) in c.fetchall():
             doc_stats[id2doc[docID][lang]][lang]['sents'] = count
-
+        c.execute("""select docID , (100* count(tag) / count(cid)) as ratio  
+        from concept as c join sent as s on c.sid = s.sid 
+        group by docID order by ratio""")
+        for (docID, ratio) in c.fetchall():
+             doc_stats[id2doc[docID][lang]][lang]['ratio'] = ratio
             
     return doc_stats
 
@@ -169,7 +173,7 @@ doc_stats = get_doc_stats(langs)
 print("<table>")
 print("<tr>")
 print("<td>Document</td>")
-colspan='1'
+colspan='2'
 for lang in langs:
     print(f"<td colspan='{colspan}'>{lang}</td>")
 print("</tr>")
@@ -185,7 +189,16 @@ for doc in doc_stats:
                 print("<td><a title='{}'>{}</a></td>".format(doc,doc))
         if lang in doc_stats[doc]:
             print("<td>{}</td>".format(doc_stats[doc][lang].get('sents', 0)))
+            ratio = int(doc_stats[doc][lang].get('ratio', 0))
+            if ratio > 80:
+                bc = 'green'
+            elif ratio > 20:
+                bc = 'orange'
+            else:
+                bc = 'grey'
+            print("<td style='background-color:{};'>{}</td>".format(bc, ratio))
         else:
+            print("<td><br></td>")
             print("<td><br></td>")
     print("</tr>")
 print("</table>")

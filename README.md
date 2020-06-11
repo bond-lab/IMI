@@ -58,3 +58,5 @@ Order allow,deny
 Allow from all
 </Directory>
 ```
+
+Note that the databases (in ntumc/db) and log file (ntumc/log/ntumc.txt) must be writable by the webserver (www-data by defualt in ubuntu).
