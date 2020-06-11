@@ -635,7 +635,7 @@ if (ss):
     c.execute("""SELECT xref, misc, confidence, synset
                  FROM xlink
                  WHERE synset in (%s)
-                 AND resource = '%s'
+                 AND resource = ?
               """ % ass, [*sss, 'svframes'])
     rows = c.fetchall()
 

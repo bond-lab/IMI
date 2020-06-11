@@ -11,6 +11,7 @@ import os, http.cookies
 import sys
 from ntumc_util import *
 from ntumc_webkit import *
+from html import escape
 
 form = cgi.FieldStorage()
 lang = form.getfirst("lang")
@@ -91,7 +92,7 @@ def process_tags(c):
                                  sentence %s was successfully updated 
                                  by %s to: <br>"%s" 
                              """ % (str(cid), str(sid), userID, 
-                                    cgi.escape(str(com))))
+                                    escape(str(com))))
 
     return html_log
 
@@ -145,7 +146,7 @@ def process_tags_taglex(c):
                                  sentence %s was successfully updated 
                                  by %s to: <br>"%s" 
                              """ % (str(cid), str(sid), userID, 
-                                    cgi.escape(str(com))))
+                                    escape(str(com))))
 
         else: # nothing update, continue
             pass
