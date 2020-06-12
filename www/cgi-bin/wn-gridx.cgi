@@ -12,8 +12,14 @@ from ntumc_util import *
 from lang_data_toolkit import *
 from html import escape
 
-start_time = time.time() # TIME
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
 
+
+start_time = time.time() # TIME
 
 ################################################################################
 # FETCH DATA FROM CGI FORM

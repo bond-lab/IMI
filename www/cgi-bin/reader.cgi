@@ -9,6 +9,11 @@ from ntumc_util import *
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
 
 ################################################################################
 # CGI FIELD STORAGE & CONSTANTS

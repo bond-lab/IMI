@@ -710,8 +710,8 @@ else:
 # FETCH COOKIE
 ################################################################
 # hashed_pw = ""
-# if 'HTTP_COOKIE' in environ:
-#    for cookie in environ['HTTP_COOKIE'].split(';'):
+# if 'HTTP_COOKIE' in os.environ:
+#    for cookie in os.environ['HTTP_COOKIE'].split(';'):
 #       (key, value ) = cookie.strip().split('=');
 #       if key == "UserID":
 #          usr = value

@@ -21,6 +21,12 @@ from collections import defaultdict as dd
 from ntumc_webkit import *  # imports HTML blocks
 from lang_data_toolkit import * # imports langs & dicts
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
 
 ################################################################################
 # READ & PROCESS CGI FORM

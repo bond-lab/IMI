@@ -30,6 +30,13 @@ from ntumc_tagdb import *
 import time
 from html import escape
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
+
 ##########################################################################
 # CONSTANTS
 ##########################################################################
@@ -578,6 +585,8 @@ target='_blank'>%s</a><sub>
 ################################################################################
 elif not lemma:
     # not totag and not lemma => show search form
+    with open('../logs/temp.log', 'wb') as templog:
+        templog.write(str(cookie_text))
     HTML.render_template('tag-lexs-search.htm', template_data, cookie_text)
 
 

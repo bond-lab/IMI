@@ -18,6 +18,13 @@ from ntumc_util import *
 from lang_data_toolkit import valid_usernames as valid_usrs
 from lang_data_toolkit import pos_tags
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
+
 ###############################################################
 # This function allows escaping text from the db to the html
 # It is not needed in 'textarea's but it is needed in 'input's 

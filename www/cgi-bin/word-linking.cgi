@@ -9,6 +9,11 @@ from collections import defaultdict as dd
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
 
 form = cgi.FieldStorage()
 fl_sid = int(form.getfirst("fl_sid", 10000))

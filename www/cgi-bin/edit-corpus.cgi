@@ -13,6 +13,13 @@ from ntumc_util import *
 from ntumc_webkit import *
 from html import escape
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
+
 form = cgi.FieldStorage()
 lang = form.getfirst("lang")
 corpus = form.getfirst("corpus")

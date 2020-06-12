@@ -29,6 +29,12 @@ from lang_data_toolkit import *
 from ntumc_tagdb import *
 import time
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
 
 ##########################################################################
 # CONSTANTS

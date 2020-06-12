@@ -17,6 +17,13 @@ import re, sqlite3
 import os, http.cookies # cookies
 from os import environ  # cookies
 
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
+
+
 from ntumc_webkit import * # ntumc_dependencies
 from lang_data_toolkit import * # ntumc_dependencies
 
