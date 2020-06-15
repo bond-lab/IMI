@@ -125,10 +125,11 @@ def connect(dbfile, *fallback, in_dirs=None):
     return sqlite3.connect(dbpath)
 
 
-def cursor(*args, **kwargs):
-    """Shortcut to return cursor from connect()"""
-    conn = connect(*args, **kwargs)
-    return conn.cursor()
+def concurs(*args, **kwargs):
+    """Shortcut to return both connection and cursor from connect()"""
+    con = connect(*args, **kwargs)
+    curs = conn.cursor()
+    return conn, curs
 
 
 def sql_escape(text):
