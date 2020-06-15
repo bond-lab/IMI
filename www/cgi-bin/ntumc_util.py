@@ -9,8 +9,8 @@ import operator
 from collections import defaultdict as dd
 import warnings
 
-from databases import placeholders_for as _placeholders_for,\
-                      sql_escape as _sql_escape
+from ntumc_gatekeeper import placeholders_for as _placeholders_for,\
+                             sql_escape as _sql_escape
 
 #############################################################
 # Configuration
