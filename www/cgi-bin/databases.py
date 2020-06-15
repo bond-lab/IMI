@@ -14,9 +14,18 @@ DATABASE_DIRS = [
 ]
 
 
+# Implicitly exported through the `import *` statement
+__all__ = [
+    'connect',
+    'cursor',
+    'placeholders_for',
+    'sql_escape'
+]
+
+
 def _supersplit(head):
     """Like os.path.split() but stronger (completely fragments the path)
-    
+
     'foo/../bar.db' -> ['foo', '..', 'bar.db']
     """
     chunks = []

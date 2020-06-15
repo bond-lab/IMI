@@ -2,7 +2,11 @@ from os.path import abspath, dirname, exists, join
 from sqlite3 import Connection, Cursor
 import unittest
 
+# explicit public exports from __all__
 from databases import *
+
+# not exported with * by default
+from databases import DATABASE_DIRS, find_file, normalize_filepath
 
 class PlaceholdersTestCase(unittest.TestCase):
     def test_iterable_literals(self):
@@ -82,7 +86,7 @@ class SqlEscapeTestCase(unittest.TestCase):
         self.assertTrue(sql_escape(arg) == res)
 
 
-class DbfileTestCase(unittest.TestCase):
+class ConnectWhitelistTestCase(unittest.TestCase):
     def test_database_dirs(self):
         for direc in DATABASE_DIRS:
             cwd = dirname(abspath(__file__))
@@ -103,7 +107,6 @@ class DbfileTestCase(unittest.TestCase):
         # Find file in relative dir
         self.assertTrue(find_file(DATABASE_DIRS, ['eng.db']) != None)
 
-
     def test_connect(self):
         # Basic functionality
         res = isinstance(connect('eng.db'), Connection)
@@ -123,7 +126,6 @@ class DbfileTestCase(unittest.TestCase):
         # Testing in_dirs by searching existing dbfile in nonexistent dir
         with self.assertRaises(FileNotFoundError):
             connect('eng.db', in_dirs=['nonexistent.dir'])
-
 
     def test_traversal_attack(self):
         # normalize() should strip out traversal to ..
