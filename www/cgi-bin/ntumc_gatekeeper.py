@@ -1,7 +1,27 @@
 """
-database.py
+ntumc_gatekeeper.py
 
-Database sanitization/whitelisting functions
+Functions for whitelisting .db file access and SQL sanitization.
+This module mainly exports:
+
+function placeholders_for(object):
+  Makes parameter binding placeholders. Acts like shorthand for 
+  ','.join('?' for x in myList), with some differences.
+        placeholders_for([1, 2, 3]) -> '?,?,?'
+        placeholders_for('string') -> '?'
+
+function connect(dbfile):
+  Searches for the specified .db file and returns a sqlite3.Connection to it. 
+  The default search dirs are cgi-bin/../db and cgi-bin/../../omw.
+  The function only allows traversal to child dirs within the search dirs.
+
+function cursor(dbfile):
+  Like connect() but returns a sqlite3.Cursor object instead.
+
+function sql_escape(string):
+  Duplicates instances of ' and " in the input string. This function is left over
+  from ntumc_util.py which I cleaned up a bit, it's not actually used anywhere 
+  in the codebase.
 """
 
 from os.path import abspath, dirname, exists, join, split
