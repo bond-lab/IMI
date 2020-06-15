@@ -4,7 +4,7 @@ database.py
 Database sanitization/whitelisting functions
 """
 
-from os.path import abspath, dirname, exists, join
+from os.path import abspath, dirname, exists, join, split
 import sqlite3
 
 
@@ -14,12 +14,28 @@ DATABASE_DIRS = [
 ]
 
 
-def get_file(dirs, files):
+def _supersplit(head):
+    """Like os.path.split() but stronger (completely fragments the path)
+    
+    'foo/../bar.db' -> ['foo', '..', 'bar.db']
+    """
+    chunks = []
+    while 1:
+        head, tail = split(head)
+        if tail:
+            chunks.append(tail)
+        else:
+            chunks.append(head)
+            break
+    return chunks[::-1]
+
+
+def find_file(dirs, files):
     """Searches `dirs` for first matching file in `files`, return absolute path
 
     Args:
     dirs - list[str]. Directories to search for the dbfiles. Both relative and
-           abosolute paths are accepted.
+           absolute paths are accepted.
     files - list[str]. Filenames to search for. The first file found in this
             list will be returned.
     """
@@ -40,6 +56,16 @@ def get_file(dirs, files):
     return None
 
 
+def normalize_filepath(file):
+    """Removes traversal to parent dir and ensures file ends with .db
+
+    spam/../eggs.txt -> spam/eggs.txt.db
+    """
+    file += ('.db' if not file.endswith('.db') else '')
+    file = join(*[x for x in _supersplit(file) if x != '..'])
+    return file
+
+
 def connect(dbfile, *fallback, in_dirs=None):
     """Opens a connection to the given database.
 
@@ -57,12 +83,10 @@ def connect(dbfile, *fallback, in_dirs=None):
     Raises: FileNotFoundError if the dbfile and fallbacks could not be found
             within in_dirs, or the default locations defined in DATABASE_DIRS.
     """
+    dbfiles = [normalize_filepath(f) for f in [dbfile] + list(fallback)]
     in_dirs = in_dirs or DATABASE_DIRS
 
-    dbfiles = [file if file.endswith('.db') else file + '.db'
-               for file in [dbfile] + list(fallback)]
-
-    dbpath = get_file(in_dirs, dbfiles)
+    dbpath = find_file(in_dirs, dbfiles)
 
     if not (dbpath and exists(dbpath)):
         files = '|'.join(dbfiles)
@@ -121,14 +145,14 @@ def placeholders_for(iterable, paramstyle='qmark', startfrom=1, delim=','):
     Returns: str
 
     Examples:
-    assert placeholders_for('test') == '?'
-    assert placeholders_for([1, 2, 3]) == '?,?,?'
-    assert placeholders_for(b'spam', paramstyle='format') == '%s'
-    assert placeholders_for([1, 2, 3], 'numeric') == ':1,:2,:3'
-    assert placeholders_for(dict(A=1, B=2, C=3), 'numeric', 7, '_') == ':7_:8_:9'
-    assert placeholders_for([]) == ''   # Empty collection is falsey
-    assert placeholders_for('') == '?'  # Empty literal is truthy
-    assert placeholders_for([[], '']) == '?,?'  # Probably a bad idea
+    placeholders_for('test') == '?'
+    placeholders_for([1, 2, 3]) == '?,?,?'
+    placeholders_for(b'spam', paramstyle='format') == '%s'
+    placeholders_for([1, 2, 3], 'numeric') == ':1,:2,:3'
+    placeholders_for(dict(A=1, B=2, C=3), 'numeric', 7, '_') == ':7_:8_:9'
+    placeholders_for([]) == ''           # Empty collection is falsey
+    placeholders_for('') == '?'          # Empty literal is truthy
+    placeholders_for([[], '']) == '?,?'  # Probably a bad idea
     """
 
     # Guard against non-iterator values passed to the `iterable` param.

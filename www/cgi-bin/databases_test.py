@@ -55,19 +55,24 @@ class PlaceholdersTestCase(unittest.TestCase):
         self.assertTrue(ph == '?_?_?')
 
     def test_empty_collection(self):
+        # Empty collection is falsey
         arg = []
         res = ''
-        self.assertTrue(placeholders_for(arg) == res)   # Empty collection is falsey
+        self.assertTrue(placeholders_for(arg) == res)
 
     def test_empty_literal(self):
+        # Empty literal is truthy
         arg = ''
         res = '?'
-        self.assertTrue(placeholders_for(arg) == res)  # Empty literal is truthy
+        self.assertTrue(placeholders_for(arg) == res)
 
     def test_nested_collection(self):
-        arg = [[], '']
+        # Nesting collections would probably be a bad idea on the user's part
+        # While placeholders_for([]) would have returned '', in this case
+        # the nested [] resolves into a placeholder (maybe unexpectedly)
+        arg = ['', []]
         res = '?,?'
-        self.assertTrue(placeholders_for(arg) == res)  # Probably a bad idea
+        self.assertTrue(placeholders_for(arg) == res)
 
 
 class SqlEscapeTestCase(unittest.TestCase):
@@ -85,18 +90,19 @@ class DbfileTestCase(unittest.TestCase):
             self.assertTrue(exists(direc),
                             f'could not find db dir expected at: {targetdir}')
 
-    def test_get_file(self):
+    def test_find_file(self):
         me = __file__
         me_path = abspath(me)
         me_dir = dirname(me_path)
 
         # Find this file
-        self.assertTrue(get_file(['.'], [me]).endswith(me))
-        self.assertTrue(get_file([me_dir], [me]) == me_path)
+        self.assertTrue(find_file(['.'], [me]).endswith(me))
+        self.assertTrue(find_file([me_dir], [me]) == me_path)
         # Find nonexistent file
-        self.assertTrue(get_file(['.'], ['nonexistent.file']) == None)
+        self.assertTrue(find_file(['.'], ['nonexistent.file']) == None)
         # Find file in relative dir
-        self.assertTrue(get_file(DATABASE_DIRS, ['eng.db']) != None)
+        self.assertTrue(find_file(DATABASE_DIRS, ['eng.db']) != None)
+
 
     def test_connect(self):
         # Basic functionality
@@ -117,6 +123,19 @@ class DbfileTestCase(unittest.TestCase):
         # Testing in_dirs by searching existing dbfile in nonexistent dir
         with self.assertRaises(FileNotFoundError):
             connect('eng.db', in_dirs=['nonexistent.dir'])
+
+
+    def test_traversal_attack(self):
+        # normalize() should strip out traversal to ..
+        from os.path import join
+        pre_norm = join('foo', '..', 'bar.txt')
+        post_norm = join('foo', 'bar.txt.db')
+        self.assertEqual(normalize_filepath('foo/../bar.txt'),
+                         post_norm)
+
+        # connect() shouldn't let us traverse to parent dirs
+        with self.assertRaises(FileNotFoundError):
+            connect('../db/eng.db', in_dirs=['.'])
 
 
 if __name__ == '__main__':
