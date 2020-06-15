@@ -132,18 +132,6 @@ def concurs(*args, **kwargs):
     return conn, curs
 
 
-def sql_escape(text):
-    """Duplicates occurrences of ' and " in the given text"""
-    quotes = [
-        '"',  # double quotes
-        "'"   # single quotes
-    ]
-    return ''.join(
-        letter * 2 if (letter in quotes) else letter
-        for letter in text
-    )
-
-
 def placeholders_for(iterable, paramstyle='qmark', startfrom=1, delim=','):
     """Makes query placeholders for the input iterable: [1, 2, 3] => '?,?,?'
 
