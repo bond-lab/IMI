@@ -259,11 +259,11 @@ class HTML:
         taking as argument the rowid and an optional 
         string to be printed on the button."""
 
-        tooltip = "Hide the row for '%s'." % rowid[10:]
-        html = """<a href="javascript:{}"
-               onclick="togglecol('%s')">
-               <span title="%s" style="color:#4D99E0;">%s</a>
-               """ % (rowid, tooltip, s)
+        tooltip = f"Hide the row for {rowid[3:]}."
+        html = f"""<a href="javascript:{{}}"
+               onclick="togglecol('{rowid}')">
+               <span title="{tooltip}" style="color:#4D99E0;">{s}</a>
+               """
         return html
 
 
