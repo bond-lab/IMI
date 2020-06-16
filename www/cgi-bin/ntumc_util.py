@@ -9,8 +9,7 @@ import operator
 from collections import defaultdict as dd
 import warnings
 
-from ntumc_gatekeeper import placeholders_for as _placeholders_for,\
-                             sql_escape as _sql_escape
+from ntumc_gatekeeper import placeholders_for as _placeholders_for
 
 #############################################################
 # Configuration
@@ -334,11 +333,6 @@ def set_rest_x(c, usrname, sid, cid):
 def _deprecating(old, new):
     """This would look cooler as a decorator..."""
     warnings.warn(f'{old} has migrated to {new}', DeprecationWarning)
-
-
-def sql_escape(*args, **kwargs):
-    _deprecating('ntumc_util.sql_escape()', 'databases.sql_escape()')
-    return _sql_escape(*args, **kwargs)
 
 
 def placeholders_for(*args, **kwargs):
