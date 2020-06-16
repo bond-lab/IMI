@@ -37,9 +37,8 @@ DATABASE_DIRS = [
 # Implicitly exported through the `import *` statement
 __all__ = [
     'connect',
-    'cursor',
+    'concurs',
     'placeholders_for',
-    'sql_escape'
 ]
 
 

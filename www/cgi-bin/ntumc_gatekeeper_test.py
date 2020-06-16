@@ -3,10 +3,10 @@ from sqlite3 import Connection, Cursor
 import unittest
 
 # explicit public exports from __all__
-from databases import *
+from ntumc_gatekeeper import *
 
 # not exported with * by default
-from databases import DATABASE_DIRS, find_file, normalize_filepath
+from ntumc_gatekeeper import DATABASE_DIRS, find_file, normalize_filepath
 
 class PlaceholdersTestCase(unittest.TestCase):
     def test_iterable_literals(self):
@@ -79,13 +79,6 @@ class PlaceholdersTestCase(unittest.TestCase):
         self.assertTrue(placeholders_for(arg) == res)
 
 
-class SqlEscapeTestCase(unittest.TestCase):
-    def test_sql_escape(self):
-        arg = """ s's'' """
-        res = """ s''s'''' """
-        self.assertTrue(sql_escape(arg) == res)
-
-
 class ConnectWhitelistTestCase(unittest.TestCase):
     def test_database_dirs(self):
         for direc in DATABASE_DIRS:
@@ -109,11 +102,8 @@ class ConnectWhitelistTestCase(unittest.TestCase):
 
     def test_connect(self):
         # Basic functionality
-        res = isinstance(connect('eng.db'), Connection)
-        self.assertTrue(res)
-
-        res = isinstance(cursor('eng.db'), Cursor)
-        self.assertTrue(res)
+        con, curs = concurs('eng.db')
+        self.assertTrue(isinstance(con, Connection) and isinstance(curs, Cursor))
 
         # Testing fallback
         res = isinstance(connect('xyz.db', 'eng.db'), Connection)
