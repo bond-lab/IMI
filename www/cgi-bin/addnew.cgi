@@ -23,7 +23,7 @@ from importlib import reload
 sys.getfilesystemencoding = lambda: 'utf-8'
 reload(os)
 
-
+from ntumc_gatekeeper import concurs
 from ntumc_webkit import * # ntumc_dependencies
 from lang_data_toolkit import * # ntumc_dependencies
 
@@ -271,9 +271,7 @@ else:
     if (synset): # IF THERE WAS A RELATED SYNSET
 
         # CONNECT TO WN
-        wndb = "../db/wn-ntumc.db"
-        con = sqlite3.connect(wndb)
-        c = con.cursor()
+        con, c = concurs('wn-ntumc.db')
 
         # FETCH DEFINITIONS
         defs = collections.defaultdict(list)

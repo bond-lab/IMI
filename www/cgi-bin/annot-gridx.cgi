@@ -18,6 +18,7 @@ import os, http.cookies # cookies
 from os import environ  # cookies
 from collections import defaultdict as dd
 
+from ntumc_gatekeeper import concurs # connects to .db files
 from ntumc_webkit import *  # imports HTML blocks
 from lang_data_toolkit import * # imports langs & dicts
 
@@ -45,13 +46,12 @@ selfcgi = "annot-gridx.cgi?gridmode=%s" % (gridmode)
 omwcgi = "wn-gridx.cgi?gridmode=%s" % (gridmode)
 
 ### working .db (should be the extended OMW) ?
-wndb = "../db/wn-ntumc.db"
+wndb = "wn-ntumc.db"
 
 
 
 ### Connect to and update the database
-con = sqlite3.connect(wndb)
-c = con.cursor()
+con, c = concurs(wndb)
 
 
 ################################################################################

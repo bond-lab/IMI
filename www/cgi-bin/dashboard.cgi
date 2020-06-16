@@ -7,6 +7,7 @@ import re, sqlite3, collections
 import os, http.cookies  # for cookies
 from collections import defaultdict as dd
 
+from ntumc_gatekeeper import concurs
 from ntumc_webkit import *  # to import HTML blocks
 from lang_data_toolkit import *  # to import langs and dictionaries data and functions
 
@@ -36,8 +37,8 @@ selfcgi = "dashboard.cgi"
 # omwcgi = "wn-gridx.cgi?usrname=%s&gridmode=%s" % (usrname, gridmode)
 
 ### ADMIN.DB
-admindb = "../db/admin.db"
 
+admindb = "admin.db"
 logged = False
 #user='fcbond'
 
@@ -83,8 +84,7 @@ if user == "" and pw == "":
 ################################################################
 if cgi_mode == "update_pw":
 
-    conn_admin = sqlite3.connect(admindb)
-    admin = conn_admin.cursor()
+    conn_admin, admin = concurs(admindb)
 
     pws = dict()
     admin.execute("""SELECT username, password
@@ -120,9 +120,7 @@ if cgi_mode == "update_pw":
 # TRY TO LOGIN (CONNECT TO ADMIN.DB)
 ################################################################
 if user != "logout":
-
-    conn_admin = sqlite3.connect(admindb)
-    admin = conn_admin.cursor()
+    conn_admin, admin = concurs(admindb)
 
     query = """SELECT username, password
                FROM  users
