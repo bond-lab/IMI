@@ -430,10 +430,11 @@ class HTML:
         ## fixme lang1 lang2
         lang1 = corpus[0:3]
         lang2 = 'eng'
-        html = """<a class='sid largefancybox fancybox.iframe' 
-        href='%s?searchlang=%s&langs2=%s&sid_from=%d&sid_to=%d'
-        onclick="return isZKeyPressed(%s);">%d</a>
-        <a href='fix-corpus.cgi?sid_edit=%s'>*</a>""" % ('showcorpus.cgi', lang1, lang2, sid-2, sid+2, sid, sid,sid)
+        html = f"""<a class='sid largefancybox fancybox.iframe' 
+        href='showcorpus.cgi?searchlang={lang1}&langs2={lang2}&sid_from={sid -2}&sid_to={sid + 2}'
+        onclick="return isZKeyPressed({sid});">{sid}</a>
+        <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        #% ('showcorpus.cgi', lang1, lang2, sid-2, sid+2, sid, sid,sid)
         return html
 
 
