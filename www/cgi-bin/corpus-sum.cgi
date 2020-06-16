@@ -3,7 +3,7 @@
 
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
-
+from ntumc_webkit import HTML
 import sqlite3
 from collections import defaultdict as dd
 
@@ -31,7 +31,7 @@ print("""Content-type: text/html; charset=utf-8\n
 <body>\n""")
 
 print("""<h1>Summary of the NTU-MC</h1>\n """)  ## add date?
-
+print(HTML.status_bar('')) ### get user
 # print("""<form action="" method="post" >
 #          <span id="search">
 #          <select id="search" name="search">""")
