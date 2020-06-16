@@ -664,9 +664,9 @@ if (ss):
         for r in rows:
             comment = escape(r[1],True)
             user = r[2]
-            time = r[3]
+            t = r[3]
 
-            coms[r[0]].append( (comment,user,time) )
+            coms[r[0]].append( (comment,user,t) )
 
 
 
@@ -769,10 +769,10 @@ if (ss):
         if s in coms.keys():
             tip = ""
             for com in coms[s]:
-                (comment, user, time) = com
+                (comment, user, t) = com
                 tip += "<p>"
                 tip += """%s (%s): %s<p>
-                       """ % (user, time, escape(comment,True))
+                       """ % (user, t, escape(comment,True))
             print("""<span style="color:#999999;" class='tooltip' title='%s'><i class="icon-comments"></i></span>""" % tip)
 
         print("</td>")
@@ -1410,11 +1410,11 @@ elif (synset):
     if len(coms) > 0:
         print("<div id='line'><span>Comments</span></div>\n")
     for com in coms:
-        (comment, user, time) = com
+        (comment, user, t) = com
         print("<p>")
         print("""<b><sub> %s (%s)</sub></b> <br>
                  <blockquote>%s</blockquote>
-                 """ % (user, time, comment))
+                 """ % (user, t, comment))
 
 
     if gridmode == "ntumcgrid":
@@ -1717,7 +1717,7 @@ print(HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling
 #     if lang in ("cmn", "eng"):
 #         print HTML.multidict_bttn(lang, lemma)
 
-time_end = time.time()
+end_time = time.time()
 
 
 
@@ -1736,7 +1736,7 @@ if len(lemma_hist) > 0:
 # Print Language Selection Panel
 print("""<hr><div style="font-size:90%;color:grey;float:right">""")
 print(HTML.language_selection(langselect, langs, wncgi))
-print("""<br><span style="font-size:80%%;color:grey;">(%s seconds)</span></div>"""  % (str(time_end - start_time)[:7]))
+print("""<br><span style="font-size:80%%;color:grey;">(%s seconds)</span></div>"""  % (str(end_time - start_time)[:7]))
 
 print("<nobr><a href='%s'>More detail about the %s (%s)</a></nobr>" % (wnurl, wnnam, wnver))
 if gridmode != "gridx":
