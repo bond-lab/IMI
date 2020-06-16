@@ -225,8 +225,8 @@ class HTML:
             html += """<li><a title="Invalid User" disabled><span style="color: #bc5847;">
                         <i class="icon-user"></i></a></span></li> """
 
-        html += """<li><a href="%s"><span style="color: #4D99E0;">
-                   <i class="icon-home"></i></a></span></li>""" % dashboardcgi
+        html += f"""<li><a title='Got to Dashboard' href='{dashboardcgi}'><span style="color: #4D99E0;">
+                   <i class="icon-home"></i></a></span></li>"""
         html += """</ul>"""
         html += message
         html += """</span>"""
@@ -416,8 +416,14 @@ class HTML:
         return html
 
 
-
-
+    @staticmethod
+    def ntumc_tagdoc():
+        """
+        link to the tagging documentation
+        """
+        html = """<a title = 'Tagging Documentation' href='https://bond-lab.github.io/IMI/tagdoc.html'>Tag Doc</a>"""
+        return html
+        
     @staticmethod
     def show_sid_bttn(corpus,  sid, lemma):
         """Prints a sid: clickable to jump to context"""

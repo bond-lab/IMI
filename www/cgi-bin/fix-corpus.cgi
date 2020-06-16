@@ -15,14 +15,15 @@ import sqlite3
 from collections import defaultdict as dd
 
 from ntumc_util import *
+from ntumc_webkit import HTML
 from lang_data_toolkit import valid_usernames as valid_usrs
 from lang_data_toolkit import pos_tags
-
+from ntumc_gatekeeper import concurs
 # Fixes encoding issues when reading cookies from os.environ
-import os, sys
-from importlib import reload
-sys.getfilesystemencoding = lambda: 'utf-8'
-reload(os)
+import sys
+# from importlib import reload
+# sys.getfilesystemencoding = lambda: 'utf-8'
+# reload(os)
 
 
 ###############################################################
@@ -112,7 +113,7 @@ else:
 ################################################################
 
 # Header
-print(u"""Content-type: text/html; charset=utf-8\n
+print("""Content-type: text/html; charset=utf-8\n
        <!DOCTYPE html>\n
        <html>\n
        <head>
@@ -150,13 +151,12 @@ print(u"""Content-type: text/html; charset=utf-8\n
     #  href="../HTML-KickStart-master/css/kickstart.css" media="all" /> 
 
 
-print("""<h2>Corpus Fixer</h2>\n """)
+print(f"""<h2>Corpus Fixer {editm}</h2> \n """)
 
 ################
 # CONNECT TO DB
 ################
-conn_db = sqlite3.connect(dbpath)
-a = conn_db.cursor()
+conn_db, a = concurs(corpusdb, dbpath)
 
 ######################################################
 # GO TO THE DB FOR THE 1st TIME (FOR EDITING PURPOSES)
@@ -177,12 +177,15 @@ for (wid, word, pos, lemma, comment, usrname) in a:
 #####################################
 cwls = dd(lambda: [])
 cwls_usr = dd()
+maxcid=0
 a.execute("""SELECT wid, cid, usrname
              FROM cwl
              WHERE sid=? """, (sid_edit,))
 for (wid, cid, usrname) in a:
     cwls[wid].append(cid)
     cwls_usr[wid] = usrname
+    if cid > maxcid:
+        maxcid=cid
 
 ########################
 # FETCH THE HIGHEST WID
@@ -237,7 +240,7 @@ if editm == "update" and userID in valid_usrs:
                      AND sid=?""", 
                   (scomment_up, userID, scomment_up, sid_edit))
 
-    log_status += u"Sent ✓; "
+    log_status += "Sent ✓; "
 
 
     # UPDATE WORD TABLE
@@ -280,7 +283,7 @@ if editm == "update" and userID in valid_usrs:
                         AND sid=? and wid=?""",
                         (wcomment_up, userID, wcomment_up, sid_edit, wid))
 
-    log_status += u"Words ✓; "
+    log_status += "Words ✓; "
 
     # UPDATE CONCEPT TABLE
     for i, cid in enumerate(new_cid):
@@ -359,7 +362,7 @@ if editm == "update" and userID in valid_usrs:
                              VALUES (?,?,?,?)
                           """, [sid_edit, wid, cid, userID])
 
-    log_status += u"Concepts ✓; "
+    log_status += "Concepts ✓; "
 
 
 ################################################################################
@@ -398,7 +401,7 @@ elif editm == "addword" and userID in valid_usrs:
                       (sid_edit, wid_new, word_up, pos_up, 
                        lemma_up, wcomment_up, userID))
 
-        log_status += u"New Word (no shifting needed) ✓; "
+        log_status += "New Word (no shifting needed) ✓; "
     
     ############################################################################
     # IF NEW ID WAS ALREADY IN THE SENTENCE (NEED TO DO SOME PUSHING AROUND)
@@ -512,7 +515,7 @@ elif editm == "addword" and userID in valid_usrs:
         #              WHERE sid=? AND wid=?
         #           """, [sid_edit, updatingwid])
 
-        log_status += u"New Word (shifting around needed) ✓; "
+        log_status += "New Word (shifting around needed) ✓; "
 
 
 ################################################################################
@@ -616,7 +619,7 @@ elif editm == "delword" and userID in valid_usrs:
         #              WHERE sid=? AND wid=?""",
         #           (sid_edit, maxwid))
 
-        log_status += u"Deleted Word ✓; "
+        log_status += "Deleted Word ✓; "
 
 
 #################################
@@ -657,7 +660,7 @@ elif editm == "addconcept" and userID in valid_usrs:
                       (sid_edit, cid_new, clemma_up, tag_up,
                        comment_up, userID))
 
-        log_status += u"Inserted Concept ✓; "
+        log_status += "Inserted Concept ✓; "
 
         # FOR EACH WID LINKED TO CONCEPT, INSERT CWL LINKS
         for i in wids_up:
@@ -665,9 +668,9 @@ elif editm == "addconcept" and userID in valid_usrs:
                              VALUES (?,?,?,?)""",
                           (sid_edit, i, cid_new, userID))
 
-        log_status += u"Inserted C-W Links ✓; "
+        log_status += "Inserted C-W Links ✓; "
     except:
-        log_status += u"""<span 
+        log_status += """<span 
                           style="color:red"><b>
                           That concept already existed!</b><br>
                           (It may have been created at the same time!)<br>
@@ -689,7 +692,7 @@ elif editm == "delconcept" and userID in valid_usrs:
     a.execute("""DELETE FROM concept
                  WHERE sid=? AND cid=?""", [sid_edit, cid_del])
 
-    log_status += u"Deleted Concept ✓; "
+    log_status += "Deleted Concept ✓; "
 
     # DELETE CWL LINKS LINKING TO THIS CONCEPT
     a.execute("""UPDATE cwl SET usrname=?
@@ -698,7 +701,7 @@ elif editm == "delconcept" and userID in valid_usrs:
     a.execute("""DELETE FROM cwl
                  WHERE sid=? AND cid=?""", [sid_edit, cid_del])
 
-    log_status += u"Deleted C-W Links ✓; "
+    log_status += "Deleted C-W Links ✓; "
 
 ###########################################
 # THIS IS THE SECOND CONNECTION TO THE DB
@@ -785,13 +788,13 @@ if userID in valid_usrs:
             # SENTENCE COMMENT TEXTAREA
             print("""<tr style="text-align:center">""")
             if sentcomment[sid]:
-                print(u"""<td><span title="comment">
+                print("""<td><span title="comment">
                           <textarea rows="1" cols="65" name="new_scomment"
                            style="font-size:12px; width:700px;
                            height:50px">%s</textarea></span></td>
                        """ % (sentcomment[sid],))
             else:  # Print "None" box
-                print(u"""<td><span title="comment">
+                print("""<td><span title="comment">
                           <textarea rows="1" cols="65" name="new_scomment"
                            style="font-size:12px;width: 700px;height:50px; 
                            background-color: #E0E0E0"
@@ -800,7 +803,7 @@ if userID in valid_usrs:
 
             # SENTENCE PID
             print("""<tr style="text-align:center">""")
-            print(u"""<td><span title="paragraph ID">
+            print("""<td><span title="paragraph ID">
                       <input type="text"  name="new_pid"
                        style="font-size:12px;width:3em" value="%s"/></span></td>
                    """ % (pid[sid],))
@@ -812,7 +815,7 @@ if userID in valid_usrs:
             # UPDATE WORDS (Multiple tables)
             #################################
             print("""<h3> Edit words:</h3>""")
-            for wid, (word, pos, lemma, comment) in words.items():
+            for wid, (word, pos, lemma, comment) in sorted(words.items()):
 
                 # FIND THE TABLE WIDTH
                 if len(lemma) == 1:
@@ -832,7 +835,7 @@ if userID in valid_usrs:
 
                 # WORDID / DELETE WORD
                 print("""<tr style="text-align:center">""")
-                print(u"""<td><span title='%s'><b>wid:%s</b></span>
+                print("""<td><span title='%s'><b>wid:%s</b></span>
                           <span title='delete wordid!' 
                            style="display:block; float:right; 
                            font-size:11px"><a 
@@ -866,7 +869,7 @@ if userID in valid_usrs:
                 # WORD POS
                 print("""<tr style="text-align:center">""")
                 if pos_tags[lang][pos]['eng_def']:
-                    pos_str = '%s:%s' % (pos, pos_tags[lang][pos]['eng_def'])
+                    pos_str = '%s: %s' % (pos, pos_tags[lang][pos]['eng_def'])
                 else:
                     pos_str = 'unknown_tag'
 
@@ -888,14 +891,14 @@ if userID in valid_usrs:
                 # COMMENT
                 print("""<tr style="text-align:center">""")
                 if comment:
-                    print(u"""<td><span 
+                    print("""<td><span 
                               title="comment ('None' will leave it empty)">
                               <textarea rows="2" cols="10" name="new_wcomment[]"
                               style="font-size:12px;width:%dem;" 
                               required>%s</textarea></span>
                               </td>""" % (inputlenght,comment))
                 else:  # Print "None" box
-                    print(u"""<td><span 
+                    print("""<td><span 
                               title="comment ('None' will leave it empty)">
                               <textarea rows="2" cols="10" name="new_wcomment[]"
                               style="font-size:12px;width:%dem; 
@@ -913,7 +916,7 @@ if userID in valid_usrs:
             # CONCEPT LEVEL
             ################
             print("""<h3> Edit concepts:</h3>""")
-            for cid, (clemma, tag, ursname, comment) in concepts.items():
+            for cid, (clemma, tag, ursname, comment) in sorted(concepts.items()):
 
                 # FIND INPUT LENGHT
                 if len(clemma) == 1:
@@ -933,7 +936,7 @@ if userID in valid_usrs:
 
                 # CONCEPT ID / DELETE CONCEPT
                 print("""<tr style="text-align:center">""")
-                print(u"""<td><span><b>cid:%s</b></span>
+                print("""<td><span><b>cid:%s</b></span>
                           <span title='delete concept!' style="color:red;
                           display: block; float: right; font-size:11px">
                           <a href="fix-corpus.cgi?corpusdb=%s&sid_edit=%s&new_cid[]=%s&editm=delconcept"
@@ -978,7 +981,7 @@ if userID in valid_usrs:
                 # CONCEPT TAG
                 if tag in ("e", "w"):
                     print("""<tr style="text-align:center">""")
-                    print(u"""<td><nobr>
+                    print("""<td><nobr>
                           <span title="tag"><input type="text"
                            pattern ="None|x|e|w|loc|org|per|dat|dat:year|oth|[<>=~!]?[0-9]{8}-[avnr]"
                           name="new_tag[]" value="%s"
@@ -992,7 +995,7 @@ if userID in valid_usrs:
                     print("""</tr>""")
                 elif tag:
                     print("""<tr style="text-align:center">""")
-                    print(u"""<td><nobr>
+                    print("""<td><nobr>
                           <span title="tag"><input type="text"
                           name="new_tag[]" value="%s"
                           style="text-align:center;width:%dem;" 
@@ -1005,7 +1008,7 @@ if userID in valid_usrs:
                     print("""</tr>""")
                 else:
                     print("""<tr style="text-align:center">""")
-                    print(u"""<td><nobr><span title="Tag"><input type="text"
+                    print("""<td><nobr><span title="Tag"><input type="text"
                           name="new_tag[]" value="None" 
                           style="text-align:center;width:%dem; 
                           background-color: #FF9696" required/></span><!--
@@ -1019,7 +1022,7 @@ if userID in valid_usrs:
                 # CONCEPT COMMENT
                 print("""<tr style="text-align:center">""")
                 if comment:
-                    print(u"""<td><span 
+                    print("""<td><span 
                            title="comment ('None' will leave it empty)">
                            <textarea rows="2" cols="10" name="new_comment[]"
                            style="font-size:12px;width:%dem;" 
@@ -1049,23 +1052,25 @@ if userID in valid_usrs:
                       <button class="btn" type="submit" 
                       style='font-size:20px;'>+Word</button></a></span>""")
 
-            print("""<span title='Add Concept'><a class='fancybox' href='#addconcept' 
+            print("""<span title='Add Concept'><a class='fancybox' 
+                      href="#addconcept" 
                       style='text-decoration:none;'>
                       <button class="btn" type="submit" 
                       style='font-size:20px;'>+Concept</button></a></span>""")
 
-            print(u"""<span title='Submit'><input type="submit" value="Save"  
+
+            print("""<span title='Submit'><input type="submit" value="Save"  
                        style="font-size:20px; text-decoration:none; 
                        color:green;"></span>""")
 
             print("""<br>&nbsp; """)
 
             if userID in valid_usrs:
-                print(u"""<span title='Username'><button type="button" 
+                print("""<span title='Username'><button type="button" 
                          style="font-size:20px; text-decoration:none; 
                          color:black;" disabled>%s</button></span>""" % userID)
             else:
-                print(u"""<span title='Username'><button type="button" 
+                print("""<span title='Username'><button type="button" 
                            style="font-size:20px; text-decoration:none; 
                            color:red;" disabled>invalid_usr</button></span>""")
 
@@ -1075,6 +1080,7 @@ if userID in valid_usrs:
                       <button class="btn" type="submit" 
                       style='font-size:20px;'>%s</button></a>
                      </span>""" % corpusdb)
+            print(f"<button class='btn' style='font-size:20px;'>{HTML.ntumc_tagdoc()}</btn>")
 
 
             print("""</span>""")  # CLOSES THE BOTTOM FLOATING BAR
@@ -1083,7 +1089,7 @@ if userID in valid_usrs:
             #######################
             # TOP RIGHT LOG BAR
             #######################
-            print(u"""<br><span style="position:fixed; 
+            print("""<br><span style="position:fixed; 
                       top:10px; right:5px;">""")
             if log_status == "":
                 pass
@@ -1100,7 +1106,7 @@ if userID in valid_usrs:
 
 
 else:
-    print(""" INVALID USER! PLEASE LOG IN! """)
+    print("""INVALID USER! PLEASE LOG IN! """)
 
 
 
@@ -1160,7 +1166,7 @@ print("""</tr>""")
 
 print("""</table></center>""")
 
-print(u"""<center><span title='Go to...'">
+print("""<center><span title='Go to...'">
           <input type="submit" value="Go"  
            style="font-size:20px; text-decoration:none; 
            color:green; margin-top: 5px;"></center>""")
@@ -1175,8 +1181,8 @@ print("""<div id="addword" style="width:400px;display: none;">
             <b>Adding New Word to (SID:%s)</b><br>""" % (sid_edit,))
 
 for w, l in sorted(words.items()):
-    print(u"""| <b>%s:</b> %s """ % (w,l[0]))
-print(u"""|""")
+    print("""| <b>%s:</b> %s """ % (w,l[0]))
+print("""|""")
 
 # onsubmit="window.location.reload(true)"
 print("""<hr><form action="fix-corpus.cgi?sid_edit=%s" 
@@ -1190,7 +1196,7 @@ print("""<center><table cellpadding="3" bgcolor="#E0E0E0"
           margin-top:5px;">""")
 
 print("""<tr style="text-align:center">""")
-print(u"""<td><span title='Select new wid position (new word will occupy that position and push forward the remaining words)'>
+print("""<td><span title='Select new wid position (new word will occupy that position and push forward the remaining words)'>
               <b>Wid:</b></span></td><td>""")
 print("""<span title="%s"><select id="pos" name="new_wid[]" 
                 style="text-align:center" required>""" % "Select the WID position you want the word to go (other words will be pushed forward)")
@@ -1247,7 +1253,7 @@ print("""</tr>""")
 
 # NEW WORD COMMENT
 print("""<tr style="text-align:center">""")
-print(u"""<td><span title="comment ('None' will leave it empty)">
+print("""<td><span title="comment ('None' will leave it empty)">
           <b>Comment: </b></td><td>
           <textarea rows="1" cols="16" name="new_wcomment[]"
            style="font-size:12px; background-color: #E0E0E0"
@@ -1256,7 +1262,7 @@ print("""</tr>""")
 
 print("""</table></center>""")
 
-print(u"""<center><span title='Create New Word!'">
+print("""<center><span title='Create New Word!'">
           <input type="submit" value="Create New Word"  
            style="font-size:20px; text-decoration:none; 
            color:green; margin-top: 5px;"></center>""")
@@ -1271,8 +1277,8 @@ print("""<div id="addconcept" style="width:400px;display: none;">
             <b>Adding New Concept to (SID:%s)</b><br>""" % (sid_edit,))
 
 for w, l in sorted(words.items()):
-    print(u"""| <b>%s:</b> %s """ % (w,l[0]))
-print(u"""|""")
+    print("""| <b>%s:</b> %s """ % (w,l[0]))
+print("""|""")
 
 
 # onsubmit="window.location.reload(true)"
@@ -1317,8 +1323,8 @@ print("""</tr>""")
 print("""<tr style="text-align:center">""")
 print("""<td><span title="The synset that should tag this concept.">
              <b>Tag: </b></td><td><input type="text" size="8" 
-             pattern="[0-9]{8}-[avnr]|dat|dat:year|e|loc|num|org|oth|per|w|" 
-             title = "xxxxxxxx-a/v/n/r"
+             pattern="[0-9]{8}-[avnr]|dat|dat:year|loc|num|org|oth|per|w|None" 
+             title = "xxxxxxxx-[avnr] per loc num dat dat:year w None "
               name="new_tag[]" style="text-align:center"/></span></td>""")
 print("""</tr>""")
 
@@ -1326,7 +1332,7 @@ print("""</tr>""")
 
 # NEW CONCEPT COMMENT
 print("""<tr style="text-align:center">""")
-print(u"""<td><span title="comment ('None' will leave it empty)">
+print("""<td><span title="comment ('None' will leave it empty)">
           <b>Comment: </b></td><td>
           <textarea rows="1" cols="16" name="new_comment[]"
             style="font-size:12px; background-color: #E0E0E0"
@@ -1335,7 +1341,7 @@ print("""</tr>""")
 print("""</table></center>""")
 
 
-print(u"""<center><span title='Create New Concept!'">
+print("""<center><span title='Create New Concept!'">
           <input type="submit" value="Create New Concept"
            style="font-size:20px; text-decoration:none;
            color:green; margin-top: 5px;"></center>""")
