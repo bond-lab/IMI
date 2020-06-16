@@ -618,7 +618,7 @@ style="display:inline-block; vertical-align:middle" target='_parent'>
 
 </form>
 
-<form name ='input' method='get' action='tag-lexs.cgi' 
+<form title='Tag all instances of this lemma' name ='input' method='get' action='tag-lexs.cgi' 
    style="display:inline-block; vertical-align:middle; float: right;" target='_blank'>
 <input type='hidden' name='corpus' value='%s'>
 <input type='hidden' name='lang' value='%s'>
@@ -631,10 +631,10 @@ style="display:inline-block; vertical-align:middle" target='_parent'>
 </span>
  <input type='text' name='lemma' placeholder='lemma' value='%s' size=8/>
 </form>
-<br><span style='float: right;'><a target='_blank' href='../tagdoc.html'>Documentation</a></span><br><br><br><br><br><br><br><br> 
+<br><span style='float: right;'>%s</span><br><br><br><br><br><br><br><br> 
 </p>""" % (cgiself, corpus, lang, gridmode, sid, window, selSize,
            ## second form (lemma)
-           corpus, lang, gridmode, tlemma)
+           corpus, lang, gridmode, tlemma, HTML.ntumc_tagdoc())
      
     return  """%s %s""" % (show_sents(c, tsid, twid), searchbox,)
 
@@ -701,4 +701,5 @@ else:
     print("""</span> """)
 
 print("  </body>")
-print("</html>")
+print("</html>"
+)

@@ -53,7 +53,8 @@ template_data = {
     'wnurl':wnurl,
     'type':'sequential',
     'taglcgi': taglcgi,
-    'lims': lims
+    'lims': lims,
+    'tagdocurl':'https://bond-lab.github.io/IMI/tagdoc.html'
 }
 
 ##########################################################################
@@ -585,7 +586,7 @@ target='_blank'>%s</a><sub>
 ################################################################################
 elif not lemma:
     # not totag and not lemma => show search form
-    with open('../logs/temp.log', 'wb') as templog:
+    with open('../log/tag-lexs.log', 'w') as templog:
         templog.write(str(cookie_text))
     HTML.render_template('tag-lexs-search.htm', template_data, cookie_text)
 
