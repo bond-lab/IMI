@@ -207,7 +207,7 @@ class HTML:
         return html
 
     @staticmethod
-    def status_bar(user, position="right", message=""):
+    def status_bar(user, position="right", message="", text=False):
         """Prints a floating status bar (in the top right corner).
            This will display an Info Button, the User Status, and 
            a Home button."""
@@ -225,11 +225,14 @@ class HTML:
             html += """<li><a title="Invalid User" disabled><span style="color: #bc5847;">
                         <i class="icon-user"></i></a></span></li> """
 
-        html += f"""<li><a title='Got to Dashboard' href='{dashboardcgi}'><span style="color: #4D99E0;">
+        html += f"""<li><a title='Go to Dashboard' href='{dashboardcgi}'><span style="color: #4D99E0;">
                    <i class="icon-home"></i></a></span></li>"""
         html += """</ul>"""
         html += message
         html += """</span>"""
+        if text:
+            html=f"""<p><a href='{dashboardcgi}'>Go to Dashboard ({user})</a>
+            """
 
         return html
 
@@ -430,10 +433,16 @@ class HTML:
         ## fixme lang1 lang2
         lang1 = corpus[0:3]
         lang2 = 'eng'
+        window=6
         html = f"""<a class='sid largefancybox fancybox.iframe' 
-        href='showcorpus.cgi?searchlang={lang1}&langs2={lang2}&sid_from={sid -2}&sid_to={sid + 2}'
-        onclick="return isZKeyPressed({sid});">{sid}</a>
-        <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        title='show more context'
+        href='show-sent.cgi?corpus={lang1}&corpus2={lang2}&sid={sid}&window={window}'>{sid}</a>
+         <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        # html = f"""<a class='sid largefancybox fancybox.iframe' 
+        # href='showcorpus.cgi?searchlang={lang1}&langs2={lang2}&sid_from={sid -2}&sid_to={sid + 2}'
+        # onclick="return isZKeyPressed({sid});">{sid}</a>
+        # <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        
         #% ('showcorpus.cgi', lang1, lang2, sid-2, sid+2, sid, sid,sid)
         return html
 

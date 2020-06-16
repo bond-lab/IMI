@@ -13,17 +13,19 @@ import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
 import os 
 import operator
+import http.cookies
 from collections import defaultdict as dd
 
 from ntumc_util import placeholders_for
+from ntumc_webkit import HTML
+from ntumc_gatekeeper import concurs
 
-
-showsentcgi = "show-sent.cgi"
+#showsentcgi = "show-sent.cgi"
 
 form = cgi.FieldStorage()
 corpus = form.getfirst("corpus", "cmn")
 sid = int(form.getfirst("sid", 1))
-window = int(form.getfirst("window", 5))
+window = int(form.getfirst("window", 7))
 if window > 200:
     window = 200
 lemma = form.getfirst("lemma", "")
@@ -32,8 +34,19 @@ lemma = lemma.strip()
 corpus2 = 'eng'
 linkdb = 'cmn-eng'
 
-con = sqlite3.connect("../db/%s.db" % corpus)
-c = con.cursor()
+### COOKIES
+if 'HTTP_COOKIE' in os.environ:
+    C = http.cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
+else:
+    C = http.cookies.SimpleCookie()
+if "UserID" in C:
+    userID = C["UserID"].value
+else:
+    userID = "guest"
+
+con, c = concurs(f"{corpus}.db")
+#con = sqlite3.connect(
+#c = con.cursor()
 ##
 ## get monolingual stuff
 ##
@@ -115,6 +128,7 @@ print(u"""Content-type: text/html; charset=utf-8\n
    <script>
       $( document ).ready(page_init);
    </script>
+<link href="../tag-wn.css" rel="stylesheet" type="text/css">
 </head>""" % (corpus, sid, window))
 
 print("""<body>""")
@@ -127,6 +141,7 @@ print("""<body>""")
 for c in sorted(corp.keys()):
     print(u"<h2>%s (%s)</h2>" % corp[c])
     print("<div><button  style='float:right;' type='button' id='btnTran' name='btnTran'>Toggle Translation</button></div>")
+    print(f"<p>Showing sentences around sid {sid} (± {window})") 
     for d in sorted(doc[c].keys()):
         print(u"<h3><a href='%s'>%s (%s)</a></h3>" % doc[c][d])
         print("<p>" )
@@ -136,13 +151,12 @@ for c in sorted(corp.keys()):
             roll_color = 0 if roll_color == 1 else 1
             print("<div style='background-color: %s'>" % roll_color_alt[roll_color])
             if s ==sid:
-                print("<span style='color:red'>%d</span>&nbsp;&nbsp;&nbsp;&nbsp;%s" % (s, 
-                                                                            ss[d][s]))
+                print(f"<span class='sent_match'>{s}&nbsp;&nbsp;&nbsp;&nbsp;{ss[d][s]}</span>")
             else:
-                print("%s&nbsp;&nbsp;&nbsp;&nbsp;%s" % (s, ss[d][s]))
+                print(f"{s}&nbsp;&nbsp;&nbsp;&nbsp;{ss[d][s]}")
             for t in links[s]:
                 print("<br/><font color='#505050' class='trans'>%s&nbsp;&nbsp;&nbsp;&nbsp;%s</font>" % (t, 
                                                                                       ttt[t]) )
             print("</div>")
-
+print(HTML.status_bar(userID,text=True))
 print("""</body></html>""")
