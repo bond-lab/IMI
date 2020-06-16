@@ -12,6 +12,8 @@ from collections import defaultdict as dd
 
 import sys, os
 
+from ntumc_gatekeeper import concurs
+
 form = cgi.FieldStorage()
 
 
@@ -49,15 +51,13 @@ print(HTML.status_bar('')) ### get user
 # sid_to:<input type="text" size="7" name="sid_to" value="%s"/>
 # <input type="submit" value="Search"/></form>""" % (sid_from, sid_to))
 print("""<h2>Genres</h2>\n """)
-dbdir='../db'
 langs =  ['eng', 'cmn', 'ind', 'jpn', 'ita', 'zsm']
 for lang in langs:
-    dbfile = "%s/%s.db" % (dbdir, lang)
-    if not os.path.isfile(dbfile):
-      continue
-    ##print("%s" % dbfile)
-    conn = sqlite3.connect(dbfile)
-    c = conn.cursor()
+    dbfile = '%s.db' % lang
+    try:
+        conn, c = concurs(dbfile)
+    except FileNotFoundError:
+        continue
     c.execute('select corpusID, corpus, title from corpus')
     corpora = c.fetchall()
     print("<table>\n<caption>Corpora for %s</caption>" % lang)
@@ -140,12 +140,11 @@ def get_doc_stats(langs):
     doc_stats=dict()
     id2doc=dd(dict) # id2doc[docID][lang] = doc
     for lang in langs:
-        dbfile = "%s/%s.db" % (dbdir, lang)
-        if not os.path.isfile(dbfile):
+        dbfile = '%s.db' % lang
+        try:
+            conn, c = concurs(dbfile)
+        except FileNotFoundError:
             continue
-        ##print("%s" % dbfile)
-        conn = sqlite3.connect(dbfile)
-        c = conn.cursor()
         c.execute('select docID, doc, title from doc')
         corpora = c.fetchall()
         for (docID, doc, title) in corpora:

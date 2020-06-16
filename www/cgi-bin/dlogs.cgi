@@ -17,6 +17,7 @@ import http.cookies
 import re, sqlite3, collections
 from collections import defaultdict as dd
 import datetime
+from ntumc_gatekeeper import concurs
 from ntumc_webkit import *
 from ntumc_util import placeholders_for
 from lang_data_toolkit import *
@@ -51,7 +52,7 @@ version = form.getfirst("version", "0.1")
 selfcgi = "dlogs.cgi"
 
 ### working wordnet.db 
-wndb = "../db/wn-ntumc.db"
+wndb = "wn-ntumc.db"
 
 ### corpus db?
 corpusdb = form.getfirst("corpusdb", "../db/eng.db")
@@ -126,8 +127,7 @@ else:
 ################################################################################
 # Connect to the Wordnet Database
 ################################################################################
-con = sqlite3.connect(wndb)
-wn = con.cursor()
+con, wn = concurs(wndb)
 
 ################################################################################
 # FINDING NEW SYNSETS
@@ -243,14 +243,14 @@ ON concept.sid = sent.sid
 WHERE tag in (%s) """ % ass
 
 tagsdict = dd(lambda: dd(list)) # tags by synset tagsdict[synset]=[sid,cid]
-for valid_db in ["../db/eng.db","../db/cmn.db", "../db/ind.db"]:
-    if not os.path.isfile(valid_db):
-        continue
+for valid_db in ["eng.db","cmn.db", "ind.db"]:
     ###########################
     # Connect to corpus.db
     ###########################
-    conc = sqlite3.connect(valid_db)
-    cc = conc.cursor()
+    try:
+        conc, cc = concurs(valid_db)
+    except FileNotFoundError:
+        continue
 
     cc.execute(corpususage, list(ss_lang_defs.keys()))
     rows = cc.fetchall()
@@ -333,14 +333,14 @@ changed_tags_sql = """ SELECT sid_new, clemma_new, tag_new, tag_old,
                               usrname_old 
                        FROM concept_log"""
 
-for db in ["../db/eng.db","../db/cmn.db", "../db/ind.db"]:
-    if not os.path.isfile(db):
-        continue
+for db in ["eng.db","cmn.db", "ind.db"]:
     ###########################
     # Connect to corpus.db
     ###########################
-    conc = sqlite3.connect(db)
-    cc = conc.cursor()
+    try:
+        conc, cc = concurs(db)
+    except FileNotFoundError:
+        continue
 
     cc.execute(changed_tags_sql)
     rows = cc.fetchall()

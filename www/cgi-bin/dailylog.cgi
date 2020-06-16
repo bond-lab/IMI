@@ -14,6 +14,8 @@ from collections import defaultdict as dd
 
 import sys, codecs
 
+from ntumc_gatekeeper import concurs
+
 
 
 form = cgi.FieldStorage()
@@ -29,15 +31,14 @@ version = form.getfirst("version", "0.1")
 wncgi = "dailylog.cgi"
 
 ### working .db (should be the extended OMW
-wndb = "../db/wn-ntumc.db"
+wndb = "wn-ntumc.db"
 
 ### reference to wn-grid (search .cgi)
 omwcgi = "wn-gridx.cgi"
 
 
 ### Connect to and update the database
-con = sqlite3.connect(wndb)
-c = con.cursor()
+con, c = concurs(wndb)
 
 
 ### Languages

@@ -7,6 +7,7 @@ import cgitb; cgitb.enable()  # for troubleshooting
 import sqlite3, codecs
 from collections import defaultdict as dd
 
+from ntumc_gatekeeper import concurs
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
@@ -53,9 +54,7 @@ else:
 ################################################################################
 # FETCH WN DATA (DEFINITIONS)
 ################################################################################
-wndb = "../db/wn-ntumc.db"
-con = sqlite3.connect(wndb)
-c = con.cursor()
+con, c = concurs('wn-ntumc.db')
 c.execute("""SELECT synset, lang, sid, def
              FROM synset_def
              WHERE lang in (?, ?)
