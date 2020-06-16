@@ -211,7 +211,7 @@ if logged:
                <li><a href="#corpustools">Corpus Tools</a></li>
                <li><a href="#changepw"><i class="icon-pencil">
                    </i> User Preferences</a></li>
-               <li><a href="#tabr3">Tab3</a></li>
+<!--               <li><a href="#tabr3">Tab3</a></li> -->
               </ul>""")
 
 # <div id="tabr1" class="tab-content">Tab1</div>
@@ -240,13 +240,13 @@ if logged:
              <b>These are the available Wordnets Views!</b>
              <br><br><div style="width: 300px">
              <ul class="menu vertical">
-               <li><a href="">
-                   Open Multilingual Wordnet</a>
-                 <ul><li><a href="wn-gridx.cgi?gridmode=grid">
-                         Original</a></li>
-                     <li><a href="wn-gridx.cgi?gridmode=gridx">
-                         Extended</a></li>
-                 </ul>
+<!--                <li><a href="">  -->
+<!--                    Open Multilingual Wordnet</a>  -->
+<!--                  <ul><li><a href="wn-gridx.cgi?gridmode=grid">  -->
+<!--                          Original</a></li>  -->
+<!--                      <li><a href="wn-gridx.cgi?gridmode=gridx">  -->
+<!--                          Extended</a></li>  -->
+<!--                  </ul>  -->
                <li><a href="wn-gridx.cgi?gridmode=ntumcgrid">
                    NTUMC Wordnet (Ongoing)</a></li>
                <li><a href="dlogs.cgi">Wordnet Editing Logs</a></li>
@@ -257,8 +257,8 @@ if logged:
                    Japanese Wordnet</a></li>
                <li><a href="wn-gridx.cgi?gridmode=wnbahasa">
                    Wordnet Bahasa</a></li>
-               <li><a href="mapwn16_30.cgi">
-                   WN1.6 to WN 3.0 Converter</a></li>
+ <!--               <li><a href="mapwn16_30.cgi"> -->
+<!--                    WN1.6 to WN 3.0 Converter</a></li> -->
 
 
              </ul></div></div>""")
@@ -481,13 +481,13 @@ if logged:
 
                <li><a href="">POS Distribution</a>
 
-                 <ul><li><a href="">English</a>
-                         <ul><li><a href="pos-sum.cgi?lang=eng&tagset=pos">
-                                 POS </a></li>
-                             <li><a href="pos-sum.cgi?lang=eng&tagset=upos">
-                                 UPOS </a></li>
-                         </ul>
-                       </li></li>
+                 <ul>
+                     <li><a href="">English</a>: 
+                        <ul>
+                        <li> <a href="pos-sum.cgi?lang=eng&tagset=pos">POS</a>
+                        <li> <a href="pos-sum.cgi?lang=eng&tagset=upos">UPOS</a>
+                        </ul>
+                     </li>
 
 
                       <li><a href="">Chinese</a>
