@@ -166,13 +166,13 @@ C["UserID"] = user
 C["Password"] = hashed_pw
 C["UserID"]["expires"] = "31 Jan 2021 12:00:00 GMT"
 C["Password"]["expires"] = "31 Jan 2021 12:00:00 GMT" 
-
 print(C)
+
 print("""Content-type: text/html; charset=utf-8\n\n""")
 print("""<html>
   <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-    <title>Login</title>
+    <title>%s</title>
 
     <script type="text/javascript">
        function toggle_visibility(id) {
@@ -189,7 +189,7 @@ print("""<html>
 
 
   </head>
-  <body>""")
+  <body>""" % 'Dashboard - NTUMC Tagging Tools' if logged else 'Login')
 
 print(message_log)
 if logged:
