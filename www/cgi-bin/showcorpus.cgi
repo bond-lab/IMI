@@ -217,15 +217,13 @@ else:
     
 if mode == "wordview":
     # errlog.write("It entered wordview mode!<br>")
-    
-    # sss = ",".join("'%s'" % s for s in wordtag)
-    sss = (",".join("?" for s in wordtag),wordtag)
 
     ###########################
     # Connect to wordnet.db
     ###########################
     con = sqlite3.connect(wndb)
     wn = con.cursor()
+
     fetch_ss_name_def = """
         SELECT s.synset, name, src, lang, def, sid
         FROM (SELECT synset, name, src
@@ -234,8 +232,8 @@ if mode == "wordview":
         LEFT JOIN synset_def
         WHERE synset_def.synset = s.synset
         AND synset_def.lang in (?, 'eng')
-    """ % placeholders_for(sss[0])
-    wn.execute(fetch_ss_name_def, sss[0] + sss[1] + [searchlang])
+    """ % placeholders_for(wordtag)
+    wn.execute(fetch_ss_name_def, wordtag + [searchlang])
     rows = wn.fetchall()
     ss_defs = dd(lambda: dd(lambda:  dd(lambda: str())))
     ss_names = dd(lambda: dd(lambda:list()))
