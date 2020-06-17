@@ -21,7 +21,8 @@
 <ul>
   <li><a href = '#instructions'>Tagging Instructions</a>
   <li><a href = '#prep'>How the data is prepared</a>
-      <li><a href = '#tags'>Word Senses and Tags</a>
+  <li><a href = '#tags'>Word Senses and Tags</a>
+  <li><a href='#ne'>Named Entities</a>
 	<ul>
 	  <li><a href = '#change'>Suggesting changes to wordnet</a> (tag with w)
 	  <li><a href = '#fw'>Tagging Foreign Words</a>
@@ -207,7 +208,7 @@
     <li><b>org</b> organization
       <br>e.g. <i>Scotland Yard</i>
     <li><b>dat</b> date/time
-      <br>e.g. <i>the 31st, 2 o'clock</i>
+      <br>e.g. <i>the 31st, 2 o'clock, 2pm, Aug 8</i>.
     <li><b>loc</b> location
       <br>e.g. <i>Riding Thorpe Manor; Norfolk; Baker Street</i>
     <li><b>oth</b> any other proper name
@@ -215,6 +216,8 @@
     <li><b>year</b> year
       <br>e.g. <i>1984</i>
   </ul>
+  See <a href='#ne'>Named Entities</a> for more detail
+  
 <li>If there is an error in the corpus (such as tokenization, lemmatization or spelling)
   <br> tag as <strong>e</strong>
    <ul>
@@ -282,6 +285,29 @@
   <tt>I can't really decide between 012345678-x and 012345678-y</tt>
 </ul>
 
+<h3><a name='ne'>Named Entities</a></h3>
+<li>If it is a name (or part of a name) chose an appropriate name tag:
+  <ul>
+    <li><b>per</b> person
+      <br>e.g. <i>Irene</i> or <i>Irene Adler</i> (tag both Irene and Adler as <b>per</b>)
+    <li><b>org</b> organization
+      <br>e.g. <i>Scotland Yard</i>
+    <li><b>dat</b> date and or time
+      <br>e.g. <i>the 31st, 2 o'clock, 2pm, Aug 8</i>.
+      <br>for <i>8 pm</i> tag as number (for 8) and (post-meridian)
+      for pm
+    <li><b>loc</b> location
+      <br>e.g. <i>Riding Thorpe Manor; Norfolk; Baker Street</i>
+    <li><b>oth</b> any other proper name
+      <br>e.g. <i>Samsung Galaxy SII</i>
+    <li><b>year</b> year
+      <br>e.g. <i>1984</i>
+  </ul>
+
+  <p>We sometimes create named entities in order to match across
+  languages, although we do not expect to keep them in the wordnet. 
+
+  <p>These are tagged as <b>notag</b> in SemCor.
 
 <hr>
 <h3><a name="change">Suggesting changes to wordnet<a> (tag with w)</h3>
@@ -850,6 +876,9 @@ having to do with the transfer of energy.
 
 <hr>
 <p>Thanks to  Christiane Fellbaum for sharing some documentation from the wordnet gloss tagging project.
+
+<a href='https://github.com/bond-lab/IMI/'>Source for the tagger is
+  available here.</a>
 </body>
 </html>
 
