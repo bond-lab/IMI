@@ -586,7 +586,7 @@ target='_blank'>%s</a><sub>
 ################################################################################
 elif not lemma:
     # not totag and not lemma => show search form
-    with open('../log/tag-lexs.log', 'w') as templog:
+    with open('../log/tag-lexs.log', 'w', encoding='utf-8') as templog:
         templog.write(str(cookie_text))
     HTML.render_template('tag-lexs-search.htm', template_data, cookie_text)
 
