@@ -213,7 +213,7 @@ if editm == "update" and userID in valid_usrs:
     # UPDATE SENT TABLE
     sent_up = new_sent.strip()
 
-    pid_up = new_pid.strip()
+    pid_up = new_pid.strip() if new_pid != None else new_pid
     scomment_up = new_scomment.strip()
     # Update sent if sent != sent
     a.execute("""UPDATE sent SET sent=?, usrname=? 
