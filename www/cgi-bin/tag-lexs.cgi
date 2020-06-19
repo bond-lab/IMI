@@ -617,6 +617,10 @@ else:
                     matched = [i]
                     ### matched first word
                     for j in range(1,len(ls)):  ## no skip for now
+                        # avoid RuntimeError from implicitly adding new key by
+                        # checking if sents[sid][i+j] exists before accessing it
+                        if not i+j in sents[sid]:
+                            continue
                         if i+j <= sentlength and ls[j] in sents[sid][i+j]:
                            matched.append(i+j) 
                     if len(matched) == len(ls):
