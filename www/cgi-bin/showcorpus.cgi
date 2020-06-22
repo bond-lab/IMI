@@ -187,8 +187,8 @@ if sid_from != 0:
     searchquery += "(SID>=%s)+" % sid_from
     # sid_from_q = " AND sent.sid >= %s " % sid_from
     # sid_from_q2 = " AND sid >= %s " % sid_from
-    sid_from_q = (" AND sent.sid >= %s ", [sid_from])
-    sid_from_q2 = (" AND sid >= %s ", [sid_from])
+    sid_from_q = (" AND sent.sid >= ? ", [sid_from])
+    sid_from_q2 = (" AND sid >= ? ", [sid_from])
 else:
     sid_from_q =  ('', False)
     sid_from_q2 =  ('', False)
@@ -364,7 +364,8 @@ if corpusdb != "../db/None.db":
            LEFT JOIN word 
            WHERE word.sid = cl.sid 
            AND word.wid = cl.wid {} {} {} {} 
-           """.format(concept_q[0], clemma_q[0], sid_from_q2[0], sid_to_q2[0], word_q[0], lemma_q[0], pos_q[0], limit_q[0])
+           """.format(concept_q[0], clemma_q[0], sid_from_q2[0], sid_to_q2[0], 
+                      word_q[0], lemma_q[0], pos_q[0], limit_q[0])
 
 
         # errlog.write("concept(tag): %s\n" % concept_q)
@@ -378,7 +379,7 @@ if corpusdb != "../db/None.db":
         for p in (concept_q, clemma_q, sid_from_q2, 
                   sid_to_q2, word_q, lemma_q, pos_q, limit_q):
             if p[1]:
-                params = params + p[1]
+                params.append(p[1])
 
         # concept_q[1] if concept_q[1] else [] +\
         # clemma_q[1] if clemma_q[1] else [] +\
