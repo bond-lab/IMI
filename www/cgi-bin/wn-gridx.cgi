@@ -1462,10 +1462,10 @@ elif (lemma):   ## Show all the entries for this lemma in language
         else: # ('gridx','ntumcgrid')
             sense_conf = ""
 
-        qparams =  lems
+        qparams = lems             # consumed in "lemma IN (...)"
         if glob:
-            qparams +=  lems
-        qparams.append(lang)
+            qparams.append(lemma)  # consumed by "OR lemma GLOB ?"
+        qparams.append(lang)       # consumed by "sense.lang = ?"
         c.execute("""SELECT DISTINCT synset
                      FROM word 
                      LEFT JOIN sense
@@ -1475,7 +1475,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      AND sense.lang = ?
                      LIMIT 200
                   """ % (lemma_q, sense_conf), 
-                  qparams)  # consumed by sense.leng = ?
+                  qparams)
 
     row = c.fetchall()
 
