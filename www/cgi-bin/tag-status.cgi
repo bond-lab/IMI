@@ -197,7 +197,18 @@ a.execute("""SELECT tag, clemma, count(*)
              ORDER BY count(*)""", [sid_from, sid_to])
 for (tag, clemma, count) in a:
     lemma_tags[tag][clemma] = count
+    
+lemma_comments = dd(lambda: dd(str))
+a.execute("""SELECT tag, clemma, group_concat(comment, "; ") AS comments
+FROM concept  
+WHERE sid > ? AND sid < ?
+AND (tag in ('x','w','e','') OR tag is Null) 
+AND (comment != '' OR comment is not Null) 
+GROUP BY clemma, tag""", [sid_from, sid_to])
+for (tag, clemma, comments) in a:
+    lemma_comments[tag][clemma] = comments
 
+    
 sid_tags = dd(lambda: dd(int))
 a.execute("""SELECT sid, tag, count(*) 
              FROM concept
@@ -208,6 +219,19 @@ a.execute("""SELECT sid, tag, count(*)
 for (sid, tag, count) in a:
     sid_tags[tag][sid] = count
 
+sid_comments = dd(lambda: dd(str))
+sid_clemmas = dd(lambda: dd(str))
+a.execute("""SELECT sid, tag, group_concat(clemma, "; ") as clems, group_concat(comment, "; ") AS comments
+FROM concept  
+WHERE sid > ? AND sid < ?
+AND (tag in ('x','w','e','') OR tag is Null) 
+GROUP BY sid, tag""", [sid_from, sid_to])
+for (sid, tag, clemmas, comments) in a:
+    sid_comments[tag][sid] = comments
+    sid_clemmas[tag][sid] = clemmas
+
+
+    
 lemma_all = dd(lambda: dd(list))
 a.execute("""SELECT sid, tag, clemma
              FROM concept
@@ -259,18 +283,18 @@ for tag in lemma_tags.keys():
     all_dict = lemma_all[tag]
     count_types = len(tag_dict.values())
     count_tokens = 0
-    for clemma, count in tag_dict.items():
+    for clemma, count in tag_dict.items() :
         count_tokens += count
 
     print("""<div id="%s" class="tab-content">""" % tagdiv)
     print("""<h6>Concepts Tagged with '%s': %s Types (%s tokens)</h6>
              """ % (tagdiv, count_types, count_tokens))
 #    print("""<h5>%s Concepts tagged with '%s'</h5>""" % (count_types, tagdiv))
-    print("""<div style="width:20%"><table cellspacing="0" cellpadding="0" 
+    print("""<div style="width:50%"><table cellspacing="0" cellpadding="0" 
               id="id_of_table" class="striped tight sortable">""")
     print("""<thead><tr><th>Concept</th><th>Count</th>
-             <th>Actions</th><th>by sid</th></tr></thead>""")
-    for clemma, count in tag_dict.items():
+             <th>Actions</th><th>by sid</th><th>Comments</th></tr></thead>""")
+    for count, clemma in sorted([(co,cl) for (cl,co) in tag_dict.items()], reverse=True):
         taglexs = taglexscgi % (lang,lang,userID,clemma, sid_from, sid_to)
         wngrid = wncgi_edit % (userID,lang, clemma)
         bysid =[]
@@ -281,14 +305,15 @@ for tag in lemma_tags.keys():
         bysidstr = ', '.join(bysid)
         print("""<tr><td><nobr>%s</nobr>
                      </td><td>%s</td>
-                     <td><a class='largefancybox fancybox.iframe'
+                     <td><a class='largefancybox fancybox.iframe' title='lookup in wordnet'
                             href="%s"><i class="icon-search"></i></a>
-                         <a class='largefancybox fancybox.iframe' 
+                         <a class='largefancybox fancybox.iframe'  title='lexical tagger'
                             href="%s"><i class="icon-tags"></i></a></td>
-        <td>
-        %s
-        </td>
-                    </tr>""" % (clemma,count,wngrid,taglexs,bysidstr))
+        <td>%s</td>
+        <td>%s</td>
+                    </tr>""" % (clemma,count,wngrid,
+                                taglexs,bysidstr,
+                                lemma_comments[tag][clemma]))
     print("</table></div></div>")
 
 # URL column (when needed)
@@ -310,10 +335,10 @@ for tag in sid_tags.keys():
     print("""<h6>%s Sentences need to be fixed (%s '%s' tokens)</h6>
                   """ % (len(sid_tags[tag].keys()), tag, tag_tokens))
 
-    print("""<div style="width:10%"><table cellspacing="0" cellpadding="0"
+    print("""<div style="width:75%"><table cellspacing="0" cellpadding="0"
                           class="striped tight sortable">""")
     print("""<thead><tr><th>SID</th><th>Count</th>
-                     <th>Actions</th></tr></thead>""")
+                     <th>Actions</th><th>Clemmas</th><th>Comments</th></tr></thead>""")
 
     for sid, count in sid_tags[tag].items():
 
@@ -326,7 +351,9 @@ for tag in sid_tags.keys():
                         href="%s"><i class="icon-edit"></i></a>
                      <a class='largefancybox fancybox.iframe' 
                         href="%s"><i class="icon-tags"></i></a></td>
-                </tr>""" % (sid,count,fix_corpus_url,tag_word_url,))
+                     <td>%s</td><td>%s</td>
+                </tr>""" % (sid,count,fix_corpus_url,tag_word_url,
+                            sid_clemmas[tag][sid], sid_comments[tag][sid]))
     print("</table></div></div>")
 
 # URL column (when needed)
