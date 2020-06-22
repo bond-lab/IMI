@@ -351,8 +351,8 @@ if logged:
                                  A Scandal In Bohemia</a>
                                  </li>
                                  <li><a target='_blank' href="tag-status.cgi?db=""" +
-                                 """../db/eng.db&sid_from=45681&sid_to=47487">
-                                 The Hound of the Baskervilles (I&II)</a>
+                                 """../db/eng.db&sid_from=45681&sid_to=48504">
+                                 The Hound of the Baskervilles       (I&ndash;III)</a>
                                  </li>
 
                                  <li><a target='_blank' href="tag-status.cgi?db=""" +
