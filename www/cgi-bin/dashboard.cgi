@@ -326,6 +326,7 @@ if logged:
 
                <li><a href="corpus-sum.cgi">Corpus Summary</a></li>
 
+               <li><a href="tag-log.cgi?days=7">Tagging Log (7 days)</a>
 
                <li><a href="tag-status.cgi">Tagging Status</a>
                <ul><li><a>English</a>
