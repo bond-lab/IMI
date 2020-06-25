@@ -74,7 +74,11 @@ class HTML:
         a dropdown for a list of available languages.
         The interface language is selected by default."""
 
-        html = """<form method="post" style="display: inline-block" 
+        html = """<form method="post" style="display: inline-block"
+                   title="search for a word  —  'word'
+or pattern  — '[wW]ord*' (using sqlite GLOB)
+or synset-id  — '06286395-n'
+or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
                    id="newquery" action="%s">
                   <span  style="font-size: %s%%">
                   <input style="font-size: %s%%" 

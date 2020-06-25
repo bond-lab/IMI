@@ -1438,13 +1438,14 @@ elif (lemma):   ## Show all the entries for this lemma in language
     # FIXME! Order the synsets by sense frequency
 
     if lemma.startswith('def::'):
-
+        print('def', lemma[5:])
         c.execute("""SELECT DISTINCT synset 
                      FROM synset_def 
-                     WHERE def GLOB '%s'  
+                     WHERE def GLOB ?  
                      AND lang = ?
                      LIMIT 200
                   """, [str(lemma[5:]), lang])
+        print(c)
     else:
 
 
