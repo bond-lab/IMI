@@ -379,7 +379,7 @@ if corpusdb != "../db/None.db":
         for p in (concept_q, clemma_q, sid_from_q2, 
                   sid_to_q2, word_q, lemma_q, pos_q, limit_q):
             if p[1]:
-                params.append(p[1])
+                params.extend(p[1])
 
         # concept_q[1] if concept_q[1] else [] +\
         # clemma_q[1] if clemma_q[1] else [] +\
