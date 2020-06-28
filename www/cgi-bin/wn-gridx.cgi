@@ -10,7 +10,7 @@ from collections import defaultdict as dd
 from ntumc_webkit import * 
 from ntumc_util import * 
 from lang_data_toolkit import *
-from html import escape
+from html import escape, unescape
 
 # Fixes encoding issues when reading cookies from os.environ
 import os, sys
@@ -30,7 +30,8 @@ lang = escape(form.getfirst("lang", ""))
 lang2 = escape(form.getfirst("lang2", "eng"))
 ss = escape(form.getfirst("ss", ""))
 synset = escape(form.getfirst("synset", ""))
-lemma = escape(form.getfirst("lemma", "").strip())
+lemma_raw = unescape(form.getfirst("lemma", "").strip())
+lemma = escape(lemma_raw, quote=True)
 pos = escape(form.getfirst("pos", ""))
 gridmode = escape(form.getvalue("gridmode", "ntumcgrid"))
 # langselect = form.getlist("langselect[]")
@@ -564,7 +565,7 @@ print("<body>")
 if (ss):
     sss = ss.split()
     ass = placeholders_for(sss)
-    lems = expandlem(lemma)
+    lems = expandlem(lemma_raw)
 
     # Fetch Lemmas by gridmode
     if gridmode == "grid":
@@ -1431,7 +1432,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
     ## note the use of narrow non-breaking spaces
 
 
-    lems = list(expandlem(lemma)) 
+    lems = list(expandlem(lemma_raw)) 
 
 
     # FIXME! Order the synsets by sense frequency
