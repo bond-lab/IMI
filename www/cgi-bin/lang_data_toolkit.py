@@ -34,7 +34,8 @@ mtags_human = { "e":"e",
               None : 'Not tagged'
 }
 
-valid_usernames = ['fcbond','lmorgado', 'wangwenjie','hannahchoi','davidmoeljadi', 'jojo',
+valid_usernames = ['fcbond','lmorgado', 'takkur', 
+                   'wangwenjie','hannahchoi','davidmoeljadi', 'jojo',
 
                    'andrew', 'melissa', 'merrick', 'jinghui', 'wilson', 
 
