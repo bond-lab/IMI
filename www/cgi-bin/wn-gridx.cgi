@@ -1463,7 +1463,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
         else: # ('gridx','ntumcgrid')
             sense_conf = ""
 
-        qparams = lems             # consumed in "lemma IN (...)"
+        qparams = list(lems)             # consumed in "lemma IN (...)"
         if glob:
             qparams.append(lemma)  # consumed by "OR lemma GLOB ?"
         qparams.append(lang)       # consumed by "sense.lang = ?"
@@ -1656,7 +1656,8 @@ elif (lemma):   ## Show all the entries for this lemma in language
     # If nothing is found
     ######################
     else:
-        print(u"<p>No synsets found!" )
+        lemstr =  ", ".join(lems)
+        print(f"<p>No synsets found (for any of {lemstr})!")
 
 
         # Quick "Search again in Lang2" button

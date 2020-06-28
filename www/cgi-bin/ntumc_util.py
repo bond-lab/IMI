@@ -8,6 +8,7 @@ import os, sys
 import operator
 from collections import defaultdict as dd
 import warnings
+import unicodedata
 
 from ntumc_gatekeeper import placeholders_for as _placeholders_for
 
@@ -64,14 +65,21 @@ class Timer:
 def expandlem (lemma):  ### keep in sync with tag-lexs
     lems=set()
     lems.add(lemma)
+    ### case
     lems.add(lemma.lower())
+    lems.add(lemma.upper())
+    lems.add(lemma.title())
+    ### hyphen, underbar, space
     lems.add(lemma.replace('-',''))
-    lems.add(lemma.replace('-','_'))
+    lems.add(lemma.replace('-',' '))
     lems.add(lemma.replace(' ','-'))
     lems.add(lemma.replace('_',''))
     lems.add(lemma.replace(' ',''))
-    lems.add(lemma.upper())
-    lems.add(lemma.title())
+    ### normalize unicode
+    lems.add(unicodedata.normalize('NFKC', lemma))
+    lems.add(unicodedata.normalize('NFKC', lemma).lower())
+    lems.add(unicodedata.normalize('NFKC', lemma).upper())
+    lems.add(unicodedata.normalize('NFKC', lemma).title())
     # lems.add(lemma.replace('_',u'∥'))
     # lems.add(lemma.replace('-',u'∥'))
     # lems.add(lemma.replace(u'・',u'∥'))
