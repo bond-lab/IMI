@@ -38,3 +38,10 @@ padding: 0 5px;
 .trans{
   color:#666666;
 }
+
+tr.ok{
+    background-color:palegreen;
+}
+tr.bad{
+    background-color:orange;
+}

@@ -125,7 +125,10 @@ def connect(dbfile, *fallback, in_dirs=None):
 
 
 def concurs(*args, **kwargs):
-    """Shortcut to return both connection and cursor from connect()"""
+    """Shortcut to return both connection and cursor from connect()
+    usage:
+      conn, c = concurs('eng.db')
+    """
     conn = connect(*args, **kwargs)
     curs = conn.cursor()
     return conn, curs

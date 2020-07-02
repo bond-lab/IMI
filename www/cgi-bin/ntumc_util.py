@@ -257,7 +257,10 @@ def check_corpusdb(corpusdb):
        5) the db path
    """
    exists = False
-   dbpath = '../db/' + corpusdb + '.db'
+   if corpusdb.endswith('.db'):
+       dbpath = '../db/' + corpusdb
+   else:
+       dbpath = '../db/' + corpusdb + '.db'
    if os.path.isfile(dbpath):
        exists = corpusdb
 
@@ -266,6 +269,8 @@ def check_corpusdb(corpusdb):
        c = conn.cursor()
        c.execute("""SELECT lang, version, master FROM meta""")
        (lang, version, master) = c.fetchone()
+   else:
+       (lang, version, master) = ('unknown', 'unknown', 'unknown')
 
    return (exists, version, master, lang, dbpath)
 

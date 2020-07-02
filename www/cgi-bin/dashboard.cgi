@@ -326,9 +326,44 @@ if logged:
 
                <li><a href="corpus-sum.cgi">Corpus Summary</a></li>
 
+               <li><a href="corpus-qc.cgi?corpus=eng&sid_from=10000&sid_to=12000">Corpus Quality Control (slowish)</a></li>
+
                <li><a href="tag-log.cgi?days=7">Tagging Log (7 days)</a>
 
                <li><a href="tag-status.cgi">Tagging Status</a>
+               <ul><li><a>English</a>
+                       <ul><li><a  target='_blank' href="tag-status.cgi?db=""" +
+                        """../db/eng.db&sid_from=10000&sid_to=12000">
+                                 Stories</a>
+
+                             <ul>
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=10000&sid_to=10999">
+                                 Speckled Band</a>
+                                 </li>
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=11000&sid_to=11899">
+                                 Dancing Men</a>
+                                 </li>
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=55657&sid_to=56209">
+                                 The Red-Headed Leaugue</a>
+                                 </li>
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=50804&sid_to=51464">
+                                 A Scandal In Bohemia</a>
+                                 </li>
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=45681&sid_to=48504">
+                                 The Hound of the Baskervilles       (I&ndash;III)</a>
+                                 </li>
+
+                                 <li><a target='_blank' href="tag-status.cgi?db=""" +
+                                 """../db/eng.db&sid_from=11900&sid_to=11999">
+                                 The Spider's Thread</a>
+                                 </li>
+                                 </ul> 
+   <li><a href="tag-status.cgi">Corpus Issues</a>
                <ul><li><a>English</a>
                        <ul><li><a  target='_blank' href="tag-status.cgi?db=""" +
                         """../db/eng.db&sid_from=10000&sid_to=12000">
