@@ -14,7 +14,7 @@ import os
 import sqlite3
 from collections import defaultdict as dd
 
-from ntumc_util import *
+from ntumc_util import check_corpusdb, all_corpusdb
 from ntumc_webkit import HTML
 from lang_data_toolkit import valid_usernames as valid_usrs
 from lang_data_toolkit import pos_tags
@@ -48,8 +48,8 @@ form = cgi.FieldStorage()
 
 sid_edit = form.getfirst("sid_edit", "11000")
 
-corpusdb = form.getfirst("corpus", "eng")
-(dbexists, dbversion, dbmaster, dblang, dbpath) = check_corpusdb(corpusdb)
+corpus = form.getfirst("corpus", "eng")
+(dbexists, dbversion, dbmaster, dblang, dbpath) = check_corpusdb(corpus)
 
 
 lang = dblang
@@ -156,7 +156,7 @@ print(f"""<h2>Corpus Fixer {editm}</h2> \n """)
 ################
 # CONNECT TO DB
 ################
-conn_db, a = concurs(corpusdb, dbpath)
+conn, a = concurs(corpus, dbpath)
 
 ######################################################
 # GO TO THE DB FOR THE 1st TIME (FOR EDITING PURPOSES)
@@ -208,7 +208,7 @@ log_status = ""
 # UPDATE - CORRECT FIELDS
 ##########################
 if editm == "update" and userID in valid_usrs:
-    log_status += "Entered 'update' mode:<br> "
+    log_status += f"Entered 'update' mode for {corpus}:<br> "
 
     # UPDATE SENT TABLE
     sent_up = new_sent.strip()
@@ -363,7 +363,7 @@ if editm == "update" and userID in valid_usrs:
                           """, [sid_edit, wid, cid, userID])
 
     log_status += "Concepts ✓; "
-
+    conn.commit()
 
 ################################################################################
 # ADDWORD - ADD A NEW WORD
@@ -402,7 +402,6 @@ elif editm == "addword" and userID in valid_usrs:
                        lemma_up, wcomment_up, userID))
 
         log_status += "New Word (no shifting needed) ✓; "
-    
     ############################################################################
     # IF NEW ID WAS ALREADY IN THE SENTENCE (NEED TO DO SOME PUSHING AROUND)
     ############################################################################
@@ -439,84 +438,8 @@ elif editm == "addword" and userID in valid_usrs:
                       (sid_edit, wid_new, word_up, pos_up, 
                        lemma_up, wcomment_up, userID))
 
-
-
-
-        # # INSERT NEW WORD AT MAX+1 POSITION (COPYING MAX)
-        # a.execute("""INSERT INTO word (sid, wid, word, pos,
-        #                                lemma, comment, usrname)
-        #              VALUES (?,?,?,?,?,?,?)""",
-        #           (sid_edit, maxwid+1, words[maxwid][0], words[maxwid][1],
-        #            words[maxwid][2], words[maxwid][3], words[maxwid][4]))
-
-        # # print "<br>INSERTED A NEW WORD with MAX+1 WID"  #TEST
-
-        # # FOR EACH CONCEPT LINKED TO MAX WID, COPY THEIR CWL LINKS TO MAX+1
-        # for conceptid in cwls[maxwid]:
-        #     a.execute("""INSERT INTO cwl (sid, wid, cid, usrname)
-        #                  VALUES (?,?,?,?)""",
-        #               (sid_edit, maxwid+1, conceptid, cwls_usr[wid]))
-
-        # # print "<br>INSERTED CWL LINKS FOR THE NEW WORD with MAX+1 WID"  #TEST
-
-        # # UPDATE OTHER WIDs, COPY WID TO WID+1
-        # updatingwid = maxwid
-        # while (updatingwid > wid_new):  
-        #     # PUSH EVERYTHING FORWARD until reaches wid_new
-        #     a.execute("""UPDATE word SET word=?, pos=?, lemma=?, 
-        #                                  comment=?, usrname=?
-        #                  WHERE sid=? AND wid=?""",
-        #               (words[updatingwid-1][0], words[updatingwid-1][1], 
-        #                words[updatingwid-1][2], words[updatingwid-1][3], 
-        #                words[updatingwid-1][4], sid_edit, updatingwid))
-
-        #     # DELETE PREVIOUS CWL LINKS
-        #     a.execute("""UPDATE cwl SET usrname=?
-        #                  WHERE sid=? AND wid=?
-        #                  AND usrname IS NOT ?
-        #               """, [userID, sid_edit, updatingwid, userID])
-        #     a.execute("""DELETE FROM cwl
-        #                  WHERE sid=? AND wid=?
-        #               """, [sid_edit, updatingwid])
-
-        #     # TRANSFER CWL LINKS FROM PREVIOUS WID
-        #     for conceptid in cwls[updatingwid-1]:
-        #         a.execute("""INSERT INTO cwl (sid, wid, cid, usrname)
-        #                      VALUES (?,?,?,?)""",
-        #                    (sid_edit, updatingwid, conceptid, userID))
-
-        #     updatingwid -= 1  # KEEP DECREASING UPDATING WID 
-
-
-        # # UPDATE THE OLD WID WITH THE NEW WORD
-        # # Update wid_new with new values
-        # a.execute("""UPDATE word SET word=?, pos=?, lemma=?, usrname=?
-        #              WHERE sid=? AND wid=?""",
-        #           (word_up, pos_up, lemma_up, userID, sid_edit, wid_new))
-
-        # # Update wcomment if wcomment != wcomment
-        # if wcomment_up == "None":
-        #     a.execute("""UPDATE word SET comment=?, usrname=? 
-        #                 WHERE comment IS NOT ? 
-        #                 AND sid=? and wid=?""", 
-        #                 (None, userID, None, sid_edit, wid_new))
-        # else:
-        #     a.execute("""UPDATE word SET comment=?, usrname=? 
-        #                 WHERE comment IS NOT ? 
-        #                 AND sid=? and wid=?""", 
-        #                 (wcomment_up, userID, wcomment_up, sid_edit, wid_new))
-
-        # # DELETE PREVIOUS CWL LINKS
-        # a.execute("""UPDATE cwl SET usrname=?
-        #              WHERE sid=? AND wid=?
-        #              AND usrname IS NOT ?
-        #           """, [userID, sid_edit, updatingwid, userID])
-        # a.execute("""DELETE FROM cwl
-        #              WHERE sid=? AND wid=?
-        #           """, [sid_edit, updatingwid])
-
         log_status += "New Word (shifting around needed) ✓; "
-
+    conn.commit()
 
 ################################################################################
 # DELETE WORD (1. DELETE; 2. SHIFT DOWN THINGS;)
@@ -620,7 +543,7 @@ elif editm == "delword" and userID in valid_usrs:
         #           (sid_edit, maxwid))
 
         log_status += "Deleted Word ✓; "
-
+    conn.commit()
 
 #################################
 # ADDCONCEPT - ADD A NEW CONCEPT
@@ -675,7 +598,7 @@ elif editm == "addconcept" and userID in valid_usrs:
                           That concept already existed!</b><br>
                           (It may have been created at the same time!)<br>
                           Please check it and try again!</span>"""
-
+    conn.commit()
 
 ################################
 # DELCONCEPT - DELETE A CONCEPT
@@ -702,7 +625,7 @@ elif editm == "delconcept" and userID in valid_usrs:
                  WHERE sid=? AND cid=?""", [sid_edit, cid_del])
 
     log_status += "Deleted C-W Links ✓; "
-
+    conn.commit()
 ###########################################
 # THIS IS THE SECOND CONNECTION TO THE DB
 # AFTER ALL THE MODIFICATIONS, EVERYTHING
@@ -771,12 +694,12 @@ if userID in valid_usrs:
             print("""<form action="fix-corpus.cgi?sid_edit=%s" 
                            method="post" name="concept"> 
                      <input type="hidden" name="editm" value="update"/>
-                     <input type="hidden" name="corpusdb" value="%s"/>
-                  """ % (sid, corpusdb))
+                     <input type="hidden" name="corpus" value="%s"/>
+                  """ % (sid, corpus))
 
             # SENTENCE TEXTAREA
-            retag_url= "tag-word.cgi?gridmode=ntumcgrid&corpus=eng&lang=eng&sid={}".format(sid)
-            print("""<h3>Edit sentence (%s): <a href='%s'>(retag)</a></h3> """ % (sid, retag_url))
+            retag_url= f"tag-word.cgi?gridmode=ntumcgrid&corpus={corpus}&lang={lang}&sid={sid}"
+            print(f"<h3>Edit sentence ({sid}): <a href='{retag_url}'>(retag)</a> in {corpus}</h3> ")
             print("""<table cellpadding="3" bgcolor="#E0E0E0"
                      style="width: 700px;border-collapse:collapse; 
                      border: 1px solid black">""")
@@ -839,11 +762,11 @@ if userID in valid_usrs:
                           <span title='delete wordid!' 
                            style="display:block; float:right; 
                            font-size:11px"><a 
-                           href="fix-corpus.cgi?corpusdb=%s&sid_edit=%s&new_wid[]=%s&editm=delword"
+                           href="fix-corpus.cgi?corpus=%s&sid_edit=%s&new_wid[]=%s&editm=delword"
                            style='color:red;text-decoration:none;'>
                           <b>x</b></a></span><input type="hidden" 
                            name="new_wid[]" value="%s"/>
-                         </td>""" % (comment, wid, corpusdb, sid_edit, wid, wid))
+                         </td>""" % (comment, wid, corpus, sid_edit, wid, wid))
                 print("""</tr>""")
 
                 # WORD SURFACE
@@ -939,11 +862,11 @@ if userID in valid_usrs:
                 print("""<td><span><b>cid:%s</b></span>
                           <span title='delete concept!' style="color:red;
                           display: block; float: right; font-size:11px">
-                          <a href="fix-corpus.cgi?corpusdb=%s&sid_edit=%s&new_cid[]=%s&editm=delconcept"
+                          <a href="fix-corpus.cgi?corpus=%s&sid_edit=%s&new_cid[]=%s&editm=delconcept"
                           style='color:red;text-decoration:none;'>
                           <b>x</b></a></span><input type="hidden" 
                           name="new_cid[]" value="%s"/>
-                          </td>""" % (cid, corpusdb, sid_edit, cid, cid))
+                          </td>""" % (cid, corpus, sid_edit, cid, cid))
                 print("""</tr>""")
 
                 # CONCEPT WORD LINKS (CWL)
@@ -1079,7 +1002,7 @@ if userID in valid_usrs:
                       style='text-decoration:none;'>
                       <button class="btn" type="submit" 
                       style='font-size:20px;'>%s</button></a>
-                     </span>""" % corpusdb)
+                     </span>""" % corpus)
             print(f"<button class='btn' style='font-size:20px;'>{HTML.ntumc_tagdoc()}</btn>")
 
 
@@ -1138,19 +1061,19 @@ print("""<center><table cellpadding="3" bgcolor="#E0E0E0"
 # CHOOSE DB
 print("""<tr style="text-align:center">""")
 print("""<td><span title="DB"><b>DB:</b></span></td>
-         <td><select id="sid" name="corpusdb"
+         <td><select id="sid" name="corpus"
          style="text-align:center" required>""")
 
 
-corpusdb_in = False
+corpus_in = False
 for db in all_corpusdb():
-    if corpusdb == db[0]:
+    if corpus == db[0]:
         print("""<option value ='%s' selected>%s</option>""" % db)
-        corpusdb_in = True
+        corpus_in = True
     else:
         print("""<option value ='%s'>%s</option>""" % db)
-if corpusdb_in == False:
-    print("<option value ='%s' selected>%s</option>" % (corpusdb, corpusdb))
+if corpus_in == False:
+    print("<option value ='%s' selected>%s</option>" % (corpus, corpus))
 
 
 print("""</select></td>""")
@@ -1188,8 +1111,8 @@ print("""|""")
 print("""<hr><form action="fix-corpus.cgi?sid_edit=%s" 
            method="post" name="addword"> 
          <input type="hidden" name="editm" value="addword"/>
-         <input type="hidden" name="corpusdb" value="%s"/>
-      """ % (sid_edit, corpusdb))
+         <input type="hidden" name="corpus" value="%s"/>
+      """ % (sid_edit, corpus))
 
 print("""<center><table cellpadding="3" bgcolor="#E0E0E0" 
           style="border-collapse:collapse; border:1px solid black; 
@@ -1285,8 +1208,8 @@ print("""|""")
 print("""<hr><form action="fix-corpus.cgi?sid_edit=%s" 
            method="post" name="addconcept"> 
          <input type="hidden" name="editm" value="addconcept"/>
-         <input type="hidden" name="corpusdb" value="%s"/>
-      """ % (sid_edit, corpusdb))
+         <input type="hidden" name="corpus" value="%s"/>
+      """ % (sid_edit, corpus))
 
 
 # NEW CONCEPT ID (Tries to find the lowest possible)
@@ -1353,4 +1276,4 @@ print("""</div>""")
 # CLOSE HTML
 #############
 print("""</body></html>\n""")
-conn_db.commit()
+conn.commit()

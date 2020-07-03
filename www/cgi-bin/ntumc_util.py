@@ -281,12 +281,13 @@ def check_corpusdb(corpusdb):
 ################################################################################
 def all_corpusdb():
 
-    corpusdb_list = [('eng','EnglishDB'), 
-                     ('eng2','English2DB'),
-                     ('cmn','ChineseDB'),
-                     ('jpn','JapaneseDB'),
-                     ('ita','ItalianDB'),
-                     ('kor','KoreanDB')]
+    corpusdb_list = [('eng','English DB'), 
+#                     ('eng2','English2DB'),
+                     ('cmn','Chinese DB'),
+                     ('jpn','Japanese DB'),
+                     ('ita','Italian DB'),
+                     ('ind','Indonesian DB'),
+                     ('zsm','Malay DB')]
 
     return corpusdb_list
 

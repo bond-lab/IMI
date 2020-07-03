@@ -435,13 +435,12 @@ or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
     def show_sid_bttn(corpus,  sid, lemma):
         """Prints a sid: clickable to jump to context"""
         ## fixme lang1 lang2
-        lang1 = corpus[0:3]
-        lang2 = 'eng'
+        corpus2 = 'eng'
         window=6
         html = f"""<a class='sid largefancybox fancybox.iframe' 
         title='show more context'
-        href='show-sent.cgi?corpus={lang1}&corpus2={lang2}&sid={sid}&window={window}'>{sid}</a>
-         <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        href='show-sent.cgi?corpus={corpus}&corpus2={corpus2}&sid={sid}&window={window}'>{sid}</a>
+         <a title = 'fix corpus' href='fix-corpus.cgi?corpus={corpus}&sid_edit={sid}'>*</a>"""
         # html = f"""<a class='sid largefancybox fancybox.iframe' 
         # href='showcorpus.cgi?searchlang={lang1}&langs2={lang2}&sid_from={sid -2}&sid_to={sid + 2}'
         # onclick="return isZKeyPressed({sid});">{sid}</a>
