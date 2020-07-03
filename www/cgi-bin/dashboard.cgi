@@ -541,7 +541,10 @@ print("""<a href='http://compling.hss.ntu.edu.sg/omw/'>
          <br> Maintainer: 
          <a href="http://www3.ntu.edu.sg/home/fcbond/">
          Francis Bond</a>&lt;<a href="mailto:bond@ieee.org">
-         bond@ieee.org</a>&gt;</p>""")
+         bond@ieee.org</a>&gt;</p>
+
+<p>Source code hosted on github: <a href='https://github.com/bond-lab/IMI'>https://github.com/bond-lab/IMI</a></p>.
+""")
 
 ### Close HTML
 print("""</body>
