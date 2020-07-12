@@ -1,16 +1,13 @@
-#!/usr/bin/env python
-  # -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import cgi, urllib
-import cgitb; cgitb.enable()  # for troubleshooting
+import cgitb#; cgitb.enable()  # for troubleshooting
 from collections import defaultdict as dd
-import sys, codecs
 from ntumc_webkit import *
 from lang_data_toolkit import *
-
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-reload(sys)  
-sys.setdefaultencoding('utf8')
+import sqlite3
+import os
 
 #############################################################################
 # This script reads the existing POS data stored in lang_data_toolkit.py
@@ -45,7 +42,11 @@ try:
 except:
     limit = 5
 
-corpusdb = "../db/%s.db" % lang
+corpusdb = os.path.normpath(os.path.join(
+    os.path.abspath(os.path.dirname(__file__)),
+    "../db/%s.db" % lang
+))#.replace('\\', '/')
+
 
 ###########################
 # Connect to corpus.db
@@ -55,10 +56,10 @@ cc = conc.cursor()
 
 cc.execute("""SELECT pos, word, count(word) 
                FROM word
-               WHERE sid > %s
-               AND sid < %s
+               WHERE sid > ?
+               AND sid < ?
                GROUP BY pos, word
-               ORDER BY pos, count(word) DESC """ % (sid_from, sid_to))
+               ORDER BY pos, count(word) DESC """, [sid_from, sid_to])
 
 rows = cc.fetchall()
 
@@ -75,24 +76,24 @@ for r in rows:
     
 
 print(u"""Content-type: text/html; charset=utf-8\n
-     <!DOCTYPE html>
-     <html>
-       <head>
-         <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-         <link href="../tag-wn.css" rel="stylesheet" type="text/css">
-         <script src="../tag-wn.js" language="javascript"></script>
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+ <link href="../tag-wn.css" rel="stylesheet" type="text/css">
+ <script src="../tag-wn.js" language="javascript"></script>
 
-         <!-- JQUERY -->
-         <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+ <!-- JQUERY -->
+ <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 
-         <!-- KICKSTART -->
-         <script src="../HTML-KickStart-master/js/kickstart.js"></script> 
-         <link rel="stylesheet" media="all"
-           href="../HTML-KickStart-master/css/kickstart.css"/>
+ <!-- KICKSTART -->
+ <script src="../HTML-KickStart-master/js/kickstart.js"></script> 
+ <link rel="stylesheet" media="all"
+   href="../HTML-KickStart-master/css/kickstart.css"/>
 
-         <!-- A cool (light) CSS Tooltip! USE:
-         class="tooltip-bottom" data-tooltip="I’m the tooltip data!" -->
-         <link href="../fancy-tooltip.css" rel="stylesheet" type="text/css">""")
+ <!-- A cool (light) CSS Tooltip! USE:
+ class="tooltip-bottom" data-tooltip="I’m the tooltip data!" -->
+ <link href="../fancy-tooltip.css" rel="stylesheet" type="text/css">""")
 
 
 print("""<title>%s</title></head><body>""" % cginame)
@@ -163,5 +164,5 @@ else:
                      pos_tags[lang][pos]['upos']))
     print("""</table>""")
 
-print "</body>"
-print "</html>"
+print("</body>")
+print("</html>")

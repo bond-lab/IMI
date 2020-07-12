@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <meta http-equiv='content-language' content='zh'>
+    <title>'NTUMC Annotation Tool ({{version}}: {{type}})</title>
+    <link href="../tag-wn.css" rel="stylesheet" type="text/css">
+    <script src="../tag-wn.js" language="javascript"></script>
+    <script src='../jquery.js' language='javascript'></script>
+    <script src='../js/scrolltotop.js' language='javascript'></script>
+    <script src='../js/showex.js' language='javascript'></script>
+    <script src='../tag-wid.js' language='javascript'></script>
+    <script src='../jquery-ui.js' language='javascript'></script>
+    <link rel='stylesheet' type='text/css' href='../css/ui-lightness/jquery-ui-1.10.4.custom.min.css'>
+    <link rel='stylesheet' type='text/css' href='../common.css'>
+    <script src='../tag_lex.js' language='javascript'></script>
+
+    {# FOR KICKSTART: #} 
+    {#  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>  THIS WAS IN CONFLICT WITH JQUERY UI ABOVE #}
+    <script src="../HTML-KickStart-master/js/kickstart.js"></script> 
+    <link rel="stylesheet" href="../HTML-KickStart-master/css/kickstart.css" media="all" />
+
+
+    <script>
+    function sizeFrame(framename) {
+        var F = document.getElementById(framename);
+        F.height = 0;
+        if(F.contentDocument) {
+            F.height = F.contentDocument.documentElement.scrollHeight+30; //FF 3.0.11, Opera 9.63, and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        } else {
+            F.height = F.contentWindow.document.body.scrollHeight+30; //IE6, IE7 and Chrome
+            if (F.height > 900) {
+                F.height = 900;
+            }
+        }
+    }
+    function resizeAllFrames(){
+        var frames2resize = ["omwiframe", "logiframe"];
+        for (i = 0; i < frames2resize.length; i++) {
+        var framename = frames2resize[i];
+        // alert(framename);
+        sizeFrame(framename);
+        }
+    }
+       $( document ).ready(function(){
+           resizeAllFrames(); 
+           page_init();
+       });
+    </script>
+
+    <style>
+      hr{
+        padding: 0px;
+        margin: 10px;    
+      }
+    </style>
+
+
+ </head>
+ <body>
+   <script type="text/javascript">
+     $(document).ready(function() {
+     $(".c60639_21").on('mouseover', function() {
+     $(".c60639_21").addClass("match");
+     });
+
+     $(".c60639_21").on('mouseout', function() {
+     $(".c60639_21").removeClass("match");
+     });
+     });
+   </script>
+   <table style="width:100%"> 
+    <tr> <td valign="top" style="width:55%; 
+             border-right: 1px solid black; padding: 5px">
+
+	{{status_bar}}
+
+	 <h6>Please enter a lemma to tag in {{corpus}} ({{lang}})</h6> 
+        <form method="get" action="{{taglcgi}}" target='_parent'>   
+          <input type='hidden' name='corpus' value='{{corpus}}'>
+          <input type='hidden' name='lang' value='{{lang}}'>
+          <input type="text" style='font-size:14px;' name="lemma" value="{{lemma}}" size=8 maxlength=30>
+          <button type="submit" name="Query" class="small">Search</button>
+          <select name="lim">
+	    {% for key,value in lims|dictsort %}
+	    <option value='{{key}}' {% if key == lim %}selected{% endif %}>{{value}}</option>
+	    {% endfor %}
+	  </select>
+
+	  {# MULTIDICT IS PART OF THE WN SIDE
+	  <a href="multidict.cgi?lg1={{lang}}&amp;lemma1={{lemma}}" 
+	     target="_blank"><button type="button">Multidict</button>
+	  </a>
+	  #}
+
+
+	  <a href='../tagdoc.html' target='_blank'>
+	    <button type="button" class="small">?</button>
+	  </a>
+
+	  {# >>>REPLACED BY STATUS_BAR<<<
+          <strong>Current user:</strong>
+          <font color="#3EA055">{{usrname_logout}}</font>
+	  <a href="login.cgi?action=logout&target={{taglcgi}}">
+	    <button type="button">Logout</button>
+	  </a> #}
+	  </form>
+
+
+	{% if message %}
+		<div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
+		<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>{{message}}</p>
+	</div>
+	{% endif %}
+      </td>
+
+         <td valign="top" style="width:45%">
+         <table style="width:100%">
+           <tr> <td valign="top" style="width:45%"> 
+           <iframe name="wn" id="omwiframe" src="{{wn_src}}" 
+                   frameborder="0" width="100%"
+                   onload="resizeAllFrames()">wordnet
+           </iframe></td></tr>
+           <tr> <td> <hr>
+           <iframe name="log" id="logiframe" frameborder="0"
+                   width="100%" onload="resizeAllFrames()">
+           </iframe> </td> </tr>
+         </table>
+     </tr>
+   </table>
+<span style="text-align:right;">
+         <p><a href='{{wnurl}}'>More detail about the {{wnnam}} ({{wnver}})</a>
+      
+<p>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a>
+         &lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;</span>   
+ </body>
+</html>

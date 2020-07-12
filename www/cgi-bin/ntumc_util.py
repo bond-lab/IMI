@@ -1,13 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import cgi
 #import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
-import sys,codecs 
+import os, sys 
 import operator
-#sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 from collections import defaultdict as dd
+import warnings
+import unicodedata
+
+from ntumc_gatekeeper import placeholders_for as _placeholders_for
 
 #############################################################
 # Configuration
@@ -29,10 +32,10 @@ wndb = "../db/wn-ntumc.db"
 
 # 2014-06-12 [Tuan Anh]
 def jilog(msg):
-    sys.stderr.write((u"%s\n" % unicode(msg)).encode("ascii","ignore"))
+    sys.stderr.write((u"%s\n" % msg))
     try:
-        with codecs.open("../log/ntumc.txt", "a", encoding='utf-8') as logfile:
-            logfile.write(u"%s\n" % unicode(msg))
+        with open("../log/ntumc.txt", "a", encoding='utf-8') as logfile:
+            logfile.write(u"%s\n" % msg)
     except Exception as ex:
         sys.stderr.write(str(ex))
         pass
@@ -52,7 +55,7 @@ class Timer:
     def __str__(self):
         return "Execution time: %.2f sec(s)" % (self.end_time - self.start_time) 
     def log(self, task_note = ''):
-        jilog(u"%s - Note=[%s]\n" % (self, unicode(task_note)))
+        jilog(u"%s - Note=[%s]\n" % (self, task_note))
         return self
 
 #############################################################
@@ -62,14 +65,21 @@ class Timer:
 def expandlem (lemma):  ### keep in sync with tag-lexs
     lems=set()
     lems.add(lemma)
+    ### case
     lems.add(lemma.lower())
+    lems.add(lemma.upper())
+    lems.add(lemma.title())
+    ### hyphen, underbar, space
     lems.add(lemma.replace('-',''))
-    lems.add(lemma.replace('-','_'))
+    lems.add(lemma.replace('-',' '))
     lems.add(lemma.replace(' ','-'))
     lems.add(lemma.replace('_',''))
     lems.add(lemma.replace(' ',''))
-    lems.add(lemma.upper())
-    lems.add(lemma.title())
+    ### normalize unicode
+    lems.add(unicodedata.normalize('NFKC', lemma))
+    lems.add(unicodedata.normalize('NFKC', lemma).lower())
+    lems.add(unicodedata.normalize('NFKC', lemma).upper())
+    lems.add(unicodedata.normalize('NFKC', lemma).title())
     # lems.add(lemma.replace('_',u'∥'))
     # lems.add(lemma.replace('-',u'∥'))
     # lems.add(lemma.replace(u'・',u'∥'))
@@ -80,15 +90,14 @@ def expandlem (lemma):  ### keep in sync with tag-lexs
 def pos2wn (pos, lang, lemma=''):
     ### FIXME: check and document --- Change POS for VN?
     if lang == 'jpn':
-        if pos in [u'名詞-形容動詞語幹', u"形容詞-自立", u"連体詞"] \
-                and not lemma in [u"この", u"その", u"あの"]:
+        if pos in [u'名詞-形容動詞語幹', u"形容詞-自立", u"連体詞"]:
             return 'a'
         elif pos in [u"名詞-サ変接続",  u"名詞-ナイ形容詞語幹", 
                      u"名詞-一般", u"名詞-副詞可能",  
                      u"名詞-接尾-一般", u"名詞-形容動詞語幹", 
                      u"名詞-数",  u"記号-アルファベット"]:
             return 'n'
-        elif pos == "動詞-自立":
+        elif pos in [u"動詞-自立", u"動詞-サ変接続"]:
             return 'v'
         elif pos in [u"副詞-一般", u"副詞-助詞類接続"]:
             return 'r'
@@ -132,6 +141,17 @@ def pos2wn (pos, lang, lemma=''):
             return 'r'
         else:
             return 'x'
+    elif lang in ('ind', 'zsm'):
+        if pos in "nn nn2 nnc nng nnp nnu nns2  prp wp prl vnb".split():
+            return 'n'
+        elif pos in "vbi vbt vbd vbb vbl".split():
+            return 'v'
+        elif pos in "jj jj2 jjs jjs2 jje jje2 dt".split():
+            return 'a'
+        elif pos in "rb".split():
+            return 'r'
+        else:
+            return 'x'
     else:
         return 'u'
 
@@ -161,14 +181,14 @@ mtags_short = { "e":"e",
               '' : 'Not tagged',
               None : 'Not tagged'
 }
-mtags_human = { "e":"e", 
-              "x":"x", 
-              "w":"w", 
+mtags_human = { "e":"Error in the Corpus", 
+              "x":"No need to tag", 
+              "w":"Wordnet needs improvement", 
               'org' : 'Organization', 
               'loc': 'Location', 
               'per': 'Person', 
               'dat': 'Date/Time',
-              'oth': 'Other', 
+              'oth': 'Other (Name)', 
               'num': 'Number', 
               'dat:year': 'Date: Year',
               '' : 'Not tagged',
@@ -176,57 +196,124 @@ mtags_human = { "e":"e",
 }
 
 
-def tbox(sss, cid, wp, tag, ntag, com):
-    """Create the box for tagging entries: return a string"""
-    box = "<span style='background-color: #eeeeee;'>"  ### FIXME cute css div
-    for i, t in enumerate(sss):
-        # 2012-06-25 [Tuan Anh]
-        # Prevent funny wordwrap where label and radio button are placed on different lines
-        box +="<span style='white-space: nowrap;background-color: #dddddd'><input type='radio' name='cid_%s' value='%s'" % (cid, t)
-        if (t == tag):
-            box += " CHECKED "
-        if wp == t[-1]:
-            box += " />%d<sub><font color='DarkRed' size='-2'>%s</font></sub></span>\n" % (i+1, t[-1])
-        else:
-            box += " />%d<sub><font size='-2'>%s</font></sub></span>\n" % (i+1, t[-1])
-    for tk in mtags:
-        # 2012-06-25 [Tuan Anh]
-        # Friendlier tag value display
-        tv = mtags_human[tk]
-        box +="""<span style='white-space: nowrap;background-color:#dddddd'>
-  <input type='radio' name='cid_%s' title='%s' value='%s'""" % (cid, tv, tk)
-        if (tk == tag):
-            box += " CHECKED "
-        show_text = mtags_short[tk] if mtags_short.has_key(tk) else tk
-        box += " /><span title='%s'>%s</span></span>\n" % (tv, show_text)
-    tagv=''
-    if unicode(tag) != unicode(ntag):
-        tagv=ntag
-    if tagv:
-        box += """<span style='background-color: #dddddd;white-space: nowrap;border: 1px solid black'>%s</span>""" % tagv
-#     box += """
-# <input style='font-size:12px; background-color: #ececec;' 
-#  title='tag' type='text' name='ntag_%s' value='%s' size='%d'
-#  pattern ="loc|org|per|dat|oth|[<>=~!]?[0-9]{8}-[avnr]"
-#  />""" % (cid, tagv, 8)
-    comv = com if com is not None else '';
-    box += """  <textarea style='font-size:12px; height: 18px; width: 150px; 
-  background-color: #ecffec;' placeholder='comment (multiline ok)'
-  title= 'comment' name='com_%s'>%s</textarea>""" % (cid, comv)
 
-    box += "</span>"  ### FIXME cute css div
+# LMC: THIS IS A TEST TO REDESIGN THE TAG BOX
+def tbox(sss, cid, wp, tag, com):
+    """Create the box for tagging entries: return a string"""
+    box = "<span>"
+    for i, t in enumerate(sss):
+
+        box +="""<nobr><span style="color:#4D99E0;font-size:13px;
+                  border-radius: 10px; background: #ededed;"
+                  onchange="document.getElementById('tagword').submit(); 
+                  return false">&nbsp;
+                  <label for="cid_%s">%s<sub><font size='-2'>%s</font>
+                  </sub></label>
+                  <input type="radio" name="cid_%s" id="cid_%s" 
+                  value="%s" %s >&nbsp;</span>&nbsp;</nobr>
+               """ % (cid+str(i), str(i+1), t[-1], 
+                      cid, cid+str(i), t,
+                      " checked " if t==tag else "")
+
+    for tk in mtags:
+        tv = mtags_human[tk]
+        box +=""" <nobr><span title="%s" style="color:#4D99E0;font-size:13px;
+                   border-radius: 10px; background: #ededed;">&nbsp;
+                  <label for="cid_%s"> %s </label>
+                  <input type="radio" name="cid_%s" id="cid_%s" value="%s" 
+                  onchange="document.getElementById('tagword').submit(); 
+                  return false" %s >&nbsp;</span>&nbsp;</nobr>
+               """ % (tv, 
+                   cid+tk, 
+                mtags_short[tk] if tk in mtags_short else tk, 
+                cid, cid+tk, tk, 
+                " checked " if tk==tag else "")
+
+    # COMMENT
+    comv = com if com is not None else '';
+    box += """  <textarea style='font-size:12px; height: 25px; width: 100px;' 
+    placeholder='Comment' onblur="document.getElementById('tagword').submit();"
+    title= 'Comment' name='com_%s'>%s</textarea>""" % (cid, comv)
+
+    box += "</span>"
+
+    # box += """<span style="color: #4D99E0;" 
+    #           onclick="document.getElementById('tagword').submit();">
+    #           <i class='icon-ok-sign'></i></span>"""
     return box
+
+
+
+################################################################################
+# 2016.02.25 LMC  -- Checking Meta of CorpusDBs
+################################################################################
+def check_corpusdb(corpusdb):
+   """ This function takes a corpusdb argument of form 'eng', 'eng1', 
+       'engB' (etc.), and returns 4 statements: 
+       1) whether it exists (self or False)
+       2) version, i.e. if it's a master or copy ('master','A','B',...)
+       3) the master db associated with it (can be self)
+       4) the language of the database
+       5) the db path
+   """
+   exists = False
+   if corpusdb.endswith('.db'):
+       dbpath = '../db/' + corpusdb
+   else:
+       dbpath = '../db/' + corpusdb + '.db'
+   if os.path.isfile(dbpath):
+       exists = corpusdb
+
+   if exists:
+       conn = sqlite3.connect(dbpath)
+       c = conn.cursor()
+       c.execute("""SELECT lang, version, master FROM meta""")
+       (lang, version, master) = c.fetchone()
+   else:
+       (lang, version, master) = ('unknown', 'unknown', 'unknown')
+
+   return (exists, version, master, lang, dbpath)
+
+################################################################################
+
+################################################################################
+# 2016.02.25 LMC  -- Listable CorpusDBs
+################################################################################
+def all_corpusdb():
+
+    corpusdb_list = [('eng','English DB'), 
+#                     ('eng2','English2DB'),
+                     ('cmn','Chinese DB'),
+                     ('jpn','Japanese DB'),
+                     ('ita','Italian DB'),
+                     ('ind','Indonesian DB'),
+                     ('zsm','Malay DB')]
+
+    return corpusdb_list
+
+################################################################################
+
+
+
 
 ###
 ### get the synsets for a lemma
 ###
 def lem2ss(c, lem, lang):
-    """return a list of possible synsets for lang; backing off to lang1"""
+    """return a list of possible synsets for lang; backing off to lang1
+
+    TODO(Wilson): Migrate to ntumc_tagdb.py?
+    """
     lems = list(expandlem(lem))
-    c.execute("""SELECT distinct synset 
-             FROM word LEFT JOIN sense ON word.wordid = sense.wordid 
-             WHERE lemma in (%s) AND sense.lang = ?
-             ORDER BY freq DESC""" % ','.join('?'*len(lems)), (lems + [lang]))
+    query = """
+        SELECT DISTINCT synset 
+        FROM word
+        LEFT JOIN sense ON word.wordid = sense.wordid 
+        WHERE lemma in (%s) 
+            AND sense.lang = ?
+        ORDER BY freq DESC
+    """ % placeholders_for(lems)
+    c.execute(query, list(lems) + [lang])
     rows = c.fetchall()
     # if not rows and lang != lang1:
     # w.execute("""SELECT distinct synset
@@ -235,17 +322,34 @@ def lem2ss(c, lem, lang):
     #              ORDER BY freq DESC""" % ','.join('?'*len(lems)), (lems + [lang1]))
     # rows = w.fetchall()
     # com_all='FW:eng'
+
     ### sort by POS
     return sorted([s[0] for s in rows], key=lambda x: x[-1])
 
 def set_rest_x(c, usrname, sid, cid):
-    query="""
-UPDATE concept SET tag='x', usrname=? 
-WHERE ROWID=(
-    SELECT bcon.ROWID 
-    FROM cwl AS a INNER JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
-    LEFT JOIN concept AS acon ON a.sid=acon.sid and a.cid=acon.cid
-    LEFT JOIN concept AS bcon ON b.sid=bcon.sid and b.cid=bcon.cid
-    WHERE a.sid=? and a.cid=? and acon.tag not in ('x', 'e') AND bcon.tag IS NULL
-)"""
+    query = """
+        UPDATE concept 
+        SET tag='x', usrname=? 
+        WHERE ROWID=(
+            SELECT bcon.ROWID 
+            FROM cwl AS a
+            INNER JOIN cwl AS b ON a.sid=b.sid AND a.wid=b.wid 
+            LEFT JOIN concept AS acon ON a.sid=acon.sid AND a.cid=acon.cid
+            LEFT JOIN concept AS bcon ON b.sid=bcon.sid AND b.cid=bcon.cid
+            WHERE a.sid=? 
+                AND a.cid=? 
+                AND acon.tag NOT IN ('x', 'e') 
+                AND bcon.tag IS NULL)
+    """
     c.execute(query, (usrname, sid,cid))
+
+
+def _deprecating(old, new):
+    """This would look cooler as a decorator..."""
+    warnings.warn(f'{old} has migrated to {new}', DeprecationWarning)
+
+
+def placeholders_for(*args, **kwargs):
+    """Depreciation wrapper for database._placeholders_for()"""
+    _deprecating('ntumc_util.placeholders_for()', 'databases.placeholders_for()')
+    return _placeholders_for(*args, **kwargs)

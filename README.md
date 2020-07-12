@@ -38,6 +38,15 @@ There is code for exporting the corpus to XML here: https://github.com/lmorgadod
 Put something like this in apache2/conf-enabled/httpd.conf
 ```
 ### NTUMC
+AddDefaultCharset UTF-8
+SetEnv PYTHONIOENCODING utf8
+
+# Uncomment to allow Python cgitb tracebacks in user-facing web browser.
+# This is a workaround for later versions of Apache 2.2+ (around 2017)
+# Not recommended in production settings. Ref: https://bugs.python.org/issue8704
+#HttpProtocolOptions Unsafe
+
+
 ScriptAlias /ntumc/cgi-bin/ /var/www/ntumc/cgi-bin/
 Alias /ntumc/ /var/www/ntumc/html/
 
@@ -49,3 +58,5 @@ Order allow,deny
 Allow from all
 </Directory>
 ```
+
+Note that the databases (in ntumc/db) and log file (ntumc/log/ntumc.txt) must be writable by the webserver (www-data by defualt in ubuntu).

@@ -1,9 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import Cookie, os, sys, codecs
+import http.cookies, os, sys, codecs
 from ntumc_util import *
 from lang_data_toolkit import *
+
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
 
 class HTML:
 
@@ -51,11 +57,11 @@ class HTML:
         env = JinjaEnv(loader=JinjaPL('ntumc', 'templates'))
         template = env.get_template(template_file_name)
 
-        sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+#        sys.stdout = codecs.getwriter('utf8')(sys.stdout)
         if cookie_text:
             print(cookie_text)
         print(u"""Content-type: text/html; charset=utf-8\n""")
-        print template.render(data)
+        print(template.render(data))
 
         
 
@@ -68,7 +74,11 @@ class HTML:
         a dropdown for a list of available languages.
         The interface language is selected by default."""
 
-        html = """<form method="post" style="display: inline-block" 
+        html = """<form method="post" style="display: inline-block"
+                   title="search for a word  —  'word'
+or pattern  — '[wW]ord*' (using sqlite GLOB)
+or synset-id  — '06286395-n'
+or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
                    id="newquery" action="%s">
                   <span  style="font-size: %s%%">
                   <input style="font-size: %s%%" 
@@ -201,7 +211,7 @@ class HTML:
         return html
 
     @staticmethod
-    def status_bar(user):
+    def status_bar(user, position="right", message="", text=False):
         """Prints a floating status bar (in the top right corner).
            This will display an Info Button, the User Status, and 
            a Home button."""
@@ -209,12 +219,8 @@ class HTML:
         html = ""
         dashboardcgi = "dashboard.cgi"
 
-        html += """<span style="display: inline-block; float:right">
-                  <ul class="button-bar">"""
-
-        html += """<li><a class="tooltip-bottom"  data-content="#guidelines" 
-              data-action="click"><span style="color: #4D99E0;">
-                        <i class="icon-info-sign"></i></a></span></li>"""
+        html += """<span style="display: inline-block; float:%s">
+                  <ul class="button-bar">""" % position
 
         if user in valid_usernames:
             html += """<li><a disabled><span style="color: #4D99E0;">
@@ -223,17 +229,20 @@ class HTML:
             html += """<li><a title="Invalid User" disabled><span style="color: #bc5847;">
                         <i class="icon-user"></i></a></span></li> """
 
-        html += """<li><a href="%s"><span style="color: #4D99E0;">
-                   <i class="icon-home"></i></a></span></li>""" % dashboardcgi
+        html += f"""<li><a title='Go to Dashboard' href='{dashboardcgi}'><span style="color: #4D99E0;">
+                   <i class="icon-home"></i></a></span></li>"""
         html += """</ul>"""
+        html += message
         html += """</span>"""
+        if text:
+            html=f"""<p><a href='{dashboardcgi}'>Go to Dashboard ({user})</a>
+            """
 
         return html
 
 
     @staticmethod
-    def ne_bttn(usrname, 
-                string2print = """<nobr><i class="icon-plus"></i>NE</nobr>"""):
+    def ne_bttn(string2print = """<i class="icon-plus"></i>NE"""):
         """Prints the Add New Named Entity button,
         taking as argument a username and an optional 
         string to be printed on the button."""
@@ -242,61 +251,102 @@ class HTML:
         addnecgi = "addne.cgi"
         html = """<form method= "post" style="display: inline-block; 
                margin: 0px; padding: 0px;" id="newNE"
-               action="%s?usrname=%s"><a href="javascript:{}"
+               action="%s"><a href="javascript:{}" style="text-decoration: none;"
                onclick="document.getElementById('newNE').submit(); 
-               return false;"><span title="%s" style="color: #4D99E0;">
+               return false;"><span class='tooltip mainColor' title="%s">
                %s</span></a></form>
-               """ % (addnecgi, usrname, tooltip, string2print)
+               """ % (addnecgi, tooltip, string2print)
         return html
 
+
+
     @staticmethod
-    def hiderow_bttn(rowid, 
-                string2print="<i class='icon-eye-close'></i>"):
+    def hiderow_bttn(rowid, s="<i class='icon-eye-close'></i>"):
         """Prints the Hide row button,
         taking as argument the rowid and an optional 
         string to be printed on the button."""
 
-        tooltip = "Hide the row for '%s'." % rowid[10:]
-        html = """<a href="javascript:{}"
-               onclick="togglecol('%s')">
-               <span title="%s" style="color:#4D99E0;">%s</a>
-               """ % (rowid, tooltip, string2print)
-        return html
-
-    @staticmethod
-    def hidecolumn_bttn(colid, 
-                string2print=""):
-        """Prints the Hide Column button,
-        taking as argument the rowid and an optional 
-        string to be printed on the button."""
-
-        tooltip = "Hide the column '%s'." % colid
-        html = """<a href="javascript:{}"
-               onclick="togglecol('%s')">
-               <i class='icon-eye-close'></i>%s</a>
-               """ % (colid, string2print)
+        tooltip = f"Hide the row for {rowid[3:]}."
+        html = f"""<a href="javascript:{{}}"
+               onclick="togglecol('{rowid}')">
+               <span title="{tooltip}" style="color:#4D99E0;">{s}</a>
+               """
         return html
 
 
     @staticmethod
-    def showallunder_bttn(elementid, 
-                string2print="<i class='icon-eye-open'></i>"):
+    def hideRowsByClass_bttn(c, s):
+        """Prints a button that hides all rows with specific POS class"""
+
+        string2print = "<i class='icon-eye-close'></i>%s" % s
+
+        tooltip = "Hide/Show rows for %s " % c
+
+        html = """<a href='javascript:{}' class='tooltip-bottom' title='%s'
+                   onclick="toggleRowsByClass('%s');"
+                   style="text-decoration: none;">%s</a>
+               """ % (tooltip, c, string2print)
+        return html
+
+
+    @staticmethod
+    def showOnlyRowsByClass_bttn(c, s):
+        """Prints a button that shows only rows with a specific POS class"""
+
+        # took the eye out! <i class='icon-eye-open'></i> 
+        string2print = "%s" % s
+
+        tooltip = "Show only rows for %s " % c
+
+        html = """<a href='javascript:{}' class='tooltip-bottom' title='%s'
+                  onclick="showOnlyRowsByClass('%s');" 
+                  style="text-decoration: none;">%s</a>
+               """ % (tooltip, c, string2print)
+        return html
+
+
+    @staticmethod
+    def showallunder_bttn(elementid, s):
         """Prints the Show All button,
         taking as argument the element id that it on top of every
         other node to be displayed and an optional 
         string to be printed on the button."""
 
+        string2print = "<i class='icon-eye-open'></i>&thinsp;%s" % s
+
+
         tooltip = "Show hidden rows."
-        html = """<a href="javascript:{}"
-               onclick="showallunder('%s')">
-               <span title="%s"style="color: #4D99E0;">%s</span></a>
+        html = """<a href="javascript:{}" class='tooltip-bottom' 
+                     onclick="showallunder('%s')" title="%s"
+                   style="text-decoration: none;">%s</a>
                """ % (elementid, tooltip, string2print)
         return html
 
 
+
     @staticmethod
-    def newsynset_bttn(usrname, synset="", 
-                       string2print='<i class="icon-plus-sign"></i>'):
+    def newdef_bttn(synset="", wndb="wn-ntumc",
+        string2print='<i class="icon-plus-sign"></i>&thinsp;'):
+        """Prints the Add New Definition button."""
+
+        tooltip = "Add a new definition to Wordnet."
+        addnewcgi = "wn-add-def.cgi"
+        #<div style="display:block; float:right;">
+        html = """<a class="largefancybox fancybox.iframe" 
+                   href="%s?synset=%s&wndb=%s"><span title="%s"
+                   style="color:white;">
+                  <i class='icon-plus-sign'></i>
+                  </span></a>""" % (addnewcgi, synset, wndb, tooltip)
+        #</div>
+        return html
+
+
+
+
+
+    @staticmethod
+    def newsynset_bttn(synset="", 
+        string2print='<i class="icon-plus-sign"></i>&thinsp;'):
         """Prints the Add New Synset button,
         taking as argument a username, an optional related synset,  
         and an optional string to be printed on the button."""
@@ -310,11 +360,12 @@ class HTML:
         addnewcgi = "addnew.cgi"
 
         html = """<form method="post" style="display: inline-block; 
-               margin: 0px; padding: 0px;" id="newss%s"
-               action="%s?usrname=%s&synset=%s"><a href="javascript:{}"
+               margin: 0px; padding: 0px;" id="newss%s" action="%s">
+               <input type="hidden" name="synset" value="%s">
+               <a href="javascript:{}" style="text-decoration:none;"
                onclick="document.getElementById('newss%s').submit(); 
-               return false;"><span title="%s"style="color: #4D99E0;">
-               %s</span></a></form>""" % (synset, addnewcgi, usrname, 
+               return false;"><span  class='tooltip mainColor' title="%s">
+               %s</span></a></form>""" % (synset, addnewcgi, 
                                 synset, synset, tooltip, string2print)
         return html
 
@@ -341,7 +392,7 @@ class HTML:
 
     @staticmethod
     def multidict_bttn(lang1, lemma, 
-                       string2print = '<i class="icon-book"></i>'):
+                       string2print = '<i class="icon-book"></i>&thinsp;'):
         """Prints the Multidict button.
         Must have a language and a lemma as arguments. 
         The optional string2print will replace the value of the button"""
@@ -351,7 +402,7 @@ class HTML:
         html = """<form method= "post" style="display: inline-block; 
                margin: 0px; padding: 0px;" id="multidict"
                target="_blank" action="%s?lg1=%s&lemma1=%s">
-               <a href="javascript:{}"
+               <a href="javascript:{}" style="text-decoration: none;"
                onclick="document.getElementById('multidict').submit(); 
                return false;"><span title="%s" 
                style="color:#4D99E0;">%s</span></a>
@@ -372,26 +423,56 @@ class HTML:
         return html
 
 
-
-
-
+    @staticmethod
+    def ntumc_tagdoc():
+        """
+        link to the tagging documentation
+        """
+        html = """<a title = 'Tagging Documentation' href='https://bond-lab.github.io/IMI/tagdoc.html'>Tag Doc</a>"""
+        return html
+        
     @staticmethod
     def show_sid_bttn(corpus,  sid, lemma):
         """Prints a sid: clickable to jump to context"""
         ## fixme lang1 lang2
-        html = """<a class='sid' href='%s?corpus=%s&sid=%d&lemma=%s' 
-target='log'>%d</a>""" % ('show-sent.cgi', corpus, sid, lemma, sid)
+        corpus2 = 'eng'
+        window=6
+        html = f"""<a class='sid largefancybox fancybox.iframe' 
+        title='show more context'
+        href='show-sent.cgi?corpus={corpus}&corpus2={corpus2}&sid={sid}&window={window}'>{sid}</a>
+         <a title = 'fix corpus' href='fix-corpus.cgi?corpus={corpus}&sid_edit={sid}'>*</a>"""
+        # html = f"""<a class='sid largefancybox fancybox.iframe' 
+        # href='showcorpus.cgi?searchlang={lang1}&langs2={lang2}&sid_from={sid -2}&sid_to={sid + 2}'
+        # onclick="return isZKeyPressed({sid});">{sid}</a>
+        # <a title = 'fix corpus' href='fix-corpus.cgi?sid_edit={sid}'>*</a>"""
+        
+        #% ('showcorpus.cgi', lang1, lang2, sid-2, sid+2, sid, sid,sid)
         return html
 
+
+    # @staticmethod
+    # def show_sid_bttn(corpus,  sid, lemma):
+    #     """Prints a sid: clickable to jump to context"""
+    #     ## fixme lang1 lang2
+    #     html = """<a class='sid largefancybox fancybox.iframe' 
+    #                href='%s?corpus=%s&sid=%d&lemma=%s'
+    #                onclick="isZKeyPressed(%s)">%d</a>
+    #            """ % ('show-sent.cgi', corpus, sid, lemma, sid, sid)
+    #     return html
+
+# href='%s?corpus=%s&sid=%d&lemma=%s'  target='log'
+# 'show-sent.cgi', corpus, sid, lemma, 
     @staticmethod
-    def edit_sid_bttn(corpus, lang, usrname, sid, string2print = u"✎"):
+    def edit_sid_bttn(lang, sid, string2print = "<i class='icon-edit'></i>"):
         """Gives button to jump to the sentence in the edit interface"""
-        html = """<a class='sid' target='_blank' 
-href="%s?corpus=%s&lang%s&usrname=%s&sid=%s">%s</a>""" % ('tag-word.cgi', 
-                                                          corpus, lang, 
-                                                          usrname, sid,  
-                                                          string2print)
+        corpus = "../db/%s.db" % lang
+        html = """<a target='_blank' style="text-decoration:none;
+        color:black;font-size:12px;"  
+        href="%s?db_edit=%s&sid_edit=%s">%s</a>""" % ('fix-corpus.cgi', 
+                                                     corpus, sid, string2print)
         return html
+
+
 
 
     @staticmethod
@@ -427,7 +508,7 @@ class NTUMC_Cookies:
 
         if 'HTTP_COOKIE' in os.environ:
             cookie_string = os.environ.get('HTTP_COOKIE')
-            user_cookie = Cookie.SimpleCookie()
+            user_cookie = http.cookies.SimpleCookie()
             user_cookie.load(cookie_string)
 
             if username:
@@ -436,7 +517,7 @@ class NTUMC_Cookies:
                 user_cookie["user_name"]['expires'] = expire_hrs * 60 * 60  
 
         else:
-            user_cookie = Cookie.SimpleCookie()
+            user_cookie = http.cookies.SimpleCookie()
             user_cookie["user_name"] = 'unknown'
 
         return user_cookie

@@ -23,6 +23,10 @@ padding: 0 5px;
   font-weight: bold;
 }
 
+.sent_match{
+  background-color:palegreen;
+}
+
 .tagme{background-color: yellow;text-decoration:none;}
 .notag{color: #660000;}
 .hastag{color: #003333;text-decoration:none;}
@@ -30,3 +34,14 @@ padding: 0 5px;
 .missing{color: #0033CC;text-decoration:none;}
 .error{color: #00CC33;text-decoration:none;}
 
+
+.trans{
+  color:#666666;
+}
+
+tr.ok{
+    background-color:palegreen;
+}
+tr.bad{
+    background-color:orange;
+}

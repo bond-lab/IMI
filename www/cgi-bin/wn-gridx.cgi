@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-  # -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-import cgi, os, Cookie
+import cgi, os, http.cookies
 import cgitb; cgitb.enable()
 from os import environ
 import re, sqlite3, time
@@ -10,40 +10,32 @@ from collections import defaultdict as dd
 from ntumc_webkit import * 
 from ntumc_util import * 
 from lang_data_toolkit import *
+from html import escape, unescape
 
-import sys,codecs 
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-reload(sys)
-sys.setdefaultencoding('utf8')
-
-
-
+# Fixes encoding issues when reading cookies from os.environ
+import os, sys
+from importlib import reload
+sys.getfilesystemencoding = lambda: 'utf-8'
+reload(os)
 
 
 start_time = time.time() # TIME
-
-def sanitize(s):
-    s = cgi.escape(s)
-    s = s.replace('"','')
-    s = s.replace("'",'')
-    s = s.replace("=",'&#61;')
-    return s
 
 ################################################################################
 # FETCH DATA FROM CGI FORM
 # langselect = Language updates. If empty, langs in cookie  will be used;
 ################################################################################
 form = cgi.FieldStorage()
-lang = sanitize(form.getfirst("lang", ""))
-lang2 = sanitize(form.getfirst("lang2", "eng"))
-ss = sanitize(form.getfirst("ss", ""))
-synset = sanitize(form.getfirst("synset", ""))
-lemma = sanitize(form.getfirst("lemma", ""))
-lemma = sanitize(lemma.strip().decode('utf-8'))
-pos = sanitize(form.getfirst("pos", ""))
-gridmode = sanitize(form.getvalue("gridmode", "grid"))
+lang = escape(form.getfirst("lang", ""))
+lang2 = escape(form.getfirst("lang2", "eng"))
+ss = escape(form.getfirst("ss", ""))
+synset = escape(form.getfirst("synset", ""))
+lemma_raw = unescape(form.getfirst("lemma", "").strip())
+lemma = escape(lemma_raw, quote=True)
+pos = escape(form.getfirst("pos", ""))
+gridmode = escape(form.getvalue("gridmode", "ntumcgrid"))
 # langselect = form.getlist("langselect[]")
-langselect = [sanitize(l) for l in form.getlist("langselect[]")]
+langselect = [escape(l) for l in form.getlist("langselect[]")]
 
 
 ################################################################################
@@ -59,30 +51,52 @@ if re.match('(\d+)-[avnrxz]',lemma):
 ################################################################################
 scaling = 100
 
-if gridmode not in ('ntumcgrid', 'grid', 'gridx', 'cow', 'wnbahasa', 
+if gridmode not in ('ntumcgrid', 'ntumcgridA', 'ntumcgridB', 'grid', 'gridx', 'cow', 'wnbahasa', 
                     'wnja', 'ntumc-noedit'):
-    gridmode = 'grid'
+    gridmode = 'ntumcgrid'
 
 if gridmode == "ntumcgrid":
     langs = omwlang.ntumclist()
     wnnam = "NTUMC+ Open Multilingual Wordnet"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
-    wndb = "../db/wn-ntumc.db"
+    wndb = "wn-ntumc"
+    wndb_path = "../db/wn-ntumc.db"
     scaling = 90
+
+elif gridmode == "ntumcgridA":
+    langs = omwlang.ntumclist()
+    wnnam = "NTUMC+ Open Multilingual Wordnet"
+    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+    wnver = "0.9"
+    wndb = "wn-ntumcA"
+    wndb_path = "../db/wn-ntumcA.db"
+    scaling = 90
+
+elif gridmode == "ntumcgridB":
+    langs = omwlang.ntumclist()
+    wnnam = "NTUMC+ Open Multilingual Wordnet"
+    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+    wnver = "0.9"
+    wndb = "wn-ntumcB"
+    wndb_path = "../db/wn-ntumcB.db"
+    scaling = 90
+
 
 elif gridmode == "ntumc-noedit":
     langs = omwlang.ntumclist()
     wnnam = "NTUMC+ Open Multilingual Wordnet"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
-    wndb = "../db/wn-ntumc.db"
+    wndb = "wn-ntumc"
+    wndb_path = "../db/wn-ntumc.db"
     scaling = 90
         
 elif gridmode == "grid":
     langs = omwlang.humanprojectslist()
     wnnam = "Open Multilingual Wordnet"
-    wndb = "../../omw/wn-multix.db"
+    wndb = "wn-multix"
+    wndb_path = "../../omw/wn-multix.db"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "1.2"
 
@@ -117,7 +131,8 @@ elif gridmode == "gridx":
 else:
     langs = omwlang.humanprojectslist()
     wnnam = "Open Multilingual Wordnet"
-    wndb = "../../omw/wn-multix.db"
+    wndb = "wn-multix"
+    wndb_path = "../../omw/wn-multix.db"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/summ.html"
     wnver = "1.2"
 
@@ -135,7 +150,8 @@ relnam= {'ants':u'⇔', 'derv':u'⊳', 'pert':u'⊞'}
 
 
 ### Connect to the database
-con = sqlite3.connect(wndb)
+#print('wndb_path', wndb_path)
+con = sqlite3.connect(wndb_path)
 c = con.cursor()
 
 
@@ -166,11 +182,11 @@ def hword(word, words, src, conf):
          style.add('opacity: %f;' % (conf-0.3) if conf != 1.0 else '')
     titlestr= ''
     if title:
-        titlestr= "title = '%s'" % '&#xA;'.join([sanitize(t) for t in title])
+        titlestr= "title = '%s'" % '&#xA;'.join([escape(t) for t in title])
     if word in words:
         style.add('color:DarkGreen;')
     return "<span style='%s'%s>%s</span>" % (" ".join(style), titlestr, 
-                                             sanitize(word))
+                                             escape(word))
 ################################################################################
 
 
@@ -178,14 +194,14 @@ def hword(word, words, src, conf):
 ################################################################################
 # COOKIES (Set SelectedLangs, MainLang, BackoffLang, PreviousSearch)
 ################################################################################
-if os.environ.has_key('HTTP_COOKIE'):
-    C = Cookie.SimpleCookie(os.environ['HTTP_COOKIE'])
+if 'HTTP_COOKIE' in os.environ:
+    C = http.cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
 else:
-    C = Cookie.SimpleCookie()
+    C = http.cookies.SimpleCookie()
 
 # If no languages were set, use cookie or default languages
 if langselect == []:
-    if C.has_key("SelectedLangs") and gridmode not in ["cow","wnja","wnbahasa"]:
+    if "SelectedLangs" in C and gridmode not in ["cow","wnja","wnbahasa"]:
         langselect = C['SelectedLangs'].value.split('::')
     else:
         if gridmode == "ntumcgrid":
@@ -213,7 +229,7 @@ else:
 
 # MainLang / BackoffLang
 if lang == "":
-    if C.has_key("MainLang"):
+    if "MainLang" in C:
         if C['MainLang'].value in langselect:
             lang = C['MainLang'].value 
         else:
@@ -247,7 +263,7 @@ else:
 
 
 # Remember Previous Searches
-if C.has_key("PreviousSearch") and lemma == "":
+if "PreviousSearch" in C and lemma == "":
 
     if synset != "":
         C["PreviousSearch"] = synset
@@ -256,10 +272,10 @@ if C.has_key("PreviousSearch") and lemma == "":
         synset = C['PreviousSearch'].value
         lemma = ''
     else:
-        lemma = C['PreviousSearch'].value.decode('utf-8')
+        lemma = C['PreviousSearch'].value
 else:
     if lemma != "":
-        C["PreviousSearch"] = lemma.encode('utf-8')
+        C["PreviousSearch"] = lemma
     elif synset != "":
         C["PreviousSearch"] = synset
 
@@ -271,7 +287,7 @@ for h in list(reversed(range(15))):
         C["lemma%d" % h] = C["lemma%d" % (h-1)].value
 
         if C["lemma%d" % h].value not in lemma_hist:
-            lemma_hist.append(C["lemma%d" % h].value.decode('utf-8'))
+            lemma_hist.append(C["lemma%d" % h].value)
     except:
         continue
 try:
@@ -279,7 +295,7 @@ try:
         C["lemma0"] = C["PreviousSearch"].value
 
         if C["lemma0" % h].value not in lemma_hist:
-            lemma_hist.append(C["lemma0"].value.decode('utf-8'))
+            lemma_hist.append(C["lemma0"].value)
 except:
     pass
 
@@ -303,7 +319,7 @@ except:
 
 
 # UserID / Password
-if C.has_key("UserID"):
+if "UserID" in C:
     usrname = C["UserID"].value
     hashed_pw = C["Password"].value
 else:
@@ -317,8 +333,8 @@ else:
 # HTML (HEADER)
 ################################################################################
 print(C), # PRINT COOKIE
-print "Content-type: text/html; charset=utf-8\n\n"
-print u"""<html>
+print("Content-type: text/html; charset=utf-8\n\n")
+print(u"""<html>
 <head>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   <meta http-equiv='content-language' content='zh'>
@@ -530,7 +546,7 @@ print u"""<html>
   }
   </style>
 
-</head>""" % (wnnam, wnver)
+</head>""" % (wnnam, wnver))
 
 #   background-color: #dadada;
 #  border: 1px solid #ccc;
@@ -548,8 +564,8 @@ print("<body>")
 ################################################################################
 if (ss):
     sss = ss.split()
-    ass = ",".join("'%s'" % s for s in sss)
-    lems = expandlem(lemma)
+    ass = placeholders_for(sss)
+    lems = expandlem(lemma_raw)
 
     # Fetch Lemmas by gridmode
     if gridmode == "grid":
@@ -563,7 +579,7 @@ if (ss):
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC"""
 
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, [*sss, lang, lang2])
 
     elif gridmode in ("cow","wnbahasa","wnja"):
         sql = """SELECT synset, s.lang, lemma, 
@@ -576,7 +592,7 @@ if (ss):
                  LEFT JOIN word
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC """
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, [*sss, lang, lang2])
 
     else: # gridx or ntumcgrid modes (do not restrict by confidence level)
         sql = """SELECT synset, s.lang, lemma, 
@@ -588,7 +604,7 @@ if (ss):
                  LEFT JOIN word
                  WHERE word.wordid = s.wordid
                  ORDER BY freq DESC """
-        c.execute(sql % ass, (lang, lang2))
+        c.execute(sql % ass, [*sss, lang, lang2])
 
     words = dd(lambda: dd(list))
     freq = dd(int)
@@ -604,9 +620,9 @@ if (ss):
                  FROM synset_def
                  WHERE synset in (%s)
                  AND lang in (?, ?)
-              """ % ass, (lang, lang2))                                       
+              """ % ass, [*sss, lang, lang2])
 
-    defs = dd(lambda: dd(lambda: dd(unicode)))
+    defs = dd(lambda: dd(lambda: dd(str)))
     for r in c:
         defs[r[0]][r[1]][r[2]] = r[3]
 
@@ -615,9 +631,9 @@ if (ss):
                  FROM synset_ex 
                  WHERE synset in (%s) 
                  AND lang in (?, ?)
-              """ % ass, (lang, lang2))
+              """ % ass, [*sss, lang, lang2])
 
-    exes = dd(lambda: dd(lambda: dd(unicode)))
+    exes = dd(lambda: dd(lambda: dd(str)))
     for r in c:
         exes[r[0]][r[1]][r[2]] = r[3]
 
@@ -625,8 +641,8 @@ if (ss):
     c.execute("""SELECT xref, misc, confidence, synset
                  FROM xlink
                  WHERE synset in (%s)
-                 AND resource = '%s'
-              """ % (ass, 'svframes'))
+                 AND resource = ?
+              """ % ass, [*sss, 'svframes'])
     rows = c.fetchall()
 
     vframes = dd(lambda: dd(list))
@@ -643,14 +659,14 @@ if (ss):
         c.execute("""SELECT synset, comment, u, t 
                      FROM synset_comment
                      WHERE synset in (%s)
-                     ORDER BY t""" % ass)
+                     ORDER BY t""" % ass, [*sss])
         rows = c.fetchall()
         for r in rows:
-            comment = cgi.escape(r[1],True)
+            comment = escape(r[1],True)
             user = r[2]
-            time = r[3]
+            t = r[3]
 
-            coms[r[0]].append( (comment,user,time) )
+            coms[r[0]].append( (comment,user,t) )
 
 
 
@@ -660,29 +676,29 @@ if (ss):
 
     if gridmode == "ntumcgrid":
 
-        print HTML.status_bar(usrname)  # Top Status Bar
+        print(HTML.status_bar(usrname))  # Top Status Bar
 
 
-    print "<br>"
-    print HTML.showallunder_bttn("ss_table",'All')
-    print "&nbsp;&nbsp;"
+    print("<br>")
+    print(HTML.showallunder_bttn("ss_table",'All'))
+    print("&nbsp;&nbsp;")
 
-    print HTML.showOnlyRowsByClass_bttn('n','N'),
-    print "&nbsp;"
-    print HTML.showOnlyRowsByClass_bttn('v','V'),
-    print "&nbsp;"
-    print HTML.showOnlyRowsByClass_bttn('a','A'),
-    print "&nbsp;"
-    print HTML.showOnlyRowsByClass_bttn('r','R'),
-    print "&nbsp;&nbsp;"
+    print(HTML.showOnlyRowsByClass_bttn('n','N'))
+    print("&nbsp;")
+    print(HTML.showOnlyRowsByClass_bttn('v','V'))
+    print("&nbsp;")
+    print(HTML.showOnlyRowsByClass_bttn('a','A'))
+    print("&nbsp;")
+    print(HTML.showOnlyRowsByClass_bttn('r','R'))
+    print("&nbsp;&nbsp;")
 
     if gridmode == "ntumcgrid":
 
-        print HTML.multidict_bttn(lang, lemma),
-        print "&nbsp;"
-        print HTML.ne_bttn(),
-        print "&nbsp;"
-        print HTML.newsynset_bttn(),
+        print( HTML.multidict_bttn(lang, lemma))
+        print( "&nbsp;")
+        print( HTML.ne_bttn())
+        print( "&nbsp;")
+        print(HTML.newsynset_bttn())
 
 
         # TOGGLE SHOW/HIDE INDIVIDUAL POS
@@ -694,7 +710,7 @@ if (ss):
 
 
     if gridmode == "ntumc-noedit":
-        print HTML.multidict_bttn(lang, lemma)
+        print(HTML.multidict_bttn(lang, lemma))
  
     print("""<table cellspacing="0" cellpadding="0" 
               id="ss_table" class="tight sortable hoverTable">""")
@@ -732,34 +748,34 @@ if (ss):
             poscolor=" color='DarkRed' "
 
         ss_pos = s[-1]
-        print """<tr class='%s' id='%s' 
+        print("""<tr class='%s' id='%s' 
               onclick="addClass(document.getElementById('%s'),'lightrow')">
                  <td valign='top'><nobr><a title='%s' 
                  href='%s&synset=%s&lang=%s&lang2=%s'>%02d</a>
                  <sub><font %s>%s</font></sub></nobr>
               """ % (ss_pos, rowid, rowid, s, wncgi, s, 
-                     lang, lang2, i+1, poscolor, s[-1])
+                     lang, lang2, i+1, poscolor, s[-1]))
         if freq[s] > 0: # FREQ + VERBFRAMES
-            print """<br><nobr><font size='-3'>(%d) %s</font><nobr>
-                  """ % (freq[s], wfrmssymb)
+            print("""<br><nobr><font size='-3'>(%d) %s</font><nobr>
+                  """ % (freq[s], wfrmssymb))
         elif s[-1] == "v" and wfrmssymb != '': # ONLY VERBFRAMES
-            print """<br><font size='-3'>%s</font>
-                  """ % wfrmssymb
+            print("""<br><font size='-3'>%s</font>
+                  """ % wfrmssymb)
 
-        print "<br>"
-        print HTML.hiderow_bttn(rowid)
+        print("<br>")
+        print(HTML.hiderow_bttn(rowid))
 
         # COMMENTS
         if s in coms.keys():
             tip = ""
             for com in coms[s]:
-                (comment, user, time) = com
+                (comment, user, t) = com
                 tip += "<p>"
                 tip += """%s (%s): %s<p>
-                       """ % (user, time, cgi.escape(comment,True))
-            print """<span style="color:#999999;" class='tooltip' title='%s'><i class="icon-comments"></i></span>""" % tip
+                       """ % (user, t, escape(comment,True))
+            print("""<span style="color:#999999;" class='tooltip' title='%s'><i class="icon-comments"></i></span>""" % tip)
 
-        print "</td>"
+        print("</td>")
 
         ### print words
         if words[s][lang] and words[s][lang2] and lang != lang2:
@@ -777,11 +793,11 @@ if (ss):
                 wsl2.append("""<span title='source: %s&#xA;conf:
                                 %0.2f' %s'>%s</span>%s""" % (src, conf, opac2, w, freq2))
 
-            print """<td valign='top'><font size='-1'><!--
+            print("""<td valign='top'><font size='-1'><!--
                      --><table style="width:100%%"><tr>
                      <td bgcolor = '#ededed'>%s</td></tr>
                      <tr><td>%s</td></tr></table></font>
-                  """ % (", ".join(wsl1),", ".join(wsl2))
+                  """ % (", ".join(wsl1),", ".join(wsl2)))
 
         elif words[s][lang2]:
 
@@ -791,7 +807,7 @@ if (ss):
                 freq1 = ("<sub>%d</sub>" % f) if f else ''
                 wsl1.append("<span title='source: %s&#xA;conf:   %0.2f' %s'>%s</span>%s" % (src, conf, opac1, w, freq1))
 
-            print "  <td  valign='top'><font size='-1'>%s</font>" % (", ".join(wsl1))
+            print("  <td  valign='top'><font size='-1'>%s</font>" % (", ".join(wsl1)))
 
 
         elif words[s][lang]:
@@ -802,10 +818,10 @@ if (ss):
                 freq1 = ("<sub>%d</sub>" % f) if f else ''
                 wsl1.append("<span title='source: %s&#xA;conf:   %0.2f' %s'>%s</span>%s" % (src, conf, opac1, w, freq1))
 
-            print "  <td  valign='top'><font size='-1'>%s</font>" % (", ".join(wsl1))
+            print("  <td  valign='top'><font size='-1'>%s</font>" % (", ".join(wsl1)))
 
         else:
-            print "  <td  valign='top'><font size='-1'>%s</font>" % "NO LEX"
+            print("  <td  valign='top'><font size='-1'>%s</font>" % "NO LEX")
 
         # print "  <td  valign='top'>&nbsp;&nbsp;&nbsp;&nbsp;</td>"
 
@@ -820,29 +836,29 @@ if (ss):
             for i in sorted(defs[s][lang2].keys()):
                 edf.append(defs[s][lang2][i])
 
-            print """<td  valign='top'><span title='%s'>
+            print("""<td  valign='top'><span title='%s'>
                      <font size='-1'>%s</font></span></td>
-                  """ % (sq(edf, "; "), sq(tdf, "; "))
+                  """ % (sq(edf, "; "), sq(tdf, "; ")))
 
         elif defs[s][lang]:
             tdf = list()
             for i in sorted(defs[s][lang].keys()):
                 tdf.append(defs[s][lang][i])
 
-            print """<td  valign='top'><font size='-1'>%s</font>
-                     </td>""" % (sq(tdf, "; "))
+            print("""<td  valign='top'><font size='-1'>%s</font>
+                     </td>""" % (sq(tdf, "; ")))
 
         elif defs[s][lang2]:
             tdf = list()
             for i in sorted(defs[s][lang2].keys()):
                 tdf.append(defs[s][lang2][i])
 
-            print """<td  valign='top'><font size='-1'>%s</font>
-                     </td>""" % (sq(tdf, "; "))
+            print("""<td  valign='top'><font size='-1'>%s</font>
+                     </td>""" % (sq(tdf, "; ")))
 
         else:
-            print """<td  valign='top'><font size='-1'>
-                      NO DEFINITION</font></td>"""
+            print("""<td  valign='top'><font size='-1'>
+                      NO DEFINITION</font></td>""")
 
 
         # Print 5 Examples (BothLangs, SearchLang, BackoffLang)
@@ -855,38 +871,38 @@ if (ss):
             for i in sorted(exes[s][lang2].keys())[:5]:
                 edf.append(exes[s][lang2][i])
 
-            print u"""<td  valign='top'><span title='%s'><font size='-1'>
-                      「%s」</font></span></td>""" % (sq(edf, "; "), sq(tdf, "; "))
+            print(u"""<td  valign='top'><span title='%s'><font size='-1'>
+                      「%s」</font></span></td>""" % (sq(edf, "; "), sq(tdf, "; ")))
 
         elif exes[s][lang]:
             tdf = list()
             for i in sorted(exes[s][lang].keys())[:5]:
                 tdf.append(exes[s][lang][i])
-            print u"""<td  valign='top'><font size='-1'>
-                      <i>%s</i></font></td>""" % (sq(tdf, "; "),)
+            print(u"""<td  valign='top'><font size='-1'>
+                      <i>%s</i></font></td>""" % (sq(tdf, "; "),))
 
         elif exes[s][lang2]:
             tdf = list()
             for i in sorted(exes[s][lang2].keys())[:5]:
                 tdf.append(exes[s][lang2][i])
-            print u"""<td  valign='top'><font size='-1'>
-                      <i>%s</i></font></td>""" % (sq(tdf, "; "),)
+            print(u"""<td  valign='top'><font size='-1'>
+                      <i>%s</i></font></td>""" % (sq(tdf, "; "),))
 
         else:
-            print "<td><br></td>"
+            print("<td><br></td>")
 
         # Print editing interface
         if gridmode == "ntumcgrid":
             # Add New Synset and Edit synset buttons
-            print """<td style="vertical-align:center">"""
-            print HTML.editsynset_bttn(usrname, s)
-            print HTML.newsynset_bttn(s)
-            print """</td>"""
+            print("""<td style="vertical-align:center">""")
+            print(HTML.editsynset_bttn(usrname, s))
+            print(HTML.newsynset_bttn(s))
+            print("""</td>""")
 
 
 
-        print "</tr>\n"
-    print "</table>\n"
+        print("</tr>\n")
+    print("</table>\n")
 
 
 
@@ -898,14 +914,14 @@ elif (synset):
     # FETCH COMMENTS
     coms = []
 
-    if gridmode == "ntumcgrid":
+    if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
         c.execute("""SELECT comment, u, t 
                      FROM synset_comment
                      WHERE synset = ?
                      ORDER BY t""", [synset])
         rows = c.fetchall()
         for r in rows:
-            coms.append((cgi.escape(r[0],True),r[1],r[2]))
+            coms.append((escape(r[0],True),r[1],r[2]))
 
 
     # Check if it's part of Core
@@ -921,14 +937,16 @@ elif (synset):
     core = ' '.join(cores)
 
     # Fetch Definitions
-    c.execute("""SELECT lang, sid, def 
+    c.execute("""SELECT lang, sid, def, usr 
                  FROM synset_def 
                  WHERE synset = ?
               """, (synset,))
     rows = c.fetchall()
-    defs = dd(lambda: dd(unicode))
+    defs = dd(lambda: dd(str))
+  
     for r in rows:
-        defs[r[0]][int(r[1])] = r[2]
+        defs[r[0]][int(r[1])] = "{} <sub>({})</sub>".format(escape(r[2]),
+                                                    escape(r[3]) if r[3] else 'PWN')
 
     # Fetch the highest definition ID
     # (in case the def sid is not 0 - e.g. was deleted)
@@ -969,16 +987,16 @@ elif (synset):
 
 
 
-    print HTML.status_bar(usrname)  # Top (Right) Status Bar
+    print(HTML.status_bar(usrname))  # Top (Right) Status Bar
 
     # Print Synset ID and first sentence of English def + synset verbframes
-    print """<font size='+1'><b>%s</b> %s</font> '%s'; %s
-          """ % (synset, core, defs['eng'][firstengdefid],wfrmssymb),
+    print("""<font size='+1'><b>%s</b> %s</font> '%s'; %s
+          """ % (synset, core, defs['eng'][firstengdefid],wfrmssymb))
 
     # Print Top Search Form
-    print """<span style="float:right;">"""
-    print HTML.search_form(wncgi, lemma, langselect, lang, " ",lang2, scaling)
-    print """&nbsp;</span> """
+    print("""<span style="float:right;">""")
+    print(HTML.search_form(wncgi, lemma, langselect, lang, " ",lang2, scaling))
+    print("""&nbsp;</span> """)
 
     ## Examples
     c.execute("""SELECT lang, sid, def 
@@ -986,7 +1004,7 @@ elif (synset):
                  WHERE synset = ? 
               """, (synset,))
     rows = c.fetchall()
-    exes = dd(lambda: dd(unicode))
+    exes = dd(lambda: dd(str))
     for r in rows:
         exes[r[0]][r[1]] = r[2]
 
@@ -1111,12 +1129,12 @@ elif (synset):
 
     ### Images
     for sid in defs['img']:
-        print """<img align='right' width=200 
+        print("""<img align='right' width=200 
                   src ='../wn-ocal/img/%s.png' alt='%s'>
-              """ % (defs['img'][sid], defs['img'][sid])
+              """ % (defs['img'][sid], defs['img'][sid]))
 
     ### Words
-    print "<table width='100%'>"
+    print("<table width='100%'>")
     # for l in list(set(words.keys()).intersection(langselect)):   
     # We're now intersecting languages showing with the selected languages
     for i, l in enumerate(sorted(list(set(words.keys()).intersection(langselect)))):
@@ -1124,8 +1142,8 @@ elif (synset):
             trcolor = " bgcolor ='#ededed'"     # to gray out every other line in table
         else:
             trcolor = ""
-        print "<tr %s>\n  <td><strong>%s</strong></td>" % (trcolor,
-                                                           omwlang.trans(l, lang))
+        print("<tr %s>\n  <td><strong>%s</strong></td>" % (trcolor,
+                                                           omwlang.trans(l, lang)))
         ws = list()
         for (w, f, conf, src) in words[l]:
             ## show confidence with opacity; freq as subscript
@@ -1141,11 +1159,11 @@ elif (synset):
             if senslinks[(l,w)]:
                 sls = []
                 for (lnk, l2, s2) in senslinks[(l,w)]:
-                     sls.append("<a title='%s: %s (%s)' \
-                                    href='%s&synset=%s&lang=%s'>%s</a>" % \
-                                    (lnk, l2, s2,
-                                     wncgi, s2, l,
-                                     relnam[lnk]))
+                    sls.append("""
+                        <a title='%s: %s (%s)'
+                        href='%s&synset=%s&lang=%s'>%s</a>
+                        """ % (lnk, l2, s2, wncgi, s2, l, relnam[lnk])
+                    )
                      
                 deriv += "<font size='-1'>(%s)</font>" % " ".join(sls)
 
@@ -1154,7 +1172,7 @@ elif (synset):
 
             ws.append("""<span title='source: %s&#xA;conf: %0.2f;&#xA;%s' %s'>%s</span>%s %s
                       """ % (src, conf, frmsymb, opac, w, freq, deriv))
-        print "<td><i>%s</i>" % (", ".join(ws))    # prints the list of words
+        print("<td><i>%s</i>" % (", ".join(ws)))    # prints the list of word
 
 
         #############################
@@ -1168,7 +1186,7 @@ elif (synset):
                   """, (synset,resource))
         cl = c.fetchall()
         if cl:
-            print "&nbsp;&nbsp;&nbsp;&nbsp;[CL: "
+            print("&nbsp;&nbsp;&nbsp;&nbsp;[CL: ")
             for i, (classifier, original_ss, distance) in enumerate(cl):
                 c.execute("""SELECT name
                              FROM synset
@@ -1181,21 +1199,21 @@ elif (synset):
                 else:
                     separator = "]"
 
-                print """<span title="%s (%s)"><a style='color:black;text-decoration:none;'
+                print("""<span title="%s (%s)"><a style='color:black;text-decoration:none;'
                       href='%s&synset=%s&lang=%s&lang2=%s'>%s</a></span>%s""" % (ssname, 
-                    distance, wncgi, original_ss, l, lang2, classifier, separator)
+                    distance, wncgi, original_ss, l, lang2, classifier, separator))
 
 
         #############################################
         # PRINT CORPUS LINK (IF LANGUAGE IN CORPUS)
         #############################################
         if l in corpuslangs:
-            print """<div style="display:block; float:right;">
+            print("""<div style="display:block; float:right;">
                      <a class="largefancybox fancybox.iframe" 
                       href="showcorpus.cgi?searchlang=%s&concept=%s&langs2=%s">
                      <span title="NTUMC Examples"><span style="color: #4D99E0;">
                      <i class='icon-book'></i>
-                    </span></span></a></div>""" % (l, synset, 'eng')
+                    </span></span></a></div>""" % (l, synset, 'eng'))
 
 
         #############################################
@@ -1203,38 +1221,40 @@ elif (synset):
         #############################################
         if i==0 and len(defs['img']) > 0:
             # Images
-            print "  <td rowspan=%d>" % len(words)
+            print("  <td rowspan=%d>" % len(words))
             for sid in defs['img']:
-                print """<img align='right' height=150 
+                print("""<img align='right' height=150 
                        src ='../wn-ocal/img/%s.png' alt='%s'><br>
-                      """ % (defs['img'][sid], defs['img'][sid])
-            print "</td>"
+                      """ % (defs['img'][sid], defs['img'][sid]))
+            print("</td>")
 
 
-        print "</tr>"              
-    print "</table>"
+        print("</tr>")
+    print("</table>")
 
     #############################################
     # PRINT DEFINITIONS
     #############################################
     # print "<div id='line'><span>Definitions</span></div>\n"
 
-    if gridmode == "ntumcgrid":
-        # Edit Synset and Add New Synset buttons
-        print "<div id='line'><span>Definitions " + HTML.newdef_bttn(synset) + "</span></div>\n"
-    else:
-        print "<div id='line'><span>Definitions</span></div>\n"
-
-    print "<dl>"
+    # if gridmode in ("ntumcgrid","ntumcgridA","ntumcgridB"):
+    #     # Edit Synset and Add New Synset buttons
+    #     print("<div id='line'><span>Definitions " + HTML.newdef_bttn(synset,wndb) + "</span></div>\n")
+    # else:
+    print("<div id='line'><span>Definitions</span></div>\n")
+        
+    print("<dl>")
     # intersection between (existing langs in defs and examples) 
     # and (langs allowed by the gridmode)
-    for l in list(set(defs.keys() + exes.keys()).intersection(langselect)):   
+    for l in list(set(list(defs.keys()) + list(exes.keys())).intersection(langselect)):   
         if l == 'img':
             continue
-        print "<dt><strong>%s</strong>" % omwlang.trans(l, lang) 
-        print "<dd>"
-        print "; ".join(defs[l][d] for d in defs[l]) 
-        print " " 
+        print("<dt><strong>%s</strong>" % omwlang.trans(l, lang))
+        print("<dd>")
+        # print "; ".join(defs[l][d] for d in defs[l]) 
+        for d in defs[l]:
+            print(str(defs[l][d]) + "<br>")
+        print(" " )
 
         ###### EXPERIMENTAL AUDIO
         # if l == "eng":
@@ -1246,12 +1266,12 @@ elif (synset):
             w = '|'.join(sorted([w[0] for w in words[l] if '|' not in w[0]],key=len, reverse=True))
             examples = re.sub(r"(%s)" % w, r"<font color='green'>\1</font>", examples)
             ## Using Horizontal bar instead of quotes as it is less language dependent
-            print u"― <i>%s</i>" % examples
-    print "</dl>"
+            print(u"― <i>%s</i>" % examples)
+    print("</dl>")
 
     ### Relations
-    print "<div id='line'><span>Relations</span></div>\n"
-    print "<table>"
+    print("<div id='line'><span>Relations</span></div>\n")
+    print("<table>")
 
     if rels:
         for rel in  ["hypo", "also", "hype", "inst", 
@@ -1261,34 +1281,34 @@ elif (synset):
                      "dmnu", "dmnr", "dmtc", "dmtu", 
                      "dmtr", "eqls","ants","qant", "hasq"]:
             if rels[rel]:
-                  print u"<tr><td valign='top'><strong>%s</strong></td>" % \
-                      omwlang.trans(rel, l);
-                  print "<td>"
+                  print(u"<tr><td valign='top'><strong>%s</strong></td>" % \
+                      omwlang.trans(rel, l))
+                  print("<td>")
                   for (sss, name) in rels[rel]:
-                      print "<a title='%s' href='%s&synset=%s&lang=%s&lang2=%s'>%s</a>" % \
-                          (sss, wncgi, sss, lang, lang2, name)
-                  print "</td></tr>"
+                      print("<a title='%s' href='%s&synset=%s&lang=%s&lang2=%s'>%s</a>" % \
+                          (sss, wncgi, sss, lang, lang2, name))
+                  print("</td></tr>")
 
     # Print Lexid
-    print """<tr><td valign='top'><strong>
+    print("""<tr><td valign='top'><strong>
              <span title='lexnames'>Semantic Field:</span></strong></td>
              <td valign='top'><span title='%s: %s'>%s</span></td>
-          """ % (lexid, lexstring, lexname)
+          """ % (lexid, lexstring, lexname))
     
-    print "</table>\n"    
+    print("</table>\n"    )
 
     # Print Verb Frames
     if vframes:
-        print "<div id='line'><span>Verb Frames</span></div>\n"
-        print "<table><tr><td valign='top'>"
+        print("<div id='line'><span>Verb Frames</span></div>\n")
+        print("<table><tr><td valign='top'>")
 
         for vid in vframes.keys():
-            print """<span title='%s: %s'><nobr>%s;&#160;&#160;</nobr></span>
-                  """ % (vid, vframes[vid][1], vframes[vid][0]) 
-        print """</td></tr></table>\n"""
+            print("""<span title='%s: %s'><nobr>%s;&#160;&#160;</nobr></span>
+                  """ % (vid, vframes[vid][1], vframes[vid][0]))
+        print("""</td></tr></table>\n""")
 
     # Print External References
-    print "<div id='line'><span>External Links</span></div>\n"
+    print("<div id='line'><span>External Links</span></div>\n")
 
     # SUMO
     c.execute("""SELECT xref, misc 
@@ -1297,11 +1317,11 @@ elif (synset):
                  AND synset=?""", (synset,))
     xrefs = c.fetchall()
     if xrefs:
-        print "<p>%s:  " % label('SUMO', 'Suggested Upper Merged Ontology', 
-                                'http://www.ontologyportal.org/')
+        print("<p>%s:  " % label('SUMO', 'Suggested Upper Merged Ontology', 
+                                'http://www.ontologyportal.org/'))
         for (xref, misc) in xrefs:
-            print """%s <a href='%s&%s'>%s</a>\n
-                  """  % (misc,  sumocgi,  xref, xref)
+            print("""%s <a href='%s&%s'>%s</a>\n
+                  """  % (misc,  sumocgi,  xref, xref))
 
     # TempoWN
     c.execute("""SELECT xref, misc 
@@ -1310,29 +1330,29 @@ elif (synset):
                AND synset=?""", (synset,))
     xrefs = c.fetchall()
     if xrefs:
-        print "<p>%s:  " % label('TempoWN', 'Tempo Wordnet',  
-                                 'https://tempowordnet.greyc.fr/')
+        print("<p>%s:  " % label('TempoWN', 'Tempo Wordnet',  
+                                 'https://tempowordnet.greyc.fr/'))
         for (xref, misc) in xrefs:
                 opacity = float(misc)+0.3    
                 if xref == "Past":
-                    print '<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                        u'◀' if float(misc) >= 0.05 else u'◁')
+                    print('<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                        u'◀' if float(misc) >= 0.05 else u'◁'))
                 elif xref == "Present":
-                    print '<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                        u'▲' if float(misc) >= 0.05 else u'△')
+                    print('<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                        u'▲' if float(misc) >= 0.05 else u'△'))
                 elif xref == "Future":
-                    print '<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                        u'▶' if float(misc) >= 0.05 else u'▷')
+                    print('<font style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                        u'▶' if float(misc) >= 0.05 else u'▷'))
                 else:
                     continue
                     
         for (xref, misc) in xrefs:
                 if xref == "Past":
-                    print "(%s: %0.03f;" % (xref, float(misc))
+                    print("(%s: %0.03f;" % (xref, float(misc)))
                 elif xref == "Present":
-                    print "%s: %0.03f;" % (xref, float(misc))
+                    print("%s: %0.03f;" % (xref, float(misc)))
                 elif xref == "Future":
-                    print "%s: %0.03f)" % (xref, float(misc))
+                    print("%s: %0.03f)" % (xref, float(misc)))
                 else:
                     continue
 
@@ -1343,22 +1363,22 @@ elif (synset):
                AND synset=?""", (synset,))
     xrefs = c.fetchall()
     if xrefs:
-        print "<p>%s: " % label('SentiWN', 'SentiWordNet3.0',  
-                                 'http://sentiwordnet.isti.cnr.it/')
+        print("<p>%s: " % label('SentiWN', 'SentiWordNet3.0',  
+                                 'http://sentiwordnet.isti.cnr.it/'))
         for (xref, misc) in xrefs:
             opacity = float(misc)+0.3    
             if xref == "Positive":
-                print '<font color="green" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                    u'▲' if float(misc) >= 0.05 else u'△')        
+                print('<font color="green" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                    u'▲' if float(misc) >= 0.05 else u'△'))
             else:
-                print '<font color="red" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                    u'▼' if float(misc) >= 0.05 else u'▽')        
+                print('<font color="red" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                    u'▼' if float(misc) >= 0.05 else u'▽'))
         
         for (xref, misc) in xrefs:
                 if xref == 'Positive':    
-                    print "<font color='green'>(+%0.02f</font>" % (float(misc))
+                    print("<font color='green'>(+%0.02f</font>" % (float(misc)))
                 else:
-                    print "<font color='red'>-%0.02f)</font>" % (float(misc))
+                    print("<font color='red'>-%0.02f)</font>" % (float(misc)))
 
 
     # MLSentiCon
@@ -1368,72 +1388,73 @@ elif (synset):
                AND synset=?""", (synset,))
     xrefs = c.fetchall()
     if xrefs:
-        print "%s: " % label('MLSentiCon', 'Multilingual Sentiment Lexicon',  
-                                 'http://timm.ujaen.es/recursos/ml-senticon/')
+        print("%s: " % label('MLSentiCon', 'Multilingual Sentiment Lexicon',  
+                                 'http://timm.ujaen.es/recursos/ml-senticon/'))
         for (xref, misc) in xrefs:
             opacity = float(misc)+0.3    
             if xref == "Positive":
-                print '<font color="green" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                    u'▲' if float(misc) >= 0.05 else u'△')        
+                print('<font color="green" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                    u'▲' if float(misc) >= 0.05 else u'△'))
             else:
-                print '<font color="red" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
-                    u'▼' if float(misc) >= 0.05 else u'▽')        
+                print('<font color="red" style="opacity: %f; font-size:150%%"> %s</font>' % (opacity,
+                    u'▼' if float(misc) >= 0.05 else u'▽'))
         
         for (xref, misc) in xrefs:
                 if xref == 'Positive':    
-                    print "<font color='green'>(+%0.02f</font>" % (float(misc))
+                    print("<font color='green'>(+%0.02f</font>" % (float(misc)))
                 else:
-                    print "<font color='red'>-%0.02f)</font>" % (float(misc))
+                    print("<font color='red'>-%0.02f)</font>" % (float(misc)))
 
 
     # PRINT COMMENTS
     if len(coms) > 0:
-        print "<div id='line'><span>Comments</span></div>\n"
+        print("<div id='line'><span>Comments</span></div>\n")
     for com in coms:
-        (comment, user, time) = com
+        (comment, user, t) = com
         print("<p>")
         print("""<b><sub> %s (%s)</sub></b> <br>
                  <blockquote>%s</blockquote>
-                 """ % (user, time, comment))
+                 """ % (user, t, comment))
 
 
     if gridmode == "ntumcgrid":
         # Edit Synset and Add New Synset buttons
-        print HTML.editsynset_bttn(usrname, synset)
-        print HTML.newsynset_bttn(synset)
+        print(HTML.editsynset_bttn(usrname, synset))
+        print(HTML.newsynset_bttn(synset))
 
 
 #######################################
 # IF QUERY == Lemma (string)
 #######################################
 elif (lemma):   ## Show all the entries for this lemma in language
-    print HTML.status_bar(usrname)  # Top (Right) Status Bar
-    print u"<h6>Results for «&#8239;%s&#8239;» (%s)</h6>\n" % (lemma, lang)
+    print(HTML.status_bar(usrname))  # Top (Right) Status Bar
+    print(u"<h6>Results for «&#8239;%s&#8239;» (%s)</h6>\n" % (lemma, lang))
     ## note the use of narrow non-breaking spaces
 
 
-    lems = list(expandlem(lemma)) 
+    lems = list(expandlem(lemma_raw)) 
 
 
     # FIXME! Order the synsets by sense frequency
 
     if lemma.startswith('def::'):
-
+        print('def', lemma[5:])
         c.execute("""SELECT DISTINCT synset 
                      FROM synset_def 
-                     WHERE def GLOB '%s'  
+                     WHERE def GLOB ?  
                      AND lang = ?
                      LIMIT 200
-                  """ % (lemma[5:]), [lang])
+                  """, [str(lemma[5:]), lang])
+        print(c)
     else:
 
 
         if containsAny(lemma, ".*+?[]"):
-            glob = " OR lemma GLOB '%s' " % lemma
+            glob = " OR lemma GLOB ? " # % lemma
         else:
             glob = ""
 
-        lemma_q = "lemma IN (%s) %s " % (','.join('?'*len(lems)), glob)
+        lemma_q = "lemma IN (%s) %s " % (placeholders_for(lems), glob)
 
 
 
@@ -1442,6 +1463,10 @@ elif (lemma):   ## Show all the entries for this lemma in language
         else: # ('gridx','ntumcgrid')
             sense_conf = ""
 
+        qparams = list(lems)             # consumed in "lemma IN (...)"
+        if glob:
+            qparams.append(lemma)  # consumed by "OR lemma GLOB ?"
+        qparams.append(lang)       # consumed by "sense.lang = ?"
         c.execute("""SELECT DISTINCT synset
                      FROM word 
                      LEFT JOIN sense
@@ -1450,9 +1475,8 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      %s
                      AND sense.lang = ?
                      LIMIT 200
-                  """ % (lemma_q, 
-                         sense_conf), 
-                        (lems + [lang]))  ### lems, lang
+                  """ % (lemma_q, sense_conf), 
+                  qparams)
 
     row = c.fetchall()
 
@@ -1463,7 +1487,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
         for s in row:
             sss.add(s[0])
 
-        ass = ",".join("'%s'" % s for s in list(sss))
+        ass = placeholders_for(sss)
 
         if gridmode in ('cow','wnbahasa','wnja','grid'):     
             sense_conf = """ AND sense.confidence IS '1.0' """
@@ -1482,7 +1506,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      LEFT JOIN word
                      WHERE word.wordid = s.wordid
                      ORDER BY freq DESC
-                  """ % (ass, sense_conf), (lang, lang2) )
+                  """ % (ass, sense_conf), [*sss, lang, lang2] )
 
 
 
@@ -1501,9 +1525,9 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      FROM synset_def 
                      WHERE synset in (%s) 
                      AND lang in (?, ?)
-                  """ % ass, (lang, lang2))
+                  """ % ass, [*sss, lang, lang2])
 
-        defs = dd(lambda: dd(lambda: dd(unicode)))
+        defs = dd(lambda: dd(lambda: dd(str)))
         for r in c:
             defs[r[0]][r[1]][r[2]] = r[3]
 
@@ -1516,7 +1540,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      WHERE synset2 = synset
                      AND synset1 in (%s) 
                      AND link = 'dmnc'
-                  """ % ass)
+                  """ % ass, [*sss])
         # synset1 : [synset2, name]
         dmncs = dd(list)
         for r in c:
@@ -1528,7 +1552,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
                      FROM xlink
                      WHERE synset in (%s) 
                      AND resource = '%s' 
-                  """ % (ass, 'svframes'))
+                  """ % (ass, 'svframes'), [*sss])
         rows = c.fetchall()
 
         vframes = dd(lambda: dd(list))
@@ -1540,7 +1564,7 @@ elif (lemma):   ## Show all the entries for this lemma in language
         ###########################################
         # Print  HTML for List of Synsets by Lemma
         ###########################################
-        print "<table>\n";
+        print("<table>\n")
         for (i, s) in enumerate(sss):
 
             if dmncs[s] != []:
@@ -1562,31 +1586,31 @@ elif (lemma):   ## Show all the entries for this lemma in language
             else:
                 wfrmssymb = ''
 
-            print "<tr>\n";
+            print("<tr>\n")
 
             # Synset
-            print """<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>
-                     <nobr>%s""" %  (wncgi, s, lang, lang2, s),
+            print("""<td valign='top'><a href='%s&synset=%s&lang=%s&lang2=%s'>
+                     <nobr>%s""" %  (wncgi, s, lang, lang2, s))
             if freq[s] > 0: ### frequency
-                print "<font size='-1'>(%d)</font>" % (freq[s]),
-            print "</nobr><br><font size='-1'>%s</font></a></td>" % wfrmssymb,
+                print("<font size='-1'>(%d)</font>" % (freq[s]))
+            print("</nobr><br><font size='-1'>%s</font></a></td>" % wfrmssymb)
 
 
 
             ### print words
             if words[s][lang] and words[s][lang2] and lang != lang2:
-                print """<td  valign='top'><table style="width:100%%"><tr>
+                print("""<td  valign='top'><table style="width:100%%"><tr>
                          <td bgcolor = '#ededed'>%s</td></tr>
                          <tr><td>%s</td></tr></table></font>""" % \
                 (sq([hword(w,lems,src,conf) for (w,f,src,conf) in words[s][lang]], ", "),
-                 sq([hword(w,lems,src,conf) for (w,f,src,conf) in words[s][lang2]], ", "))
+                 sq([hword(w,lems,src,conf) for (w,f,src,conf) in words[s][lang2]], ", ")))
             elif words[s][lang]:
-                print "  <td  valign='top'>%s</font>" % \
-                    sq([hword(w,lems,src,conf) for (w,f,src,conf) in words[s][lang]], ", ")
+                print("  <td  valign='top'>%s</font>" % \
+                    sq([hword(w,lems,src,conf) for (w,f,src,conf) in words[s][lang]], ", "))
             else:
-                print "  <td valign='top'>%s</font>" % "NO LEX"
+                print("  <td valign='top'>%s</font>" % "NO LEX")
 
-            print "  <td  valign='top'>&nbsp;&nbsp;&nbsp;&nbsp;</td>"
+            print("  <td  valign='top'>&nbsp;&nbsp;&nbsp;&nbsp;</td>")
 
 
             # Print definitions
@@ -1598,94 +1622,95 @@ elif (lemma):   ## Show all the entries for this lemma in language
                 for i in sorted(defs[s][lang2].keys()):
                     edf.append(defs[s][lang2][i])
 
-                print """<td  valign='top'>%s <span title='%s'>%s</span>
-                         </td>""" % (dmnc,sq(edf, "; "), sq(tdf, "; "))
+                print("""<td  valign='top'>%s <span title='%s'>%s</span>
+                         </td>""" % (dmnc,sq(edf, "; "), sq(tdf, "; ")))
 
             elif defs[s][lang]:
                 tdf = list()  # stores defs in the search lang
                 for i in sorted(defs[s][lang].keys()):
                     tdf.append(defs[s][lang][i])
 
-                print "<td  valign='top'>%s %s</td>" % (dmnc, sq(tdf, "; "))
+                print("<td  valign='top'>%s %s</td>" % (dmnc, sq(tdf, "; ")))
 
             elif defs[s][lang2]:
                 edf = list()  # stores defs in the search lang
                 for i in sorted(defs[s][lang2].keys()):
                     edf.append(defs[s][lang2][i])
 
-                print "<td  valign='top'>%s %s</td>" % (dmnc, sq(edf, "; "))
+                print("<td  valign='top'>%s %s</td>" % (dmnc, sq(edf, "; ")))
 
             else:
-                print "<td  valign='top'>%s %s</font>" %(dmnc, "NO DEFINITION")
+                print("<td  valign='top'>%s %s</font>" %(dmnc, "NO DEFINITION"))
 
             if gridmode == "ntumcgrid":
                 # Add New Synset and Edit synset buttons
-                print """<td style="vertical-align:center">"""
-                print HTML.editsynset_bttn(usrname, s)
-                print HTML.newsynset_bttn(s)
-                print """</td>"""
+                print("""<td style="vertical-align:center">""")
+                print(HTML.editsynset_bttn(usrname, s))
+                print(HTML.newsynset_bttn(s))
+                print("""</td>""")
 
-            print "</tr>\n"
-        print "</table>"
+            print("</tr>\n")
+        print("</table>")
 
     ######################
     # If nothing is found
     ######################
     else:
-        print u"<p>No synsets found!" 
+        lemstr =  ", ".join(lems)
+        print(f"<p>No synsets found (for any of {lemstr})!")
 
 
         # Quick "Search again in Lang2" button
         if lang != lang2:
-            print """<form method="post" action="%s">
+            print("""<form method="post" action="%s">
             <strong>Look it up again in:</strong>
             <input type="hidden" name="lemma" value="%s">
             <input type="hidden" name="lang" value="%s">
             <input type="hidden" name="lang2" value="%s">
             <input type="submit" name="Query" value="%s">
             </form></p>""" % (wncgi, lemma, lang2, lang, 
-                              omwlang.trans(lang2, lang))
+                              omwlang.trans(lang2, lang)))
 
         if gridmode == "ntumcgrid":
             # Print bottom buttons (+NE, +NewSS, Multidict)
-            print HTML.ne_bttn(),
-            print HTML.newsynset_bttn(),
-            print HTML.multidict_bttn(lang, lemma)
+            print(HTML.ne_bttn(),)
+            print(HTML.newsynset_bttn(),)
+            print(HTML.multidict_bttn(lang, lemma))
         if gridmode == "ntumc-noedit":
-            print HTML.multidict_bttn(lang, lemma)
+            print(HTML.multidict_bttn(lang, lemma))
 
 
 ################################################################################
 # If nothing was added in search (default display)
 ################################################################################
 else:
-    print "<h4> Welcome to the %s (%s)</h4>\n" % (wnnam, wnver)
+    print("<h4> Welcome to the %s (%s)</h4>\n" % (wnnam, wnver))
 
     if gridmode == "ntumcgrid":
-        print HTML.ne_bttn(),  
-        print HTML.newsynset_bttn(),
-        print HTML.multidict_bttn(lang, lemma)
+        print(HTML.ne_bttn())
+        print(HTML.newsynset_bttn())
+        print(HTML.multidict_bttn(lang, lemma))
     if gridmode == "ntumc-noedit":
-        print HTML.multidict_bttn(lang, lemma)
+        print(HTML.multidict_bttn(lang, lemma))
 
 ################################################################################
 # Warn users if the list was truncated (current limit is 200)
 ################################################################################
 try: # sss may not have been defined before
     if len(sss) == 200:
-        print """This list has been truncated to 200 entries."""
+        print("""This list has been truncated to 200 entries.""")
 except:
     pass
 
 ################################################################################
 # Search Interface, User Interface  & Footer
 ################################################################################
-print """<hr><p>"""
+print("""<hr><p>""")
 
 # This is the original that takes the full list of languages!
 # print HTML.search_form(wncgi, lemma, langs, lang, "Langs: ", lang2, scaling),
 
-print HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling), # Print Search Form
+print(HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling)) # Print Search Form
 # print HTML.language_selection(langselect, langs, wncgi)
 
 # # Multidict should be ported to compling excluding CCD 
@@ -1694,34 +1719,34 @@ print HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling
 #     if lang in ("cmn", "eng"):
 #         print HTML.multidict_bttn(lang, lemma)
 
-time_end = time.time()
+end_time = time.time()
 
 
 
 # Print Search History
 if len(lemma_hist) > 0:
-    print "<hr>"
-    print "Seen Lemmas: "
+    print("<hr>")
+    print("Seen Lemmas: ")
     for w in lemma_hist:
-        print  """<a style='color:black;text-decoration:none;'
-                   href='%s&lemma=%s'>%s</a>; """ % (wncgi, w, w)
+        print ("""<a style='color:black;text-decoration:none;'
+                   href='%s&lemma=%s'>%s</a>; """ % (wncgi, w, w))
 
 
 #print synset_hist #TEST
 
 
 # Print Language Selection Panel
-print """<hr><div style="font-size:90%;color:grey;float:right">""" 
-print HTML.language_selection(langselect, langs, wncgi)
-print """<br><span style="font-size:80%%;color:grey;">(%s seconds)</span></div>"""  % (str(time_end - start_time)[:7])
+print("""<hr><div style="font-size:90%;color:grey;float:right">""")
+print(HTML.language_selection(langselect, langs, wncgi))
+print("""<br><span style="font-size:80%%;color:grey;">(%s seconds)</span></div>"""  % (str(end_time - start_time)[:7]))
 
-print "<nobr><a href='%s'>More detail about the %s (%s)</a></nobr>" % (wnurl, wnnam, wnver)
+print("<nobr><a href='%s'>More detail about the %s (%s)</a></nobr>" % (wnurl, wnnam, wnver))
 if gridmode != "gridx":
-    print """<br>This project is now integrated in the 
-             <a href='%s'> %s (%s)</a>""" % (omwurl, omwnam, wnver)
-print """<br>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">
-             Francis Bond</a>"""
-print '&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;'
+    print("""<br>This project is now integrated in the 
+             <a href='%s'> %s (%s)</a>""" % (omwurl, omwnam, wnver))
+print("""<br>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">
+             Francis Bond</a>""")
+print('&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;')
 
-print "  </body>"
-print "</html>"
+print("  </body>")
+print("</html>")
