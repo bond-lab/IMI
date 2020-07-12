@@ -33,9 +33,20 @@ There is code for exporting the corpus to XML here: https://github.com/lmorgadod
 
 
 
+Installation
+------------
 
+Copy the files to `/var/www/ntumc/`
 
-Put something like this in apache2/conf-enabled/httpd.conf
+`$rsync -av IMI/www/* /var/www/ntumc/`
+
+Make `$user:www-data` the owner of `/var/www/ntumc`
+
+Put something like this in `/etc/apache2/conf-enabled/httpd.conf`
+
+Add an admin db, wordnet db and corpora as needed
+(this code does not yet include all the bits)
+
 ```
 ### NTUMC
 AddDefaultCharset UTF-8
