@@ -20,10 +20,11 @@ from ntumc_util import placeholders_for
 from ntumc_webkit import HTML
 from ntumc_gatekeeper import concurs
 
-#showsentcgi = "show-sent.cgi"
+selfcgi = "show-sent.cgi"
 
 form = cgi.FieldStorage()
-corpus = form.getfirst("corpus", "cmn")
+corpus = form.getfirst("corpus", "eng")
+corpus2 = form.getfirst("corpus2", "jpn")
 sid = int(form.getfirst("sid", 1))
 window = int(form.getfirst("window", 7))
 if window > 200:
@@ -31,8 +32,6 @@ if window > 200:
 lemma = form.getfirst("lemma", "")
 lemma = lemma.strip()
 
-corpus2 = 'eng'
-linkdb = 'cmn-eng'
 
 ### COOKIES
 if 'HTTP_COOKIE' in os.environ:
@@ -61,7 +60,7 @@ for (s, d, sent) in c:
     sss.add(s)
     if lemma:
         for l in lemma.split():
-            sent = sent.replace(l,"<font color='green'>%s</font>" % l)
+            sent = sent.replace(l, f"<font color='green'>{l}</font>")
     ss[d][s] = sent
 
 query = """SELECT corpusID, docid, doc, title, url 
@@ -84,20 +83,28 @@ query = """SELECT corpusID, corpus, title
 c.execute(query, list(doc.keys()))
 
 corp = dd(list)
-for (corpusID, corpus, title) in c:
+for (corpusID, corpuslabel, title) in c:
     #print corpusID, corpus, title
-    corp[int(corpusID)] = (title, corpus)
+    corp[int(corpusID)] = (title, corpuslabel)
 
 ###
-### get links  ### FIXME -- how to tell which direction programatically?
+### get links 
 ###
 links = dd(set)
 ttt = dict()
-if os.path.isfile("../db/%s.db" % linkdb):
-    lcon = sqlite3.connect("../db/%s.db" % linkdb)
-    lc = lcon.cursor() 
+linkdb= ''
+if os.path.isfile(f"../db/{corpus}-{corpus2}.db"):
+    linkdb = f"{corpus}-{corpus2}"
     query = """SELECT fsid, tsid FROM slink  
-               WHERE fsid IN (%s)""" % placeholders_for(sss)
+     WHERE fsid IN (%s)""" % placeholders_for(sss)
+elif os.path.isfile(f"../db/{corpus2}-{corpus}.db"):
+    linkdb = f"{corpus2}-{corpus}"
+    query = """SELECT tsid, fsid FROM slink  
+    WHERE tsid IN (%s)""" % placeholders_for(sss)
+
+if linkdb:
+    lcon = sqlite3.connect(f"../db/{linkdb}.db")
+    lc = lcon.cursor()
     lc.execute(query, list(sss))
     for (fsid, tsid) in lc:
         links[int(fsid)].add(int(tsid))
@@ -138,10 +145,30 @@ print("""<body>""")
 
 
 
+
+          
+print(f"""<form id='input' name ='input' method='get' action='{selfcgi}' 
+style="display:inline-block;" target='_parent'>""")
+#<input type='text' name='corpus' value='{corpus}' style="width:3em">
+print("""<span style="display:inline-block;">""")
+print(HTML.select_corpus(text='From', field='corpus', value=corpus))
+print(HTML.select_corpus(text='to: ', field='corpus2', value=corpus2))
+print(f"""sid: <input type='text' name='sid' value='{sid}' size=3/>
+window: <input type='text' name='window' value='{window}' style="width:2em" />
+</span>
+<button class="small"> <a href="javascript:{{}}"
+ onclick="document.getElementById('input').submit(); 
+ return false;"><span title="Search">
+ <span style="color: #4D99E0;">GO
+ </span></span></a>
+</button>
+
+</form>""")
+print("<div><button  style='float:right;' type='button' id='btnTran' name='btnTran'>Toggle Translation</button></div>")
+
+
 for c in sorted(corp.keys()):
     print(u"<h2>%s (%s)</h2>" % corp[c])
-    print("<div><button  style='float:right;' type='button' id='btnTran' name='btnTran'>Toggle Translation</button></div>")
-    print(f"<p>Showing sentences around sid {sid} (± {window})") 
     for d in sorted(doc[c].keys()):
         print(u"<h3><a href='%s'>%s (%s)</a></h3>" % doc[c][d])
         print("<p>" )
@@ -158,5 +185,7 @@ for c in sorted(corp.keys()):
                 print("<br/><font color='#505050' class='trans'>%s&nbsp;&nbsp;&nbsp;&nbsp;%s</font>" % (t, 
                                                                                       ttt[t]) )
             print("</div>")
+
+            
 print(HTML.status_bar(userID,text=True))
 print("""</body></html>""")

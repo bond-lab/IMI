@@ -490,6 +490,17 @@ or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
                <audio controls="controls" style="display:none;" autoplay="autoplay">
                <source src="http://translate.google.com/translate_tts?tl=%s&q=%s" type="audio/mpeg"/></audio></span>""" % (l,text)
         return html
+    
+    @staticmethod
+    def select_corpus(text = 'Corpus:', field = 'corpus', value = 'eng'):
+        html = f"{text} <select name='{field}'>\n"
+        for corpus in all_corpusdb():
+            sel = ''
+            if corpus[0] == value:
+                sel=' selected'
+            html += f"  <option = '{corpus[0]}'{sel}>{corpus[0]}</option>\n"
+        html += "</select>\n"
+        return html
 
 
 
