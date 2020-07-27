@@ -82,6 +82,8 @@ c.execute(query,  (tsid - window, 2 * window -1))
 for (sid, wid, word, pos, lemma) in c:
     wds[int(sid)][int(wid)] = (word, pos, lemma)
 
+if twid == 0:
+    twid = min(wds[tsid])
 tword = wds[tsid][twid][0]  ### target word
 twp = pos2wn(wds[tsid][twid][1],lang) ### target wn pos
 tlemma = wds[tsid][twid][2] ### target lemma
