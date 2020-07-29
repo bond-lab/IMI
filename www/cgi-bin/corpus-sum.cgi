@@ -49,7 +49,9 @@ print(HTML.status_bar('')) ### get user
 # print("""</select>
 # sid_from:<input type="text" size="7" name="sid_from" value="%s"/>
 # sid_to:<input type="text" size="7" name="sid_to" value="%s"/>
-# <input type="submit" value="Search"/></form>""" % (sid_from, sid_to))
+# <input type="submit" value="\Search"/></form>""" % (sid_from, sid_to))
+doc2corpus=dd(str)
+
 print("""<h2>Genres</h2>\n """)
 langs =  ['eng', 'cmn', 'ind', 'jpn', 'ita', 'zsm']
 for lang in langs:
@@ -58,6 +60,14 @@ for lang in langs:
         conn, c = concurs(dbfile)
     except FileNotFoundError:
         continue
+
+    c.execute("select doc, corpus from doc left join corpus on doc.corpusID=corpus.corpusID")
+    for doc, corpus in c:
+        if doc in doc2corpus:
+            if corpus != doc2corpus[doc]:
+                print("Warning", doc, corpus)
+        else:
+            doc2corpus[doc]=corpus
     c.execute('select corpusID, corpus, title from corpus')
     corpora = c.fetchall()
     print("<table>\n<caption>Corpora for %s</caption>" % lang)
@@ -169,7 +179,9 @@ print("""<h2>Documents</h2>\n """)
 
 doc_stats = get_doc_stats(langs)
 
-print("<table>")
+print("""<p>For each document, for each language, show how many sentences and the percentage of concepts that are tagged: more than 80 is shown in green, more than 20 in orange, otherwise gray.""")
+
+print("<table border>")
 print("<tr>")
 print("<td>Document</td>")
 colspan='2'
@@ -177,7 +189,7 @@ for lang in langs:
     print(f"<td colspan='{colspan}'>{lang}</td>")
 print("</tr>")
 
-for doc in doc_stats:
+for doc in sorted(doc_stats, key=lambda x: doc2corpus[x]):
     print("<tr>")
     #print("<th>{}</th><td>{}</td>".format(docID, doc_stats[docID].get('doc', '???')))
     for lang in langs:
