@@ -5,9 +5,11 @@ import cgi, urllib, http.cookies, os
 import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
 from collections import defaultdict as dd
-from ntumc_util import *
-from ntumc_webkit import *
-from lang_data_toolkit import *
+from ntumc_util import taglcgi, wndb, wncgi, check_corpusdb, all_corpusdb
+from ntumc_util import  expandlem, lem2ss, pos2wn,  tbox, Timer
+from ntumc_webkit import HTML
+from lang_data_toolkit import valid_usernames, pos_tags, wnnam, wnver, wnurl
+from ntumc_gatekeeper import concurs, placeholders_for
 from html import escape
 
 # Fixes encoding issues when reading cookies from os.environ
@@ -20,7 +22,7 @@ reload(os)
 # CGI FIELD STORAGE & CONSTANTS
 ################################################################################
 cgiself = "tag-word.cgi"
-wndb="../db/wn-ntumc.db"
+wndb="wn-ntumc" # NOT "../db/wn-ntumc.db"
 
 form = cgi.FieldStorage()
 version = form.getfirst("version", "0.1")
@@ -28,8 +30,19 @@ lemma = form.getfirst("lemma", "")
 lemma = lemma.strip()
 gridmode = form.getfirst("gridmode", "ntumc-noedit")
 
-lang = form.getfirst("lang", "cmn")
+#lang = form.getfirst("lang", "cmn")
 corpus = form.getfirst("corpus", "cmn")
+corpus = form.getfirst("corpus", "cmn")
+(dbexists, dbversion, dbmaster, dblang, dbpath) = check_corpusdb(corpus)
+if not dbexists:
+    print("""Content-type: text/html; charset=utf-8\n\n""")
+    print (f"""<html>
+<body>No such corpus: <strong>{corpus}</strong>, try again</body>
+</html>""")
+    quit()
+else:    
+    lang = dblang
+
 
 tsid = int(form.getfirst("sid", 10000)) #default to sentence 1000
 twid = int(form.getfirst("wid", 0)) #default to first word
@@ -64,11 +77,9 @@ else:
 ################################################################################
 # CONNECT TO DATABASES
 ################################################################################
-con = sqlite3.connect("../db/%s.db" % corpus)
-c = con.cursor()
+conn, c = concurs(corpus, dbpath)
+wn, w = concurs(wndb, dbpath)
 
-wn = sqlite3.connect(wndb)
-w = wn.cursor()
 
 # GET WORDS
 wds = dd(lambda: dd(tuple))
