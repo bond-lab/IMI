@@ -1,0 +1,275 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Sentiment Annotation Guide</title>
+<style>
+h1, h2, h3, h4 {font-family: Helvetica, Arial, Droid Sans, sans-serif}
+h3 {font-size: 1.4em}
+h4 {font-size: 1.2em}
+li {padding: 10px}
+img {border: 1px solid #999; box-shadow: 3px 3px 10px rgba(0, 0, 0, .2);} /* width: 100%; max-width: 850px }*/
+em {color: magenta}
+#toc {display: inline-block; background-color: #eee; padding-top: 10px; padding-bottom: 10px; font-family: Helvetica, Arial, Droid Sans, sans-serif}
+#toc ul {list-style-type: none; margin-left: -50px;}
+#toc ul a {margin-left: 10px}
+
+
+span.synset {font-family: "Courier New", "Courier", monospace}
+.note {font-family: "Helvetica", "Arial", "Droid Sans", sans-serif; width: 30%;
+		border-color: #666;  border-style: solid; border-width: 0px 3px 0px 5px; 
+		background-color: #ccc; padding: 10px 20px; margin: 0px 0px 30px 80px;
+		line-height: 1.5em} 
+.note-red {border-left-color: #ff0000; border-right-color: #ff0000; background-color: #fee}
+div.note li {padding: 2px}
+td.tag_type {font-size: 1.2em; text-align: center; padding: 10px;}
+.key {display: inline-block; padding: 7px 5px 2px 5px;
+      border-radius: 2px;
+      font-family: "Courier New", Courier, monospace; font-size: 1.2em; text-shadow: 0px 1px 0px #fff; font-weight: bold; background-color: #ddd; box-shadow: 0px 3px 0px rgba(0, 0, 0, .5)}
+hr {border: 1px dashed #999}
+
+table.meter {padding: 30px; text-align: center}
+table.meter td {width: 40px; font-family: sans-serif}
+table.score-examples {padding: 10px; text-align: center}
+table.score-examples th {border-bottom: 2px solid #000; padding: 5px}
+table.score-examples th {}
+table.score-examples td {padding: 10px}
+
+
+@media (min-width: 800px){
+
+	img {width: 100%; max-width: 850px}
+	body {border: 0px solid green; overflow: auto; height: 100%; min-width: 800px; max-width: 2000px}
+	#toc {float: left; position: fixed; left: 20px; width: 25%; max-width: 600px}
+	#main {float: right; border: 0px solid red; width: 65%; min-width: 500px; overflow: hidden}
+	
+}
+
+
+</style>
+</head>
+
+<body>
+
+<header id="hdr">
+<h1>Sentiment Annotation - Quick Start Guide</h1>
+(Please refer to the <a href='../index.html'>main assignment page</a> for details or clarifications for each year)
+
+<br><br>
+
+Last Updated: 01-03-2016
+
+<!-- Change Log 
+	01-03-2016: Fixed some styles;
+		    Fixed some writing
+	24-02-2016: Fixed name of anchor and also confirmed words tagged with "x" as the only ones without a sentiment rating tool
+	23-02-2016(3): Fixed some minor layout issues; added text for confirmation message
+	23-02-2016(2): Modified layout slightly (such that the TOC is displayed at the side for wider screens
+	23-02-2016: Initial Upload
+-->
+
+<br><br>
+
+<p>Questions? Drop an email to <em>bond</em> (+ @ieee.org)</p><p>
+
+
+</p><ol id="toc">
+<li><a href="#ann">Sentiment Annotation</a>
+  <ul>
+    <li>1.1. <a href="#ann_gen">Preliminaries (What Should Be Done)</a></li>
+    <li>1.2. <a href="#ann_start">Annotating</a></li>
+  </ul>
+</li>
+<li><a href="#scale-ex">Sentiment Rating Scale and Examples</a>
+  <ul>
+     <li>2.1. <a href="#scale">Sentiment Rating Scale</a></li>
+     <li>2.2. <a href="#exs">Examples</a></li>
+  </ul>
+</li>
+<!-- 	<li>2.3 - <a href="#guidelines">Points to Note</a></li> -->
+</li></ol>
+
+<hr>
+</header>
+
+<div id="main">
+
+<a name="ann"></a><h2>1) Sentiment Annotation</h2>
+<p>This section will walk you through the process of using the sentiment rating tool.</p>
+
+<p class="note note-red">This guide assumes you already know how to log-in and that you are familiar with the general layout of the annotation interface. 
+<br /><br />You can <b><a href="index.html" target="qsg">check out the annotation Quick Start Guide</a></b> for Projects 1 and 2 for a refresher.</p>
+
+<a name="ann_gen"></a><h3>1.1 - Preliminaries (What Should Be Done)</h3>
+
+<p>You need to annotate words in the text for their <i>sentiment</i>. You will determine whether a word is <i>positive</i> or <i>negative</i> (polarity), to what degree it is positive or negative (magnitude), and thereafter give it a sentiment score/rating.
+
+<p>Unlike sense tagging, you <em>do not</em> have to annotate every word.  Most words are <em>neutral</em> for sentiment.</p>
+
+<div class="note" style="width: 40%">
+<h4>What should be annotated for sentiment?</h4>
+  <ul style="text-indent: 0px; margin-left: -20px">
+    <li>You should annotate concepts that show clear positive or negative sentiment, such as:
+      <ul><li><i>Happy</i>, <i>sad</i>, <i>angry</i></li></ul>
+    </li>
+    <li>These can include <a href="#tag-multi">multi-word expressions (MWE)</a>:
+      <ul><li><i>fed up</i>
+	  <li><i>break down</i></li>
+	  <li>As with sense tagging, you should give the sentiment rating to the MWE (<a href="#tag-multi">More Info</a>)</li>
+      </ul>
+    </li>
+    <li>You should not tag modifiers such as <i>very</i>, <i>not</i>, etc</li>
+    <li>The remaining words should be left as-is</li>
+  </ul>
+</div>
+<p>Other points to take note:</p>
+<ul>
+    <li>The sentiment score/rating should be based on the <i>concept used to tag that word</i></li>
+      <ul>
+	<li>It will be useful to look at, and base your decision on, the definition and example(s) of the concept (ie, synset)</li>
+      </ul>
+    </li>
+    <li><b>Your annotation should be context <i>independent</i></b></li>
+    <li>As with sense annotating, <em>do not overthink!</em></li>
+    <li>Make use of the Comments box.</li>
+</ul>
+<hr>
+
+<a name="ann_start"></a><h3>1.2 - Annotating</h3>
+
+<ol>
+  <li>To begin, click on the word you wish to annotate for sentiment.</li>
+  <li>The word will be highlighted <span style="background-color: yellow">in yellow</span>, and its available senses loaded on the right panel.</li>
+    <ul><li>This should already be familiar to all of you who have worked on Projects 1 and 2.</li>
+    </ul>
+  <li>Unlike in previous projects, we will be using the Sentiment Rating tool towards the bottom of the screen, as illustrated below:</li>
+  <img src="images/Main Interface 2.png" />
+  <br /><br />
+  <p class="note note-red" style="margin-left: 0px">NOTE: Words which were tagged as <b>"x"</b> will <i>not</i> have a Sentiment Rating tool.</p>
+  <li>The Rating tool contains <b>seven (7) main Steps</b>, for scores ranging from <b><tt>-100 to 100</tt></b>.
+    <ul>
+      <li><b>1</b> being Very Negative</li>
+      <li><b>7</b> being Very Positive</li>
+      <li><b>4</b> being Neutral</li>
+      <li>The other numbers {<b>2</b>, <b>3</b>; <b>5</b>, <b>6</b>} being of lesser magnitudes than their extremes</li>
+    </ul>
+  </li>
+  <p class="note" style="margin-left: 0px">See <b><a href="#scale">Sentiment Scale and Examples</a></b> for more information on the scale and some example words and their ratings.</li>
+  <li>There are two ways to set the sentiment score:
+    <ul>
+      <li>Using the <b>keyboard</b>, press <span class="key">Z</span> + <span class="key">[Step Number]</span> and the tool's meter will be changed accordingly. (Eg: To give it a rating of <b>3</b>, press <span class="key">Z</span> + <span class="key">3</span> on the keyboard) 
+      <li>Using the <b>mouse</b>, drag the meter's slider to where you want it to be</li>
+      <li>We recommend using the keyboard for coarser ratings, and then adjusting using the mouse for finer sentiment.*
+      <li>(Alternatively, the <span class="key">&larr;</span> and <span class="key">&rarr;</span> keys can also be used for fine adjustments. You need to click on the slider &#8212; to bring it into focus &#8212; before you can use the arrow keys)</li> 
+    </ul>
+    
+    <p class="note" style="margin-left: 0px">* In most cases, the 7-step scale should be enough for your sentiment annotation task, and you will not need to make fine adjustments.</p>
+    
+  <li>As illustrated above, I have selected <i>malodorous</i> to rate for sentiment. It is a negative word, and so I choose to give it a rating of <b>2</b>.
+  <br /><br />
+  To do this, I press <span class="key">Z</span> + <span class="key">2</span> on the keyboard.
+  <br /><br />
+  The sentiment rating tool's slider shifts accordingly to <b>2</b>:
+  </li>
+  <img src="images/Rating Given.png" />
+  <li>The rating is <em>automatically saved</em>.
+    <ul><li>A confirmation message (<b><tt>The sentiment score of the concept [# (sid:#####)] was updated to -64 by USERNAME</tt></b>) should appear at the bottom of the interface to indicate the rating was performed successfully.</li>
+	<li>The number indicated in the confirmation message is the <em>numerical score</em>, <i>not</i> the Step. (<a href="#scale">Find out more about the sentiment scale</a>)
+    </ul>
+  </li>
+  <li>In the text, the rating is reflected for <i>malodorous</i>, and it now has a red underline below its normal underline, like so: <span style="text-decoration: underline; border-bottom: 3px solid red">malodorous</span></li>
+  <li><b>You will have to click on another word to see the second underline (for sentiment).</b></li>
+  
+  <li>Let's take a look at another word: <i>friend</i>
+    <ul>
+      <li><i>Friend</i> is a rather positive word, and should therefore be given a rather positive rating.</li>
+      <li>Let's give it a rating of <b>5</b>.</li>
+    </ul>
+  <li>To do this, I press <span class="key">Z</span> + <span class="key">5</span> on the keyboard.
+	<li>The slider shifts accordingly:</li>
+  </li>
+    <img src="images/Rating Given 2.png" />
+  <li>Again, a confirmation message should appear at the bottom of the interface to indicate the rating was performed successfully.</li>
+  <li>In the text, the sentiment rating is reflected for <i>friend</i>, and it now has a green underline below its normal underline, like so: <span style="text-decoration: underline; border-bottom: 3px solid green">friend</span></li>
+  
+</ol>
+  
+<p class="note">If, by accident, you gave a sentiment rating to a word that should not have a sentiment, you can reset it by changing its sentiment rating to <b>Neutral (4)</b> by pressing <span class="key">Z</span> + <span class="key">4</span> on your keyboard. 
+<br /><br />Avoid using the mouse to drag the slider when neutral-ising.
+<br /><br />
+Neutral-ised words will no longer have the second underline.
+</p>
+
+<a name="tag-multi"></a><h4>Multi-word Expressions?</h4>
+<p>A Multi-word Expression (MWE) should be tagged as a whole for sentiment.</p>
+<p>If you have previously tagged the individual words in an MWE with <b>"x"</b> (as you should!) then only the MWE itself would have a Sentiment Rating tool available for it, as shown below:</p>
+<img src="images/MWE Tagging 2.png" />
+<br /><br />
+<p>As you can see, the MWE <i>as good as one's word</i> is the only one with a Sentiment Rating tool. The smaller parts of the MWE (<i>good</i> and <i>good word</i>) were correctly tagged with <b>"x"</b>.
+<p class="note note-red">If you see multiple Sentiment Rating tools, then it is likely the individual words or phrases within an MWE were not tagged as <b>"x"</b> during sense-tagging.<br /><br />
+Fix this by retagging these smaller components with <b>"x"</b> (<a href="index.html" target="qsg">see the sense tagging Quick Start Guide</a> on what to do for MWEs, if you need a refresher).</p>
+
+<hr>
+
+<a name="scale-ex"></a><h2>2) Sentiment Rating Scale and Examples</h2>
+
+<a name="scale"></a><h3>2.1 - The Scale</h3>
+<p>The Sentiment Rating tool has a scale that ranges from <b><tt>-100</tt> to <tt>100</tt></b> (negative to positive sentiment).</p>
+
+<p>To facilitate annotation, there are also <b>seven (7) main Steps</b> on the scale. These Steps are displayed on the tool itself.</p>
+
+<!-- <img src="images/Sentiment Rating Tool Ann.png" /> -->
+
+<p>Each Step corresponds to a certain score on the <tt>-100</tt> – <tt>100</tt> scale:
+
+<table class="meter" cellpadding="10" cellspacing="0" style="text-align: center">
+  <tr>
+    <td style="border-right: 2px solid #000">Step</td>
+    <td bgcolor="#CD2626">1</td>
+    <td bgcolor="#E26262">2</td>
+    <td bgcolor="#EEA6A6">3</td>
+    <td style="border: 1px solid black; border-width: 0px 1px">4</td>
+    <td bgcolor="#94D994">5</td>
+    <td bgcolor="#40B640">6</td>
+    <td bgcolor="#228B22">7</td>
+  </tr>
+  <tr>
+    <td style="border-right: 2px solid #000">Score</td>
+    <td>-95</td>
+    <td>-64</td>
+    <td>-34</td>
+    <td style="border: 1px solid black; border-width: 0px 1px">0</td>
+    <td>34</td>
+    <td>64</td>
+    <td>95</td>
+  </tr>
+  <tr><td></td><td colspan="3">&larr; More Negative</td><td style="border: 1px solid black; border-width: 0px 1px">Neutral</td><td colspan="3">More Positive &rarr;</td></tr>
+</table>
+
+<p>As you can see, the lowest and highest score you can give using using the 7-step scale is -95 (1) and 95 (7) respectively.
+<br />You can use the mouse or the keyboard arrow keys (<span class="key">&larr;</span> and <span class="key">&rarr;</span>) to adjust it to the maximum on either side (-100, or 100).</p>
+
+<p class="note">In most cases, the 7-step scale should be enough for your sentiment annotation task, and you will not need to make fine adjustments.</p>
+
+<a name="exs"></a><h3>2.2 - Some Examples</h3>
+The table below shows some examples and the score/rating that might be assigned to them.
+<table class="score-examples" cellspacing="0">
+  <tr><th>Score</th><th>Step</th><th>Examples 1</th><th>Examples 2 (from corpus)</th></tr>
+  <tr><td>95</td><td>7</td><td>fantastic</td><td>perfect</td></tr>
+  <tr><td>64</td><td>6</td><td>good</td><td>soothing</td></tr>
+  <tr><td>34</td><td>5</td><td>ok</td><td>easy</td></tr>
+  <tr><td>0</td><td>4</td><td>bread</td><td>puff</td></tr>
+  <tr><td>-34</td><td>3</td><td>poor</td><td>rumour</td></tr>
+  <tr><td>-64</td><td>2</td><td>bad</td><td>hideous</td></tr>
+  <tr><td>-95</td><td>1</td><td>awful</td><td>deadly</td></tr>
+</table>
+
+<p>These are just for illustrative purposes, and you might have a different opinion on the sentiment rating of these words.</p>
+
+<hr>
+</div>
+
+</body>
+
+
+</html>
