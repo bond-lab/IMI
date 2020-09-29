@@ -201,11 +201,15 @@ In the tagging bar, you will see some letters as well as a series of numbers (if
 	<tr><td class="tag_type">1, 2, 3...n</td><td>These numbered choices correspond to the numbers of the synsets shown in the right panel.<br />
 				The letters in subscript (Eg: 1<sub>a</sub>, 2<sub>n</sub>) are the parts of speech
 				</td></tr>
-	<tr><td class="tag_type">e</td><td>Used to indicate an <em>error</em> in corpus/text (spelling, lemmatization, tokenization, etc)<br />
-			Eg: <i>does</i> being mistakenly analysed as <i>doe</i>+s and not <i>do</i>+es in "He <u>does</u> not know"<br /><br />
-			
-			Refer to the <a href="../tagdoc.html" target="tagdoc_win">Detailed Documentation</a> for more cases to use <b>'e'</b>
-		
+	<tr><td class="tag_type">e</td><td>Used to indicate
+			an <em>error</em> in corpus/text (spelling,
+			lemmatization, tokenization, etc)<br />
+			Eg: <i>does</i> being mistakenly analysed
+			as <i>doe</i>+s and not <i>do</i>+es in
+			"He <u>does</u> not know" or <i>leaves</i>
+			as <i>leaf</i>, instead of <i>leave</i>:
+	    <br/> In this case write the correct lemma and synset in the Comments box.
+	    <br/><br/> Refer to the <a href="../tagdoc.html" target="tagdoc_win">Detailed Documentation</a> for more cases to use <b>'e'</b>
 			</td></tr>
 	<tr><td class="tag_type">x</td><td>Used to indicate that there is no need to tag the word<br />
 			Examples include <em>closed class parts-of-speech</em>, such as auxiliaries (<i>Fred <u>is</u> swimming; Fred <u>has</u> swum</i>)<br />
@@ -238,7 +242,6 @@ This can mean a few things:
 <ul>
 	<li>The word is not in any of the synsets (yet)</li>
 	<li>The synset for that concept does not exist at all</li>
-	<li>The base form of the word was mis-identified</li>
 </ul>
 
 In such a case, <b>tag the word as 'w'</b>.<br /><br />
@@ -302,9 +305,6 @@ For example, the base form of the word <i>leaves</i> &#8212; the verb &#8212; mi
 	</li>
 </ul>
 
-<b>Sometimes, it could mean the base form was mis-identified</b> (Eg: mis-identifying the base form of verb <i>leaves</i> as <i>leaf</i>, instead of <i>leave</i>)
-<br>
-Note down in the Comments box for such cases.
 
 <hr />
 
