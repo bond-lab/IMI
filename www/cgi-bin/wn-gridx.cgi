@@ -8,7 +8,8 @@ import re, sqlite3, time
 from collections import defaultdict as dd
 
 from ntumc_webkit import * 
-from ntumc_util import * 
+from ntumc_util import *
+from ntumc_gatekeeper import concurs
 from lang_data_toolkit import *
 from html import escape, unescape
 
@@ -51,9 +52,10 @@ if re.match('(\d+)-[avnrxz]',lemma):
 ################################################################################
 scaling = 100
 
-if gridmode not in ('ntumcgrid', 'ntumcgridA', 'ntumcgridB', 'grid', 'gridx', 'cow', 'wnbahasa', 
-                    'wnja', 'ntumc-noedit'):
-    gridmode = 'ntumcgrid'
+if gridmode not in ('ntumcgrid', 'wnja','cow', 'wnbahasa', 'ntumc-noedit',
+                    'grid', 'gridx'):
+#                    'ntumcgridA', 'ntumcgridB',
+    gridmode = 'grid'
 
 if gridmode == "ntumcgrid":
     langs = omwlang.ntumclist()
@@ -61,26 +63,26 @@ if gridmode == "ntumcgrid":
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
     wndb = "wn-ntumc"
-    wndb_path = "../db/wn-ntumc.db"
+    #wndb_path = "../db/"
     scaling = 90
 
-elif gridmode == "ntumcgridA":
-    langs = omwlang.ntumclist()
-    wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
-    wnver = "0.9"
-    wndb = "wn-ntumcA"
-    wndb_path = "../db/wn-ntumcA.db"
-    scaling = 90
+# elif gridmode == "ntumcgridA":
+#     langs = omwlang.ntumclist()
+#     wnnam = "NTUMC+ Open Multilingual Wordnet"
+#     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+#     wnver = "0.9"
+#     wndb = "wn-ntumcA"
+#     wndb_path = "../db/wn-ntumcA.db"
+#     scaling = 90
 
-elif gridmode == "ntumcgridB":
-    langs = omwlang.ntumclist()
-    wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
-    wnver = "0.9"
-    wndb = "wn-ntumcB"
-    wndb_path = "../db/wn-ntumcB.db"
-    scaling = 90
+# elif gridmode == "ntumcgridB":
+#     langs = omwlang.ntumclist()
+#     wnnam = "NTUMC+ Open Multilingual Wordnet"
+#     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+#     wnver = "0.9"
+#     wndb = "wn-ntumcB"
+#     wndb_path = "../db/wn-ntumcB.db"
+#     scaling = 90
 
 
 elif gridmode == "ntumc-noedit":
@@ -89,53 +91,47 @@ elif gridmode == "ntumc-noedit":
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
     wndb = "wn-ntumc"
-    wndb_path = "../db/wn-ntumc.db"
+    #wndb_path = "../db/wn-ntumc.db"
     scaling = 90
         
 elif gridmode == "grid":
-    langs = omwlang.humanprojectslist()
-    wnnam = "Open Multilingual Wordnet"
-    wndb = "wn-multix"
-    wndb_path = "../../omw/wn-multix.db"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
-    wnver = "1.2"
+     langs = omwlang.humanprojectslist()
+     wnnam = "Open Multilingual Wordnet"
+     wndb = "wn-multix"
+     #@wndb_path = "../../omw/wn-multix.db"
+     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+     wnver = "1.2"
 
 elif gridmode == "cow":
-    langs = ("eng", "cmn")
+    langs = ("cmn", "eng")
     wnnam = "Chinese Open Wordnet"
-    wndb = "../../omw/wn-multix.db"
-    wnurl = "http://compling.hss.ntu.edu.sg/cow/"
+    wndb = "wn-ntumc"
+    wnurl = "https://bond-lab.github.io/cow/"
     wnver = "1.2"
 
 elif gridmode == "wnbahasa":
-    langs = ("eng", "ind","zsm")
+    langs = ("ind", "zsm", "eng")
     wnnam = "Wordnet Bahasa"
-    wndb = "../../omw/wn-multix.db"
+    wndb = "wn-ntumc"
     wnurl = "http://wn-msa.sourceforge.net"
     wnver = "1.0"
 
 elif gridmode == "wnja":
-    langs = ("eng", "jpn")
+    langs = ("jpn", "eng")
     wnnam = "Japanese Wordnet"
-    wndb = "../../omw/wn-multix.db"
-    wnurl = "http://compling.hss.ntu.edu.sg/wnja/index.en.html"
+    wndb = "wn-ntumc"
+    wnurl = "https://bond-lab.github.io/wnja/"
     wnver = "1.1"
 
 elif gridmode == "gridx":
     langs = omwlang.alllangslist()
     wnnam = "Extended Open Multilingual Wordnet"
-    wndb = "../../omw/wn-multix.db"
+    wndb =  "wn-multix"
     wnurl = "http://compling.hss.ntu.edu.sg/omw/summx.html"
     wnver = "1.2"
 
-else:
-    langs = omwlang.humanprojectslist()
-    wnnam = "Open Multilingual Wordnet"
-    wndb = "wn-multix"
-    wndb_path = "../../omw/wn-multix.db"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/summ.html"
-    wnver = "1.2"
 
+    
 omwnam = "Extended Open Multilingual Wordnet"
 omwurl = "http://compling.hss.ntu.edu.sg/omw/summx.html"
 wncgi = "wn-gridx.cgi?gridmode=%s" % (gridmode)
@@ -151,8 +147,8 @@ relnam= {'ants':u'⇔', 'derv':u'⊳', 'pert':u'⊞'}
 
 ### Connect to the database
 #print('wndb_path', wndb_path)
-con = sqlite3.connect(wndb_path)
-c = con.cursor()
+#con = sqlite3.connect(wndb_path)
+con, c  = concurs(wndb)
 
 
 ################################################################################
@@ -197,7 +193,7 @@ def hword(word, words, src, conf):
 if 'HTTP_COOKIE' in os.environ:
     C = http.cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
 else:
-    C = http.cookies.SimpleCookie()
+     C = http.cookies.SimpleCookie()
 
 # If no languages were set, use cookie or default languages
 if langselect == []:
@@ -945,9 +941,12 @@ elif (synset):
     defs = dd(lambda: dd(str))
   
     for r in rows:
-        defs[r[0]][int(r[1])] = "{} <sub>({})</sub>".format(escape(r[2]),
-                                                    escape(r[3]) if r[3] else 'PWN')
-
+        if r[3]:
+            defs[r[0]][int(r[1])] = "{} <sub>({})</sub>".format(escape(r[2]),
+                                                                escape(r[3]))
+        else:
+            defs[r[0]][int(r[1])] = "{}".format(escape(r[2]))
+            
     # Fetch the highest definition ID
     # (in case the def sid is not 0 - e.g. was deleted)
     firstengdefid = 999

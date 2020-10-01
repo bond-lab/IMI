@@ -36,11 +36,28 @@ There is code for exporting the corpus to XML here: https://github.com/lmorgadod
 Installation
 ------------
 
+Install passlib through apt-get (not sure why)
+sudo apt-get install python3-passlib python3-jinja2
+
+
+
+
 Copy the files to `/var/www/ntumc/`
 
-`$rsync -av IMI/www/* /var/www/ntumc/`
+`$ rsync -av IMI/www/* /var/www/ntumc/`
 
 Make `$user:www-data` the owner of `/var/www/ntumc`
+
+
+`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/`
+`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.cgi`
+`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.py`
+
+If you have not already enabled cgi:
+
+`$ sudo a2enmod cgid`
+
+
 
 Put something like this in `/etc/apache2/conf-enabled/httpd.conf`
 
