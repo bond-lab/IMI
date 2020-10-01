@@ -73,7 +73,7 @@ def find_file(dirs, files):
     for path in dirs:
         # join() relative path with this script's dir,
         # then resolve to absolute path using abspath()
-        path = path if exists(path) else abspath(join(cwd, path))
+        path =  abspath(join(cwd, path))
         if not exists(path):
             continue
 
