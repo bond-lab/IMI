@@ -10,6 +10,8 @@ from collections import defaultdict as dd
 from ntumc_webkit import *
 from lang_data_toolkit import *
 
+from html import escape
+
 ################################################################################
 # GET CGI FORM FIELDS / GLOBAL VARIABLES
 ################################################################################
@@ -31,7 +33,7 @@ langs = [('eng','English'), ('eng1','English 1'), ('eng2','English 2'),
 
 dbs = [] # TRIPLET (A/B/..., db_path, corpus_code)
 #for i in ['A','B','C','D','E']:
-for i in ['A','B','C']:
+for i in ['A','B','C', 'D']:
     if os.path.isfile("../db/%s%s.db" % (lang,i)):
         dbs.append((i, "../db/%s%s.db" % (lang,i),"%s%s" % (lang,i)))
 
@@ -101,7 +103,7 @@ def link(tag, ref):
         for i in sorted(defs[tag][lang].keys()):
             tdf.append(defs[tag][lang][i])
         if len(tdf) > 0:
-            tdf = cgi.escape('; '.join(tdf) + ';', True)
+            tdf = escape('; '.join(tdf) + ';', True)
         else:
             tdf = ''
 
@@ -109,7 +111,7 @@ def link(tag, ref):
         for i in sorted(defs[tag]['eng'].keys()):
             edf.append(defs[tag]['eng'][i])
         if len(edf) > 0:
-            edf = cgi.escape('; '.join(edf)+ ';', True)
+            edf = escape('; '.join(edf)+ ';', True)
         else:
             edf = ''
 
@@ -306,13 +308,18 @@ guidelines = """<div class="info">
 <div class="show_info">
 <h5>Guidelines:</h5>
 
-<p>Agreement is the percentage of times the tag agreed with the majority.
-<br>The majority tag is calculated as the most frequent tag between A, B, C and D.
+<p>Agreement is the percentage of times the tag agreed with the
+majority.  <br>The majority tag is calculated as the most frequent tag
+between all the Annotators, ignoring None.  
+Tags that agree with the majority are shown in green.
+Sentiment is shown as ⇧ or ⇩ for positive or negative.
 
-<p>Clicking on the sentence number (marked by ✎) will jump you to the 
-sentence to be tagged (you may have to log in). Clicking on the lemma looks 
-it up in wordnet, clicking on the tag looks it up on wordnet, mouse-over on 
-the tag gives you the defintion.
+<p>Clicking on the sentence number (marked by ✎) will jump you to the
+sentence to be tagged (you may have to log in). Clicking on the lemma
+looks it up in wordnet, clicking on the tag looks it up on wordnet,
+mouse-over on the tag gives you the definition.  You should tag
+everything marked with a '?' in the MajTag column (and anything else
+you think is wrong).
 
 </div></div>"""
 ################################################################################
@@ -324,12 +331,12 @@ the tag gives you the defintion.
 ########
 
 # Header
-print(u"""Content-type: text/html; charset=utf-8\n""")
-print(u"""
+print("""Content-type: text/html; charset=utf-8\n""")
+print(f"""
 <!DOCTYPE html>
 <html>
   <head>
-
+    <title>IAA {sid_from}-{sid_to}</title>
     <!-- IMPORT FONT AWESOME -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
@@ -342,10 +349,10 @@ print(u"""
     <link href="../ntumc-common.css" rel="stylesheet" type="text/css">
 
 <style>
-hr{
+hr{{
   padding: 0px;
   margin: 10px;    
-}
+}}
 </style>
 
 </head>
@@ -468,7 +475,7 @@ for sid in sorted(data.keys()):  # for sentence in selected range
                 elif data[sid][cid][db_ref]['sentiment'] < 0:
                     senti = "<span title='%s'>⇩</span>"  % data[sid][cid][db_ref]['sentiment']
             # TAG
-            print("<td><nobr>%s %s</nobr></td>" % (senti, tag))
+            print("<td><nobr>%s&#8239;%s</nobr></td>" % (tag, senti))
             com = data[sid][cid][db_ref]['com']
             if com:
                 comms += ("<b>%s:</b>" % (db[0])) + com + '; '
@@ -477,7 +484,7 @@ for sid in sorted(data.keys()):  # for sentence in selected range
         print("<td><nobr>%s</nobr></td>" % link(majtag, None))
 
         # COMMENTS
-        print(u"""<td>%s</td>""" % comms )
+        print("""<td>%s</td>""" % comms )
 
         print("</tr>")
 
