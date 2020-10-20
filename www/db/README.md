@@ -18,3 +18,11 @@ ind-zsm.db
 jpn-ind.db
 jpn-zsm.db
 wn-ntumc.db	NTU Multilingual Wordnet
+
+
+It also has files for mfs tagging and merging annotations
+see Notes in Semantics-and-Pragmatics
+---------------------------------------------------------
+tag-mfs.py		tag with MFS
+merge.tsv		sentiment scores for MFS tagging
+assign-majtag.py	merge annotation from eng[A-E].db into eng.db
