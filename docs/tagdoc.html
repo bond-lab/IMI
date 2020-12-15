@@ -22,6 +22,7 @@
   <li><a href = '#instructions'>Tagging Instructions</a>
   <li><a href = '#prep'>How the data is prepared</a>
   <li><a href = '#tags'>Word Senses and Tags</a>
+  <li><a href = '#anot'>Holmesian Annotation</a>
   <li><a href='#ne'>Named Entities</a>
 	<ul>
 	  <li><a href = '#change'>Suggesting changes to wordnet</a> (tag with w)
@@ -286,6 +287,21 @@
   <tt>I can't really decide between 012345678-x and 012345678-y</tt>
 </ul>
 
+<h3><a name='anot'>Holmesian Annotation</a></h3>
+
+<p>If we want to write something about a word or sentence in the style
+  of Holmesian Annotation, then start the annotation with 'ANOT: '.
+  E.g.
+  <p> sid 48800 "Sufficient for to-morrow is the evil thereof, but I
+    hope before the day is past to have the upper hand at last.'"
+    <br>Sentence comment = "ANOT: A reference to Mathew 6:34 "Take
+    therefore no thought for the morrow: for the morrow shall take
+    thought for the things of itself. Sufficient unto the day is the
+    evil thereof.""
+    <br>Note: students cannot write sentence comments at present, but
+    can mention it in their reports or add it to a word.
+
+
 <h3><a name='ne'>Named Entities</a></h3>
 <li>If it is a name (or part of a name) chose an appropriate name tag:
   <ul>
@@ -351,7 +367,13 @@
 </ul>
 
 
-	
+<h4><a name="metaphor">Tagging Metaphorical Uses<a></h4>	
+
+<p>If you think that a word is being used in a metaphorical sense, but
+  it is not established enough to be in wordnet, then tag with the
+  closest literal sense, and add "METAPHOR" in the comments.  If there
+  is a good synset for the metaphorical use, then also note that
+  "METAPHOR: 12345678-x".
 
 <h3><a name="fw">Tagging Foreign Words<a></h3>
 
@@ -728,6 +750,10 @@ and <i>odd-sounding</i>: split, lemma does not include hyphen.
 <p>Please tag comparatives and superlatives with their base form.
   So <i>better</i> is <i>good</i>, <i>least</i> is <i>less</i>, etc
 
+<p>The fact that e.g. <i>wiser</i> means "more wise" is deducible from
+  the POS tag (JJR: comparative), so just chose the most appropriate
+  sense of <i>wise</i>
+  
 <h2><a name="relations">Using Wordnet Relations to determine sense (or
     senses)</a></h2>
 
