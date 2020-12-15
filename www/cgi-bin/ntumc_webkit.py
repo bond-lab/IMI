@@ -543,6 +543,6 @@ class NTUMC_Cookies:
         """
         Adds secure=True to all cookies
         """
-        #for k in cookie:
-        #    cookie[k]['secure']=True
+        for k in cookie:
+            cookie[k]['secure']=True
         return cookie
