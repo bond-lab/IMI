@@ -7,7 +7,7 @@ from os import environ
 import re, sqlite3, time
 from collections import defaultdict as dd
 
-from ntumc_webkit import * 
+from ntumc_webkit import HTML, NTUMC_Cookies
 from ntumc_util import *
 from ntumc_gatekeeper import concurs
 from lang_data_toolkit import *
@@ -91,7 +91,7 @@ elif gridmode == "ntumc-noedit":
     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
     wnver = "0.9"
     wndb = "wn-ntumc"
-    #wndb_path = "../db/wn-ntumc.db"
+    wndb_path = "../db/{}.db".format(wndb)
     scaling = 90
         
 elif gridmode == "grid":
@@ -193,7 +193,7 @@ def hword(word, words, src, conf):
 if 'HTTP_COOKIE' in os.environ:
     C = http.cookies.SimpleCookie(os.environ['HTTP_COOKIE'])
 else:
-     C = http.cookies.SimpleCookie()
+    C = http.cookies.SimpleCookie()
 
 # If no languages were set, use cookie or default languages
 if langselect == []:
@@ -258,61 +258,16 @@ else:
     C['BackoffLang'] = lang2
 
 
-# Remember Previous Searches
-if "PreviousSearch" in C and lemma == "":
-
-    if synset != "":
-        C["PreviousSearch"] = synset
-
-    if re.match('(\d+)-[avnrxz]', C['PreviousSearch'].value):
-        synset = C['PreviousSearch'].value
-        lemma = ''
-    else:
-        lemma = C['PreviousSearch'].value
+if 'lemmas' in C:
+    seen_lemmas = C['lemmas'].value.split('::')
 else:
-    if lemma != "":
-        C["PreviousSearch"] = lemma
-    elif synset != "":
-        C["PreviousSearch"] = synset
-
-
-# Fetch Search History
-lemma_hist = []
-for h in list(reversed(range(15))):
-    try: 
-        C["lemma%d" % h] = C["lemma%d" % (h-1)].value
-
-        if C["lemma%d" % h].value not in lemma_hist:
-            lemma_hist.append(C["lemma%d" % h].value)
-    except:
-        continue
-try:
-    if not re.match('(\d+)-[avnrxz]', C['PreviousSearch'].value):
-        C["lemma0"] = C["PreviousSearch"].value
-
-        if C["lemma0" % h].value not in lemma_hist:
-            lemma_hist.append(C["lemma0"].value)
-except:
-    pass
-
-synset_hist = []
-for h in list(reversed(range(15))):
-    try: 
-        C["synset%d" % h] = C["synset%d" % (h-1)].value
-
-        if C["synset%d" % h].value not in synset_hist:
-            synset_hist.append(C["synset%d" % h].value)
-    except:
-        continue
-try:
-    if re.match('(\d+)-[avnrxz]', C['PreviousSearch'].value):
-        C["synset0"] = C["PreviousSearch"].value
-
-        if C["synset0" % h].value not in synset_hist:
-            synset_hist.append(C["synset0"].value)
-except:
-    pass
-
+    seen_lemmas = list()
+if lemma and lemma not in seen_lemmas:
+    seen_lemmas.insert(0,lemma)
+if seen_lemmas:
+    C['lemmas'] = '::'.join(seen_lemmas)   
+if len(seen_lemmas) > 10:
+    seen_lemmas = seen_lemmas[:10]
 
 # UserID / Password
 if "UserID" in C:
@@ -324,11 +279,10 @@ else:
 ################################################################################
 
 
-
 ################################################################################
 # HTML (HEADER)
 ################################################################################
-print(C), # PRINT COOKIE
+print(NTUMC_Cookies.secure(C)), # PRINT COOKIE
 print("Content-type: text/html; charset=utf-8\n\n")
 print(u"""<html>
 <head>
@@ -1723,10 +1677,12 @@ end_time = time.time()
 
 
 # Print Search History
-if len(lemma_hist) > 0:
+if lemma in seen_lemmas:
+    seen_lemmas.remove(lemma)
+if len(seen_lemmas) > 0:
     print("<hr>")
     print("Seen Lemmas: ")
-    for w in lemma_hist:
+    for w in seen_lemmas:
         print ("""<a style='color:black;text-decoration:none;'
                    href='%s&lemma=%s'>%s</a>; """ % (wncgi, w, w))
 

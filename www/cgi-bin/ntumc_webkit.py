@@ -537,3 +537,12 @@ class NTUMC_Cookies:
             user_cookie["user_name"] = 'unknown'
 
         return user_cookie
+
+    @staticmethod 
+    def secure(cookie):
+        """
+        Adds secure=True to all cookies
+        """
+        #for k in cookie:
+        #    cookie[k]['secure']=True
+        return cookie

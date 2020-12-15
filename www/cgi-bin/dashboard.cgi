@@ -4,7 +4,7 @@
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 import re, sqlite3, collections
-import os, http.cookies  # for cookies
+import os, http.cookies, datetime  # for cookies
 from collections import defaultdict as dd
 
 from ntumc_gatekeeper import concurs
@@ -164,10 +164,11 @@ if user != "logout":
 
 C["UserID"] = user
 C["Password"] = hashed_pw
-C["UserID"]["expires"] = "31 Jan 2021 12:00:00 GMT"
-C["Password"]["expires"] = "31 Jan 2021 12:00:00 GMT" 
-print(C)
+expires = datetime.datetime.utcnow() + datetime.timedelta(days=30) # expires in 30 days
+C['UserID']['expires'] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+C["Password"]["expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
+print(NTUMC_Cookies.secure(C))
 print("""Content-type: text/html; charset=utf-8\n\n""")
 print("""<html>
   <head>
