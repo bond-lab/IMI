@@ -424,11 +424,16 @@ or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
 
 
     @staticmethod
-    def ntumc_tagdoc():
+    def ntumc_tagdoc(short=False):
         """
         link to the tagging documentation
         """
-        html = """<a title = 'Tagging Documentation' href='https://bond-lab.github.io/IMI/tagdoc.html'>Tag Doc</a>"""
+        if short:
+            anchor = 'Tag Doc'
+        else:
+            anchor = 'Tagging Documentation'
+        
+        html = f"""<a title = 'Tagging Documentation' href='https://bond-lab.github.io/IMI/tagdoc.html'>{anchor}</a>"""
         return html
         
     @staticmethod
