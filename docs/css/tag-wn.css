@@ -22,11 +22,10 @@ padding: 0 5px;
   color:green;
   font-weight: bold;
 }
-
-.tagme{background-color: yellow;text-decoration:underline silver;}
-.notag{color: #660000;text-decoration:underline silver;}
-.hastag{color: #003333;text-decoration:underline silver;}
-.ignore{color: #333333;text-decoration:underline silver;}
-.missing{color: #0033CC;text-decoration:underline silver;}
-.error{color: #00CC33;text-decoration:underline silver;}
+.tagme{background-color: yellow;text-decoration:none;}
+.notag{color: #660000;}
+.hastag{color: #003333;text-decoration:none;}
+.ignore{color: #333333;text-decoration:none;}
+.missing{color: #0033CC;text-decoration:none;}
+.error{color: #00CC33;text-decoration:none;}
 
