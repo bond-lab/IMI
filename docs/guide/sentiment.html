@@ -30,7 +30,7 @@ hr {border: 1px dashed #999}
 
 table.meter {padding: 30px; text-align: center}
 table.meter td {width: 40px; font-family: sans-serif}
-table.score-examples {padding: 10px; text-align: center}
+table.score-examples {padding: 10px; text-align: left}
 table.score-examples th {border-bottom: 2px solid #000; padding: 5px}
 table.score-examples th {}
 table.score-examples td {padding: 10px}
@@ -74,17 +74,18 @@ Last Updated: 01-03-2016
 
 
 </p><ol id="toc">
-<li><a href="#ann">Sentiment Annotation</a>
-  <ul>
-    <li>1.1. <a href="#ann_gen">Preliminaries (What Should Be Done)</a></li>
-    <li>1.2. <a href="#ann_start">Annotating</a></li>
-  </ul>
-</li>
 <li><a href="#scale-ex">Sentiment Rating Scale and Examples</a>
   <ul>
-     <li>2.1. <a href="#scale">Sentiment Rating Scale</a></li>
-     <li>2.2. <a href="#exs">Examples</a></li>
+     <li>1.1 <a href="#scale">Sentiment Rating Scale</a></li>
+     <li>1.2 <a href="#exs">Examples</a></li>
   </ul>
+  <li><a href="#ann">Sentiment Annotation</a>
+  <ul>
+    <li>2.1 <a href="#ann_gen">Tagging Preliminaries (What Should Be Done)</a></li>
+    <li>2.2 <a href="#ann_start">Annotating</a></li>
+  </ul>
+   <li><a href="#ref">References</a>
+</li>
 </li>
 <!-- 	<li>2.3 - <a href="#guidelines">Points to Note</a></li> -->
 </li></ol>
@@ -93,14 +94,94 @@ Last Updated: 01-03-2016
 </header>
 
 <div id="main">
+<p> First we will discuss the sentiment rating
+  scale and then the annotation process.</p>
 
-<a name="ann"></a><h2>1) Sentiment Annotation</h2>
-<p>This section will walk you through the process of using the sentiment rating tool.</p>
+<a name="scale-ex"></a><h2>1) Sentiment Rating Scale and Examples</h2>
+
+<a name="scale"></a><h3>1.1 - The Scale</h3>
+<p>The Sentiment Rating tool has a scale that ranges from <b><tt>-100</tt> to <tt>100</tt></b> (negative to positive sentiment).</p>
+
+<p>To facilitate annotation, there are also <b>seven (7) main Steps</b> on the scale. These Steps are displayed on the tool itself.</p>
+
+<!-- <img src="images/Sentiment Rating Tool Ann.png" /> -->
+
+<p>Each Step corresponds to a certain score on the <tt>-100</tt> – <tt>100</tt> scale:
+
+<table class="meter" cellpadding="10" cellspacing="0" style="text-align: center">
+  <tr>
+    <td style="border-right: 2px solid #000">Step</td>
+    <td bgcolor="#CD2626">1</td>
+    <td bgcolor="#E26262">2</td>
+    <td bgcolor="#EEA6A6">3</td>
+    <td style="border: 1px solid black; border-width: 0px 1px">4</td>
+    <td bgcolor="#94D994">5</td>
+    <td bgcolor="#40B640">6</td>
+    <td bgcolor="#228B22">7</td>
+  </tr>
+  <tr>
+    <td style="border-right: 2px solid #000">Score</td>
+    <td>-95</td>
+    <td>-64</td>
+    <td>-34</td>
+    <td style="border: 1px solid black; border-width: 0px 1px">0</td>
+    <td>34</td>
+    <td>64</td>
+    <td>95</td>
+  </tr>
+  <tr><td></td><td colspan="3">&larr; More Negative</td><td style="border: 1px solid black; border-width: 0px 1px">Neutral</td><td colspan="3">More Positive &rarr;</td></tr>
+</table>
+
+<p>As you can see, the lowest and highest score you can give using using the 7-step scale is -95 (1) and 95 (7) respectively.
+<br />You can use the mouse or the keyboard arrow keys (<span class="key">&larr;</span> and <span class="key">&rarr;</span>) to adjust it to the maximum on either side (-100, or 100).</p>
+
+<p class="note">In most cases, the 7-step scale should be enough for your sentiment annotation task, and you will not need to make fine adjustments.</p>
+
+<a name="exs"></a><h3>1.2 - Some Examples</h3>
+The table below shows some examples and the score/rating that might be assigned to them.
+<table class="score-examples" cellspacing="0">
+  <tr><th>Score</th><th>Step</th><th>Example</th><th>From corpus</th><th>Compositional</th></tr>
+  <tr><td align = 'right'>  95</td><td>7</td>
+    <td>fantastic</td><td>perfect, splendidly</td>
+    <td>very good</td></tr>
+  <tr><td align = 'right'> 64</td><td>6</td>
+    <td>good</td><td>soothing, pleasure</td>
+    <td></td></tr>
+  <tr><td align = 'right'> 34</td><td>5</td>
+    <td>ok</td><td>easy, interesting</td>
+    <td>sort of  good, not bad</td></tr>
+  <tr><td align = 'right'>  0</td><td>4</td>
+    <td>bread</td><td>puff, dig, top-knot</td><td>sliced bread</td></tr>
+  <tr><td align = 'right'>-34</td><td>3</td>
+    <td>poor</td><td>rumour, cripple</td><td>kind of
+  bad, not good</td></tr>
+  <tr><td align = 'right'>-64</td><td>2</td>
+    <td>bad</td><td>hideous, death</td>
+    <td></td></tr>
+  <tr><td align = 'right'>-95</td><td>1</td>
+    <td>awful</td><td>deadly, foul play, horror-stricken</td>
+    <td>very bad</td></tr>
+</table>
+
+
+<p>The compositional examples are for illustrative purposes, this
+  guide does not show you how to tag chunks consisting of multiple concepts.
+
+<p>
+
+<hr>
+
+<a name="ann"></a><h2>2) Sentiment Annotation</h2>
+<p>This section will walk you through the process of using the
+  sentiment rating tool.
 
 <p class="note note-red">This guide assumes you already know how to log-in and that you are familiar with the general layout of the annotation interface. 
 <br /><br />You can <b><a href="index.html" target="qsg">check out the annotation Quick Start Guide</a></b> for Projects 1 and 2 for a refresher.</p>
 
-<a name="ann_gen"></a><h3>1.1 - Preliminaries (What Should Be Done)</h3>
+
+<hr>
+
+<a name="ann_gen"></a><h3>2.1 - Preliminaries (What Should Be Done)</h3>
 
 <p>You need to annotate words in the text for their <i>sentiment</i>. You will determine whether a word is <i>positive</i> or <i>negative</i> (polarity), to what degree it is positive or negative (magnitude), and thereafter give it a sentiment score/rating.
 
@@ -135,7 +216,7 @@ Last Updated: 01-03-2016
 </ul>
 <hr>
 
-<a name="ann_start"></a><h3>1.2 - Annotating</h3>
+<a name="ann_start"></a><h3>2.2 - Annotating</h3>
 
 <ol>
   <li>To begin, click on the word you wish to annotate for sentiment.</li>
@@ -209,64 +290,21 @@ Neutral-ised words will no longer have the second underline.
 <p class="note note-red">If you see multiple Sentiment Rating tools, then it is likely the individual words or phrases within an MWE were not tagged as <b>"x"</b> during sense-tagging.<br /><br />
 Fix this by retagging these smaller components with <b>"x"</b> (<a href="index.html" target="qsg">see the sense tagging Quick Start Guide</a> on what to do for MWEs, if you need a refresher).</p>
 
-<hr>
 
-<a name="scale-ex"></a><h2>2) Sentiment Rating Scale and Examples</h2>
+<a name='ref'><h2>References:</h2></a>
+<ul>
+  <li><a name="Bond:Ohkuma:Morgado da
+      Costa:Miura:Chen:Kuribayashi:Wang:2016">Francis Bond, Tomoko
+      Ohkuma, Luis Morgado da Costa, Yasuhide Miura, Rachel Chen,
+      Takayuki Kuribayashi, and Wenjie Wang (2016)</a> A multilingual sentiment corpus for Chinese, English and Japanese.
+      In <i><a href="http://gsi.dit.upm.es/esa2016/Proceedings-ESA2016.pdf">Proceedings of the LREC 2016 Workshop “Emotion and Sentiment Analysis”</a></i>, Portorož. pp&nbsp;59&ndash;62
+  <li>Francis Bond, Arkadiusz Janz and Maciej Piasecki (2019)
+<a href='https://aclanthology.org/2019.gwc-1.46/'>A Comparison of
+  Sense-level Sentiment Scores</a>  Proceedings of the 10th Global Wordnet Conference
+pp 363–372
+  
+    </ul> 
 
-<a name="scale"></a><h3>2.1 - The Scale</h3>
-<p>The Sentiment Rating tool has a scale that ranges from <b><tt>-100</tt> to <tt>100</tt></b> (negative to positive sentiment).</p>
-
-<p>To facilitate annotation, there are also <b>seven (7) main Steps</b> on the scale. These Steps are displayed on the tool itself.</p>
-
-<!-- <img src="images/Sentiment Rating Tool Ann.png" /> -->
-
-<p>Each Step corresponds to a certain score on the <tt>-100</tt> – <tt>100</tt> scale:
-
-<table class="meter" cellpadding="10" cellspacing="0" style="text-align: center">
-  <tr>
-    <td style="border-right: 2px solid #000">Step</td>
-    <td bgcolor="#CD2626">1</td>
-    <td bgcolor="#E26262">2</td>
-    <td bgcolor="#EEA6A6">3</td>
-    <td style="border: 1px solid black; border-width: 0px 1px">4</td>
-    <td bgcolor="#94D994">5</td>
-    <td bgcolor="#40B640">6</td>
-    <td bgcolor="#228B22">7</td>
-  </tr>
-  <tr>
-    <td style="border-right: 2px solid #000">Score</td>
-    <td>-95</td>
-    <td>-64</td>
-    <td>-34</td>
-    <td style="border: 1px solid black; border-width: 0px 1px">0</td>
-    <td>34</td>
-    <td>64</td>
-    <td>95</td>
-  </tr>
-  <tr><td></td><td colspan="3">&larr; More Negative</td><td style="border: 1px solid black; border-width: 0px 1px">Neutral</td><td colspan="3">More Positive &rarr;</td></tr>
-</table>
-
-<p>As you can see, the lowest and highest score you can give using using the 7-step scale is -95 (1) and 95 (7) respectively.
-<br />You can use the mouse or the keyboard arrow keys (<span class="key">&larr;</span> and <span class="key">&rarr;</span>) to adjust it to the maximum on either side (-100, or 100).</p>
-
-<p class="note">In most cases, the 7-step scale should be enough for your sentiment annotation task, and you will not need to make fine adjustments.</p>
-
-<a name="exs"></a><h3>2.2 - Some Examples</h3>
-The table below shows some examples and the score/rating that might be assigned to them.
-<table class="score-examples" cellspacing="0">
-  <tr><th>Score</th><th>Step</th><th>Examples 1</th><th>Examples 2 (from corpus)</th></tr>
-  <tr><td>95</td><td>7</td><td>fantastic</td><td>perfect</td></tr>
-  <tr><td>64</td><td>6</td><td>good</td><td>soothing</td></tr>
-  <tr><td>34</td><td>5</td><td>ok</td><td>easy</td></tr>
-  <tr><td>0</td><td>4</td><td>bread</td><td>puff</td></tr>
-  <tr><td>-34</td><td>3</td><td>poor</td><td>rumour</td></tr>
-  <tr><td>-64</td><td>2</td><td>bad</td><td>hideous</td></tr>
-  <tr><td>-95</td><td>1</td><td>awful</td><td>deadly</td></tr>
-</table>
-
-<p>These are just for illustrative purposes, and you might have a different opinion on the sentiment rating of these words.</p>
-
-<hr>
 </div>
 
 </body>
