@@ -382,7 +382,7 @@ for sid in sorted(sid_cid_clemma.keys()):
             sys.stderr.write('/n')
             sys.stderr.write(clemma)
         ### get lemmas with no spaces (from word table)
-        wids = sid_cid_wid[sid][cid]
+        wids = sorted(sid_cid_wid[sid][cid])
         wlemmas = []
         uwlemmas = ''
         for i in wids:
