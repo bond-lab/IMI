@@ -74,11 +74,13 @@ con.close()
 # FUNCTIONS
 ################################################################################
 def s_color(num):
-    """This functions takes a float number, trims it to n decimals places 
+    """This function takes a float number, trims it to n decimals places 
        without rounding it, and assigns color according to it."""
     
     n = 2
-    if num < 0.5:
+    if num == 'N.A.':  # no agreement values
+        return ('N.A.')
+    elif num < 0.5:
         return ('<span style="color:red">%.*f</span>' % (n + 1, num))[:-1]
     elif num < 0.7:
         return ('<span style="color:orange">%.*f</span>' % (n + 1, num))[:-1]
