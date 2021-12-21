@@ -24,8 +24,8 @@ from collections import OrderedDict as od
 from collections import namedtuple as ntu
 import operator
 from ntumc_util import * #taglcgi, wndb wncgi, check_corpusdb, all_corpusdb, expandlem, lem2ss, Timer
-from ntumc_webkit import HTML
-from lang_data_toolkit import valid_usernames, pos_tags, wnnam, wnver, wnurl
+from ntumc_webkit import HTML, wnnam, wnver, wnurl
+from lang_data_toolkit import valid_usernames, pos_tags
 from ntumc_gatekeeper import concurs
 from ntumc_tagdb import *
 import time

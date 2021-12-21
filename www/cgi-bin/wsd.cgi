@@ -22,7 +22,6 @@ from lang_data_toolkit import *
 
 
 cginame = "NTU WN Ambiguator"
-url = "http://compling.hss.ntu.edu.sg/"
 
 
 form = cgi.FieldStorage()

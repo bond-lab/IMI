@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict as dd
-
 #mtags values
 mtags = [ 'e', 'x', 'w' ] + ["org", "loc", "per", "dat", "oth", "num", "dat:year"]
 
@@ -140,11 +139,6 @@ synlinksopp = ["also", "hypo", "hasi", "hype", "inst",
                "mprt", "attr", "sim", None, None, 
                "dmtc", "dmtu", "dmtr", "dmnc", "dmnu", 
                "dmnr", "eqls","ants","qant", "hasq"]
-
-
-wnnam = "Open Multilingual Wordnet"
-wnver = "1.0"
-wnurl = "http://compling.hss.ntu.edu.sg/omw/index.html"
 
 
 ####################################################################

@@ -7,7 +7,7 @@ from os import environ
 import re, sqlite3, time
 from collections import defaultdict as dd
 
-from ntumc_webkit import HTML, NTUMC_Cookies
+from ntumc_webkit import HTML, NTUMC_Cookies, omw1_url, omw1x_url, fcbond_url
 from ntumc_util import *
 from ntumc_gatekeeper import concurs
 from lang_data_toolkit import *
@@ -60,7 +60,7 @@ if gridmode not in ('ntumcgrid', 'wnja','cow', 'wnbahasa', 'ntumc-noedit',
 if gridmode == "ntumcgrid":
     langs = omwlang.ntumclist()
     wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+    wnurl = omw1_url  
     wnver = "0.9"
     wndb = "wn-ntumc"
     #wndb_path = "../db/"
@@ -69,7 +69,7 @@ if gridmode == "ntumcgrid":
 # elif gridmode == "ntumcgridA":
 #     langs = omwlang.ntumclist()
 #     wnnam = "NTUMC+ Open Multilingual Wordnet"
-#     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+#     wnurl = omw1_url  
 #     wnver = "0.9"
 #     wndb = "wn-ntumcA"
 #     wndb_path = "../db/wn-ntumcA.db"
@@ -78,7 +78,7 @@ if gridmode == "ntumcgrid":
 # elif gridmode == "ntumcgridB":
 #     langs = omwlang.ntumclist()
 #     wnnam = "NTUMC+ Open Multilingual Wordnet"
-#     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+#     wnurl = omw1_url  
 #     wnver = "0.9"
 #     wndb = "wn-ntumcB"
 #     wndb_path = "../db/wn-ntumcB.db"
@@ -88,7 +88,7 @@ if gridmode == "ntumcgrid":
 elif gridmode == "ntumc-noedit":
     langs = omwlang.ntumclist()
     wnnam = "NTUMC+ Open Multilingual Wordnet"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+    wnurl = omw1_url  
     wnver = "0.9"
     wndb = "wn-ntumc"
     wndb_path = "../db/{}.db".format(wndb)
@@ -99,7 +99,7 @@ elif gridmode == "grid":
      wnnam = "Open Multilingual Wordnet"
      wndb = "wn-multix"
      #@wndb_path = "../../omw/wn-multix.db"
-     wnurl = "http://compling.hss.ntu.edu.sg/omw/"
+     wnurl = omw1_url  
      wnver = "1.2"
 
 elif gridmode == "cow":
@@ -127,13 +127,13 @@ elif gridmode == "gridx":
     langs = omwlang.alllangslist()
     wnnam = "Extended Open Multilingual Wordnet"
     wndb =  "wn-multix"
-    wnurl = "http://compling.hss.ntu.edu.sg/omw/summx.html"
+    wnurl =  omw1x_url
     wnver = "1.2"
 
 
     
 omwnam = "Extended Open Multilingual Wordnet"
-omwurl = "http://compling.hss.ntu.edu.sg/omw/summx.html"
+omwurl = omw1x_url
 wncgi = "wn-gridx.cgi?gridmode=%s" % (gridmode)
 editcgi = "annot-gridx.cgi" # allows for add/edit wordnet entries 
 addnewcgi = "addnew.cgi" # adds new synsets
@@ -1666,7 +1666,7 @@ print("""<hr><p>""")
 print(HTML.search_form(wncgi, lemma, langselect, lang, "Langs: ", lang2, scaling)) # Print Search Form
 # print HTML.language_selection(langselect, langs, wncgi)
 
-# # Multidict should be ported to compling excluding CCD 
+# # Multidict should be ported excluding CCD 
 # # (which we don't have permission to share)
 # if gridmode != "ntumcgrid":
 #     if lang in ("cmn", "eng"):
@@ -1699,7 +1699,7 @@ print("<nobr><a href='%s'>More detail about the %s (%s)</a></nobr>" % (wnurl, wn
 if gridmode != "gridx":
     print("""<br>This project is now integrated in the 
              <a href='%s'> %s (%s)</a>""" % (omwurl, omwnam, wnver))
-print("""<br>Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">
+print(f"""<br>Maintainer: <a href="{fcbond_url}">
              Francis Bond</a>""")
 print('&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;')
 

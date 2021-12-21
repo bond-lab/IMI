@@ -814,11 +814,7 @@ elif mode == "tagsview":
 
 
 # Footer
-print("""<p><a href='http://compling.hss.ntu.edu.sg/'>
-         NTU Computational Linguistics Lab</a><br>""")
-print("""Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/")>
-         Francis Bond</a>""")
-print("""&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;""")
+print(HTML.wordnet_footer())  # Footer
 
 
 print("  </body>")

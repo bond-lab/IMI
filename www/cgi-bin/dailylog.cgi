@@ -15,7 +15,7 @@ from collections import defaultdict as dd
 import sys, codecs
 
 from ntumc_gatekeeper import concurs
-
+from ntumc_webkit import HTML # ntumc_dependencies
 
 
 form = cgi.FieldStorage()
@@ -981,14 +981,7 @@ print("""
 
 
 ### General Info (always visible below)
-print("""
-<hr><p>
-<a href='http://compling.hss.ntu.edu.sg/omw/'>More detail about the wordnets</a>, 
-including links to the data, licenses and statistics about the wordnets.
-<br> Maintainer: <a href="http://www3.ntu.edu.sg/home/fcbond/">Francis Bond</a>
-&lt;<a href="mailto:bond@ieee.org">bond@ieee.org</a>&gt;
-""")
-
+print(HTML.wordnet_footer())  # Footer
 
 
 ### Close HTML

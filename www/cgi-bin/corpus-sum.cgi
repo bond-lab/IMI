@@ -3,7 +3,7 @@
 
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
-from ntumc_webkit import HTML
+from ntumc_webkit import HTML, corpus_url
 import sqlite3
 from collections import defaultdict as dd
 
@@ -136,12 +136,12 @@ where (docid in (select docid from doc where corpusID=?)))""", (corpusID,))
 
     print("</table>")
 
-print("""<h4>Current known Issues</h4>
+print(f"""<h4>Current known Issues</h4>
 <p>not all the data is up
 <p>Missing a lot of Japanese and English catb!
 <p>yoursing is from ver 3, ver 5 (with headers) is available)
 <hr>
-<p><a href="http://compling.hss.ntu.edu.sg/ntumc/">More Information about the Corpus</a>
+<p><a href="{corpus_url}">More Information about the Corpus</a>
 <hr>
 """)
 

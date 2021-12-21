@@ -28,7 +28,7 @@ errlog.write("LAST SEARCH LOG:\n")
 
 cginame = "NTU Multilingual Corpus Interface"
 ver = "0.1"
-url = "http://compling.hss.ntu.edu.sg/"
+url = corpus_url
 
 
 form = cgi.FieldStorage()

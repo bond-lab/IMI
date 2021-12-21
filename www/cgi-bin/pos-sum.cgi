@@ -19,7 +19,6 @@ import os
 selfcgi = "pos-sum.cgi"
 cginame = "POS Summary - NTUMC"
 ver = "0.1"
-url = "http://compling.hss.ntu.edu.sg/"
 
 form = cgi.FieldStorage()
 lang = form.getfirst("lang", "eng")

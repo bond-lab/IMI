@@ -535,16 +535,9 @@ else:
 
 # Print Footer
 # print "<hr><p>"
-print("""<a href='http://compling.hss.ntu.edu.sg/omw/'>
-         More detail about the wordnets</a>, including 
-         links to the data, licenses and statistics about 
-         the wordnets.
-         <br> Maintainer: 
-         <a href="http://www3.ntu.edu.sg/home/fcbond/">
-         Francis Bond</a>&lt;<a href="mailto:bond@ieee.org">
-         bond@ieee.org</a>&gt;</p>
+print(HTML.wordnet_footer())  # Footer
 
-<p>Source code hosted on github: <a href='https://github.com/bond-lab/IMI'>https://github.com/bond-lab/IMI</a></p>.
+print("""<p>Source code hosted on github: <a href='https://github.com/bond-lab/IMI'>https://github.com/bond-lab/IMI</a></p>
 """)
 
 ### Close HTML

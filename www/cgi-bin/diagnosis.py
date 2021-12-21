@@ -25,7 +25,7 @@ from lang_data_toolkit import *
 
 cginame = "NTUMC DB Diagnosis"
 ver = "0.1"
-url = "http://compling.hss.ntu.edu.sg/"
+url = 'https://bond-lab.github.io/'
 tagset = 'pos'
 limit = 20
 

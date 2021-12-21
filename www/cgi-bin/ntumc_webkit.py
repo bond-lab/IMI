@@ -11,6 +11,25 @@ from importlib import reload
 sys.getfilesystemencoding = lambda: 'utf-8'
 reload(os)
 
+
+#############################################################
+# External Links
+#############################################################
+bondlab_url = 'https://bond-lab.github.io/'
+fcbond_url  = 'https://fcbond.github.io/'
+omw_url     = 'https://omwn.org/'
+omw1_url    = 'https://omwn.org/'
+omw1x_url   = 'https://omwn.org/'
+omw2_url    = 'https://omwn.org/'
+corpus_url  = 'https://bond-lab.github.io/NTUMC/'
+
+wnnam = "Open Multilingual Wordnet"
+wnver = "1.0"
+wnurl = omw1_url
+
+
+
+
 class HTML:
 
     @staticmethod
@@ -413,11 +432,22 @@ or a pattern in a definition — 'def::*word*' (using sqlite GLOB)"
 
     @staticmethod
     def wordnet_footer():
-        html = """<p><a href='http://compling.hss.ntu.edu.sg/omw/'>
+        html = f"""<p><a href='{omw1_url}'>
                More detail about the wordnets</a>, including 
                links to the data, licenses and statistics about 
                the wordnets.<br> Maintainer: 
-               <a href="http://www3.ntu.edu.sg/home/fcbond/">
+               <a href="{fcbond_url}">
+               Francis Bond</a>&lt;<a href="mailto:bond@ieee.org">
+               bond@ieee.org</a>&gt;</p>"""
+        return html
+
+    @staticmethod
+    def corpus_footer():
+        html = f"""<p><a href='{corpus_url}'>
+               More detail about the corpus</a>, including 
+               links to the data, licenses and statistics about 
+               the wordnets.<br> Maintainer: 
+               <a href="{fcbond_url}">
                Francis Bond</a>&lt;<a href="mailto:bond@ieee.org">
                bond@ieee.org</a>&gt;</p>"""
         return html
