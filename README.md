@@ -85,7 +85,7 @@ Alias /ntumc/ /var/www/ntumc/html/
 <Directory "/ntumc/cgi-bin/">
 AddHandler cgi-script .cgi 
 AllowOverride All
-Options -Indexes, +FollowSymLinks +ExecCGI
+Options -Indexes +FollowSymLinks +ExecCGI
 Order allow,deny
 Allow from all
 </Directory>
