@@ -49,14 +49,14 @@ Copy the files to `/var/www/ntumc/`
 Make `$user:www-data` the owner of `/var/www/ntumc`
 e.g.
 `sudo chown -R bond:www-data /var/www/ntumc`
-
-`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/`
-`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.cgi`
-`$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.py`
-`$ sudo chmod g+w /var/www/ntumc/db/*.db`
-`$ sudo chmod a+r /var/www/ntumc/db/*.db`
-`$ sudo chmod g+w /var/www/ntumc/db`
-
+```
+$ sudo chmod a+rx /var/www/ntumc/cgi-bin/
+$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.cgi
+$ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.py
+$ sudo chmod g+w /var/www/ntumc/db/*.db
+$ sudo chmod a+r /var/www/ntumc/db/*.db
+$ sudo chmod g+w /var/www/ntumc/db
+```
 If you have not already enabled cgi:
 
 `$ sudo a2enmod cgid`
