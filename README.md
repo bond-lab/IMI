@@ -61,7 +61,12 @@ If you have not already enabled cgi:
 
 `$ sudo a2enmod cgid`
 
-
+Set up the logs:
+```
+cd /var/www/ntumc/cgi-bin/
+touch  addss_error.log cgi_err.log
+chmod a+w *.log
+```
 
 Put something like this in `/etc/apache2/conf-enabled/httpd.conf`
 
