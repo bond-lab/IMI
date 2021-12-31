@@ -56,6 +56,8 @@ $ sudo chmod a+rx /var/www/ntumc/cgi-bin/*.py
 $ sudo chmod g+w /var/www/ntumc/db/*.db
 $ sudo chmod a+r /var/www/ntumc/db/*.db
 $ sudo chmod g+w /var/www/ntumc/db
+$ sudo chgrp www-data /var/www/ntumc/db
+$ sudo chgrp www-data /var/www/ntumc/db/*.db
 ```
 If you have not already enabled cgi:
 
