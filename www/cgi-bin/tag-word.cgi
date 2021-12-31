@@ -7,7 +7,7 @@ import re, sqlite3, collections
 from collections import defaultdict as dd
 from ntumc_util import taglcgi, wndb, wncgi, check_corpusdb, all_corpusdb
 from ntumc_util import  expandlem, lem2ss, pos2wn,  tbox, Timer
-from ntumc_webkit import HTML, wnnam, wnver, wnurl
+from ntumc_webkit import HTML
 from lang_data_toolkit import valid_usernames, pos_tags
 from ntumc_gatekeeper import concurs, placeholders_for
 from html import escape

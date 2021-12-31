@@ -22,8 +22,9 @@ omw1_url    = 'https://omwn.org/'
 omw1x_url   = 'https://omwn.org/'
 omw2_url    = 'https://omwn.org/'
 corpus_url  = 'https://bond-lab.github.io/NTUMC/'
-
-wnnam = "Open Multilingual Wordnet"
+tagdoc_url  = 'https://bond-lab.github.io/IMI/tagdoc.html'
+wn_nam      = "Open Multilingual Wordnet"
+corpus_nam  = "NTUMC Corpus"
 wnver = "1.0"
 wnurl = omw1_url
 

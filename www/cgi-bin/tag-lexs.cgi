@@ -24,7 +24,7 @@ from collections import OrderedDict as od
 from collections import namedtuple as ntu
 import operator
 from ntumc_util import * #taglcgi, wndb wncgi, check_corpusdb, all_corpusdb, expandlem, lem2ss, Timer
-from ntumc_webkit import HTML, wnnam, wnver, wnurl
+from ntumc_webkit import HTML, wn_nam, wnver, wnurl, corpus_url, corpus_nam, tagdoc_url
 from lang_data_toolkit import valid_usernames, pos_tags
 from ntumc_gatekeeper import concurs
 from ntumc_tagdb import *
@@ -47,13 +47,15 @@ lims = { 10:10, 20:20, 40:40, 80:80, 200:200, 400:400, -1:'All'}
 # Add more tags in
 
 template_data = {
-    'wnnam':wnnam,
+    'wnnam':wn_nam,
     'wnver':wnver,
     'wnurl':wnurl,
     'type':'sequential',
     'taglcgi': taglcgi,
     'lims': lims,
-    'tagdocurl':'https://bond-lab.github.io/IMI/tagdoc.html'
+    'corpusurl':corpus_url,
+    'corpusnam':corpus_nam,
+    'tagdocurl':tagdoc_url    
 }
 
 ##########################################################################

@@ -19,7 +19,7 @@ reload(os)
 # CONSTANTS
 ##########################################################################
 template_data = {
-    'wnnam': wnnam,
+    'wnnam': wn_nam,
     'wnver': wnver,
     'wnurl': wnurl,
     'type': 'sequential',
