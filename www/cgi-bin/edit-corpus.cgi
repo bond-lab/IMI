@@ -89,7 +89,13 @@ def process_tags(c):
             html_log.append(u"""The concept ID: %s of sentence %s was 
                                  successfully tagged with %s by %s
                              """ % (str(cid), str(sid), tag, userID))
-
+        if tag == 'x':
+            c.execute("""DELETE from sentiment
+            WHERE sid=? and cid=?""", 
+                      (sid, cid))
+            if c.rowcount:
+                html_log.append(f"""Sentiment removed from concept {cid} of sentence {sid} by {userID}""")
+            
         c.execute("""UPDATE concept SET comment=?, usrname=? 
                      WHERE comment IS NOT ? 
                      AND sid=? AND cid=?""", 
