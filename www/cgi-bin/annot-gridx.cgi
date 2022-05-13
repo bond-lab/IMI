@@ -22,6 +22,8 @@ from ntumc_gatekeeper import concurs # connects to .db files
 from ntumc_webkit import *  # imports HTML blocks
 from lang_data_toolkit import * # imports langs & dicts
 
+from html import escape
+
 # Fixes encoding issues when reading cookies from os.environ
 import os, sys
 from importlib import reload
@@ -278,7 +280,7 @@ c.execute("""SELECT comment, u, t
              ORDER BY t""", [synset])
 rows = c.fetchall()
 for r in rows:
-    coms.append((cgi.escape(r[0],True),r[1],r[2]))
+    coms.append((escape(r[0],True),r[1],r[2]))
 
 
 # FETCH DEFINITIONS
