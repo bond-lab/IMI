@@ -100,7 +100,7 @@ elif gridmode == "grid":
      wndb = "wn-multix"
      #@wndb_path = "../../omw/wn-multix.db"
      wnurl = omw1_url  
-     wnver = "1.2"
+     wnver = "1.3"
 
 elif gridmode == "cow":
     langs = ("cmn", "eng")
@@ -128,7 +128,7 @@ elif gridmode == "gridx":
     wnnam = "Extended Open Multilingual Wordnet"
     wndb =  "wn-multix"
     wnurl =  omw1x_url
-    wnver = "1.2"
+    wnver = "1.3"
 
 
     

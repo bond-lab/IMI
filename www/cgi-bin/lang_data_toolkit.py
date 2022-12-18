@@ -38,7 +38,7 @@ valid_usernames = ['fcbond','lmorgado', 'takkur',
 
                    'andrew', 'melissa', 'merrick', 'jinghui', 'wilson', 
 
-'uinsuka01','uinsuka02','uinsuka03','uinsuka04','uinsuka05','uinsuka06','uinsuka07',
+'uinsuka01','uinsuka02','uinsuka03','uinsuka04','uinsuka05','uinsukaJo06','uinsuka07',
 'uinsuka08','uinsuka09','uinsuka10','uinsuka11','uinsuka12','uinsuka13','uinsuka14',
 'uinsuka15','uinsuka16','uinsuka17','uinsuka18','uinsuka19','uinsuka20','uinsuka21',
 'uinsuka22','uinsuka23','uinsuka24','uinsuka25','uinsuka26','uinsuka27','uinsuka28',

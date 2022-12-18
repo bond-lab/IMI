@@ -18,9 +18,9 @@ reload(os)
 bondlab_url = 'https://bond-lab.github.io/'
 fcbond_url  = 'https://fcbond.github.io/'
 omw_url     = 'https://omwn.org/'
-omw1_url    = 'https://omwn.org/'
-omw1x_url   = 'https://omwn.org/'
-omw2_url    = 'https://omwn.org/'
+omw1_url    = 'https://omwn.org/omw1.html'
+omw1x_url   = 'https://omwn.org/omw1.html'
+omw2_url    = 'https://omwn.org/omw2.html'
 corpus_url  = 'https://bond-lab.github.io/NTUMC/'
 tagdoc_url  = 'https://bond-lab.github.io/IMI/tagdoc.html'
 wn_nam      = "Open Multilingual Wordnet"
