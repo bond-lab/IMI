@@ -1360,7 +1360,13 @@ class omwlang:
             "ita", "por", "nob", "nno", "dan",
             "swe", "fra", "fin", "ell", "glg",
             "cat", "spa", "eus", "als", "pol",
-            "bul", "hrv")
+            "bul",
+            "isl",
+            "hrv",
+            "ron",
+            "slk",
+            "lit",
+            "nld")
         return langsprojects
 
     @staticmethod
