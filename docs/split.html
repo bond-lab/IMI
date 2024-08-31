@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+  <META HTTP-EQUIV="Content-Type" CONTENT = "text/html; charset=utf-8">
+  <TITLE>Tagging Documentation</TITLE>
+<style type="text/css">  
+    em {
+      font-family: monospace;    
+      font-style: normal;  
+      font-size: 120%;  
+      font-weight: bold;  
+    }  
+</style>
+<link rel="stylesheet" type="text/css" href="css/tag-wn.css">
+</HEAD>
+<BODY>
+
+  <h1>Documentation on splits</h1>
+
+
+  <p> We split corpora into 10 folds, balanced by the number of words
+  (tokens), using dynamic programming.  Folds should start on a header
+  or the beginning of a paragraph.
+  <p>Create a train/dev/test split (60/20/20), based on the folds
+  <p>Output as toml
+
+
+
+  <h3>Script</h3>
+
+  <pre>
+    scripts/split.py
+  </pre>  
+
+  <ul>
+    <li> Checks for stype in comments
+    <li> Should be created when the corpus is created
+    <li> Should be stored in a table (or in the doc metadata)
+  </ul>
+  
+  <h3>Example</h3>
+
+  <ul>
+    <li> <code>first, last</code> are the sids (sentence identifiers)
+    <li> <code>length</code> is the number of tokens in the fold or split
+</ul>  
+  <p>Speckled Band</p>
+  <pre>
+[meta]
+doc = "spec"
+docid = 440
+length = 11741
+first = 10000
+last = 10598
+split = "60/20/20 -- split on paragraphs so lengths are slightly uneven"
+"dcterms:created" = "2024-08-31"
+
+[train]
+first = 10000
+last = 10336
+length = 6905
+
+[dev]
+first = 10337
+last = 10490
+length = 2425
+
+[test]
+first = 10491
+last = 10598
+length = 2411
+
+[fold0]
+first = 10000
+last = 10052
+length = 1213
+
+[fold1]
+first = 10053
+last = 10089
+length = 1126
+
+[fold2]
+first = 10090
+last = 10154
+length = 1181
+
+[fold3]
+first = 10155
+last = 10205
+length = 992
+
+[fold4]
+first = 10206
+last = 10277
+length = 1182
+
+[fold5]
+first = 10278
+last = 10336
+length = 1211
+
+[fold6]
+first = 10337
+last = 10414
+length = 1216
+
+[fold7]
+first = 10415
+last = 10490
+length = 1209
+
+[fold8]
+first = 10491
+last = 10552
+length = 1215
+
+[fold9]
+first = 10553
+last = 10598
+length = 1196
+  </pre>
+  
+</body>
+</html>
