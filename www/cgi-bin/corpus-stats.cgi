@@ -10,6 +10,8 @@ from collections import defaultdict as dd
 import nltk
 from nltk.corpus import wordnet as pwn
 
+from ntumc_gatekeeper import connect
+
 form = cgi.FieldStorage()
 
 # It allows selecting what part of the corpus to compare
@@ -20,10 +22,12 @@ sid_to = form.getfirst("sid_to", 11609)
 search = form.getfirst("search")
 
 # It allows to compare up to 4 databases
-dba = form.getfirst("dba", "../db/enga.db")
-dbb = form.getfirst("dbb", "../db/engb.db")
-dbc = form.getfirst("dbc", "../db/engc.db")
-dbd = form.getfirst("dbd", "../db/engd.db")  # old eng.db (renamed to engd.db)
+# NOTE: these are language/db codes (e.g. "enga"), not paths -- connect()
+# below only resolves them within the whitelisted db directories.
+dba = form.getfirst("dba", "enga")
+dbb = form.getfirst("dbb", "engb")
+dbc = form.getfirst("dbc", "engc")
+dbd = form.getfirst("dbd", "engd")  # old eng.db (renamed to engd.db)
 
 usr = form.getfirst("usr", "")  # if it finds a user, will use it in links
 
@@ -102,7 +106,7 @@ def linkw(word):
 ##########################
 # FETCH sentences BY sid
 ##########################
-conn_dba = sqlite3.connect(dba)
+conn_dba = connect(dba)
 a = conn_dba.cursor()
 
 sent = dict()
@@ -147,7 +151,7 @@ for (sid, cid, clemma, tag, tags, comment, usrname) in a:
 
 
 # DATABASE B
-connb = sqlite3.connect(dbb)
+connb = connect(dbb)
 b = connb.cursor()
 b.execute(concept_query, (sid_from, sid_to))
 
@@ -164,7 +168,7 @@ for (sid, cid, clemma, tag, tags, comment, usrname) in b:
 
 
 # DATABASE C
-connc = sqlite3.connect(dbc)
+connc = connect(dbc)
 c = connc.cursor()
 c.execute(concept_query, (sid_from, sid_to))
 
@@ -181,7 +185,7 @@ for (sid, cid, clemma, tag, tags, comment, usrname) in c:
 
 
 # DATABASE D
-conng = sqlite3.connect(dbd)
+conng = connect(dbd)
 g = conng.cursor()
 g.execute(concept_query, (sid_from, sid_to))
 

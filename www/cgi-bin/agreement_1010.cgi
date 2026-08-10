@@ -4,12 +4,13 @@
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 
-import sqlite3, codecs
+import sqlite3, codecs, sys
 from collections import defaultdict as dd
 
-from ntumc_gatekeeper import concurs
+from ntumc_gatekeeper import concurs, connect, find_file, normalize_filepath, DATABASE_DIRS
 from ntumc_webkit import *
 from lang_data_toolkit import *
+from html import escape
 
 
 ################################################################################
@@ -31,13 +32,18 @@ langs = [('eng','English'), ('eng1','English 1'), ('eng2','English 2'),
          ('jpn','Japanese'), ('ita','Italian')]
 
 
-dbs = [] # TRIPLET (A/B/..., db_path, corpus_code)
+dbs = [] # TRIPLET (A/B/..., db_code, corpus_code)
 #for i in ['A','B','C','D','E']:
 for i in ['A','B','C']:
-    if os.path.isfile("../db/%s%s.db" % (lang,i)):
-        dbs.append((i, "../db/%s%s.db" % (lang,i),"%s%s" % (lang,i)))
+    code = "%s%s" % (lang,i)
+    if find_file(DATABASE_DIRS, [normalize_filepath(code)]):
+        dbs.append((i, code, code))
 
-target_db = [('target', "../db/%s.db" % (lang,), "%s" % (lang,))]
+if not find_file(DATABASE_DIRS, [normalize_filepath(lang)]):
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(lang)}</p>")
+    sys.exit(0)
+target_db = [('target', lang, lang)]
 
 
 
@@ -145,7 +151,7 @@ ag_scores = dd(lambda: dd(int))  # e.g. {sid: {'AvsS' : 0.8} }
 tagger = dict()
 
 
-con = sqlite3.connect(dbs[0][1])
+con = connect(dbs[0][1])
 c = con.cursor()
 
 c.execute("""SELECT sid, sent
@@ -173,7 +179,7 @@ word_query = """SELECT sid, wid, word, pos, lemma
 
 for db in dbs + target_db:
     db_ref = db[0].lower()
-    con = sqlite3.connect(db[1])
+    con = connect(db[1])
     c = con.cursor()
 
     # sys.stderr.write('CONNECTING TO DB: ' + db_ref + ' ' + db[1] + '\n') #TEST#

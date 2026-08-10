@@ -8,7 +8,9 @@ import sqlite3
 from collections import defaultdict as dd
 
 import json
+from html import escape
 from lang_data_toolkit import valid_usernames as valid_usrs
+from ntumc_gatekeeper import connect, find_file, normalize_filepath, DATABASE_DIRS
 
 # Fixes encoding issues when reading cookies from os.environ
 import os, sys
@@ -39,6 +41,14 @@ form = cgi.FieldStorage()
 
 db = form.getfirst("db", "../db/eng.db")
 lang = db[-6:-3]
+
+# `db` is attacker-controlled (?db=...); only allow it through if it
+# actually resolves to a whitelisted database, rather than trusting the
+# string directly.
+if not find_file(DATABASE_DIRS, [normalize_filepath(lang)]):
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(str(db))}</p>")
+    sys.exit(0)
 
 sid_from = form.getfirst("sid_from", 0)
 sid_to = form.getfirst("sid_to", 1000000)
@@ -182,7 +192,7 @@ print("""<h6>From sentence %s to sentence %s</h6>""" % (sid_from, sid_to))
 ##############################
 # CONNECT TO DB
 ##############################
-conn_db = sqlite3.connect(db)
+conn_db = connect(lang)
 a = conn_db.cursor()
 
 ##############################

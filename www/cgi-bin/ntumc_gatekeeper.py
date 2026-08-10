@@ -24,7 +24,7 @@ function sql_escape(string):
   in the codebase.
 """
 
-from os.path import abspath, dirname, exists, join, split
+from os.path import abspath, commonpath, dirname, exists, join, split
 import sqlite3
 
 
@@ -78,19 +78,28 @@ def find_file(dirs, files):
             continue
 
         for file in files:
-            filepath = join(path, file)
+            filepath = abspath(join(path, file))
+            # Defense in depth: if `file` is itself an absolute path,
+            # os.path.join() silently discards `path` and returns `file`
+            # unchanged. normalize_filepath() is supposed to prevent that
+            # from ever reaching here, but verify containment directly
+            # rather than trust the string was sanitized correctly.
+            if commonpath([path, filepath]) != path:
+                continue
             if exists(filepath):
                 return filepath
     return None
 
 
 def normalize_filepath(file):
-    """Removes traversal to parent dir and ensures file ends with .db
+    """Removes traversal to parent dir, strips any absolute root, and
+    ensures file ends with .db
 
     spam/../eggs.txt -> spam/eggs.txt.db
+    /etc/passwd -> etc/passwd.db
     """
     file += ('.db' if not file.endswith('.db') else '')
-    file = join(*[x for x in _supersplit(file) if x != '..'])
+    file = join(*[x for x in _supersplit(file) if x not in ('..', '/', '')])
     return file
 
 

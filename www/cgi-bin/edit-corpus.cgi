@@ -11,6 +11,7 @@ import os, http.cookies
 import sys
 from ntumc_util import *
 from ntumc_webkit import *
+from ntumc_gatekeeper import connect
 from html import escape
 
 # Fixes encoding issues when reading cookies from os.environ
@@ -22,7 +23,7 @@ reload(os)
 
 form = cgi.FieldStorage()
 lang = form.getfirst("lang")
-corpus = form.getfirst("corpus")
+corpus = form.getfirst("corpus", "")
 
 cgi_mode = form.getfirst("cgi_mode")
 
@@ -57,7 +58,12 @@ html_log = []
 ###
 ### Process tags
 ###
-con = sqlite3.connect("../db/%s.db" % corpus) ###
+try:
+    con = connect(corpus)
+except FileNotFoundError:
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(str(corpus))}</p>")
+    sys.exit(0)
 c = con.cursor()
 c.execute("""PRAGMA recursive_triggers = 1""")
 

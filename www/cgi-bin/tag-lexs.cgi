@@ -26,7 +26,7 @@ import operator
 from ntumc_util import * #taglcgi, wndb wncgi, check_corpusdb, all_corpusdb, expandlem, lem2ss, Timer
 from ntumc_webkit import HTML, wn_nam, wnver, wnurl, corpus_url, corpus_nam, tagdoc_url
 from lang_data_toolkit import valid_usernames, pos_tags
-from ntumc_gatekeeper import concurs
+from ntumc_gatekeeper import concurs, connect
 from ntumc_tagdb import *
 import time
 from html import escape
@@ -133,7 +133,12 @@ tm = Timer()
 
 
 # Create database pointers
-con = sqlite3.connect("../db/%s.db" % corpus)
+try:
+    con = connect(corpus)
+except FileNotFoundError:
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(str(corpus))}</p>")
+    sys.exit(0)
 c = con.cursor() # cursor to corpus database
 cur = con.cursor() # cursor to corpus database
 wcon = sqlite3.connect(wndb)

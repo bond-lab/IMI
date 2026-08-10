@@ -18,6 +18,8 @@ import operator
 from collections import defaultdict as dd
 
 from ntumc_util import placeholders_for
+from ntumc_gatekeeper import connect
+from html import escape
 
 showsentcgi = "show-sent.cgi"
 
@@ -29,7 +31,13 @@ lang=form.getfirst("lang", "eng")
 # corpus2 = 'eng'
 # linkdb = 'cmn-eng'
 
-con = sqlite3.connect("../db/%s.db" % corpus)
+try:
+    con = connect(corpus)
+except FileNotFoundError:
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(corpus)}</p>")
+    import sys
+    sys.exit(0)
 c = con.cursor()
 ##
 ## get monolingual stuff
@@ -73,9 +81,12 @@ for (corpusID, corpus, title) in c:
 ###
 links = dd(set)
 ttt = dict()
-if os.path.isfile("../db/%s.db" % linkdb):
-    lcon = sqlite3.connect("../db/%s.db" % linkdb)
-    lc = lcon.cursor() 
+try:
+    lcon = connect(linkdb)
+except FileNotFoundError:
+    lcon = None
+if lcon:
+    lc = lcon.cursor()
     query = """SELECT fsid, tsid FROM slink  
                WHERE fsid IN (%s)""" % placeholders_for(sss)
     lc.execute(query, list(sss))
@@ -85,9 +96,12 @@ if os.path.isfile("../db/%s.db" % linkdb):
 ##
 ## Get translations
 ##
-if os.path.isfile("../db/%s.db" % corpus2):
-    tcon = sqlite3.connect("../db/%s.db" % corpus2)
-    tc = tcon.cursor() 
+try:
+    tcon = connect(corpus2)
+except FileNotFoundError:
+    tcon = None
+if tcon:
+    tc = tcon.cursor()
     query = """SELECT sid, sent FROM sent  
                WHERE sid IN (%s)""" % placeholders_for(ttt.keys())
     tc.execute(query, list(ttt.keys()))

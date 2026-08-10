@@ -3,10 +3,12 @@
 
 import cgi, urllib
 import cgitb#; cgitb.enable()  # for troubleshooting
+import sys
 from collections import defaultdict as dd
+from html import escape
 from ntumc_webkit import *
 from lang_data_toolkit import *
-import sqlite3
+from ntumc_gatekeeper import connect
 import os
 
 #############################################################################
@@ -41,16 +43,15 @@ try:
 except:
     limit = 5
 
-corpusdb = os.path.normpath(os.path.join(
-    os.path.abspath(os.path.dirname(__file__)),
-    "../db/%s.db" % lang
-))#.replace('\\', '/')
-
-
 ###########################
 # Connect to corpus.db
 ###########################
-conc = sqlite3.connect(corpusdb)
+try:
+    conc = connect(lang)
+except FileNotFoundError:
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown corpus: {escape(lang)}</p>")
+    sys.exit(0)
 cc = conc.cursor()
 
 cc.execute("""SELECT pos, word, count(word) 

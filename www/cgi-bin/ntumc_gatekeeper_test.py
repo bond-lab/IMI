@@ -1,5 +1,7 @@
 from os.path import abspath, dirname, exists, join
 from sqlite3 import Connection, Cursor
+import sqlite3
+import tempfile
 import unittest
 
 # explicit public exports from __all__
@@ -116,6 +118,26 @@ class ConnectWhitelistTestCase(unittest.TestCase):
         # Testing in_dirs by searching existing dbfile in nonexistent dir
         with self.assertRaises(FileNotFoundError):
             connect('eng.db', in_dirs=['nonexistent.dir'])
+
+    def test_absolute_path_attack(self):
+        # normalize_filepath() must neutralise a leading absolute root,
+        # not just '..' components -- os.path.join(dir, abspath) silently
+        # discards `dir` and returns `abspath` unchanged, which would let
+        # an absolute path escape DATABASE_DIRS entirely if left as-is.
+        self.assertEqual(normalize_filepath('/etc/passwd'), 'etc/passwd.db')
+
+        # A real, existing file *outside* DATABASE_DIRS must still be
+        # unreachable via its absolute path -- find_file()/connect()
+        # should never resolve outside the whitelisted directories,
+        # regardless of what exists on disk at that absolute path.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            outside_db = join(tmpdir, 'secrets.db')
+            sqlite3.connect(outside_db).close()
+            self.assertTrue(exists(outside_db))
+
+            self.assertIsNone(find_file(DATABASE_DIRS, [normalize_filepath(outside_db)]))
+            with self.assertRaises(FileNotFoundError):
+                connect(outside_db)
 
     def test_traversal_attack(self):
         # normalize() should strip out traversal to ..

@@ -19,6 +19,7 @@ import datetime
 from ntumc_util import placeholders_for
 from ntumc_webkit import *
 from lang_data_toolkit import *
+from ntumc_gatekeeper import connect
 from html import escape
 
 # create the error log for the cgi errors
@@ -323,8 +324,11 @@ if mode == "wordview":
 ###########################
 # Connect to corpus.db
 ###########################
-if corpusdb != "../db/None.db":
-    conc = sqlite3.connect(corpusdb)
+try:
+    conc = connect(searchlang)
+except FileNotFoundError:
+    conc = None
+if conc:
     cc = conc.cursor()
     cc2 = conc.cursor()
 
@@ -554,37 +558,43 @@ if corpusdb != "../db/None.db":
         # try to find a link database between searchlang and lang2
         for lang2 in langs2:
             lang2_sids = set()
-            if os.path.isfile("../db/%s-%s.db" % (searchlang, lang2)):
+            try:
+                lcon = connect(f"{searchlang}-{lang2}")
+            except FileNotFoundError:
+                lcon = None
+
+            if lcon:
 
                 # Links will always come from "searchlang" to "lang2"
                 # links[lang][fsid] = set(tsid)
                 # fsid should be in searchlang
                 # for example links[10001] = (10002,10003)
-                linkdb = "../db/%s-%s.db" % (searchlang, lang2)
-                errlog.write("Found lang1-lang2: %s \n" % linkdb) #LOG
-                lcon = sqlite3.connect("%s" % linkdb)
+                errlog.write("Found lang1-lang2: %s-%s \n" % (searchlang, lang2)) #LOG
                 lc = lcon.cursor()
-                query="""SELECT fsid, tsid 
-                         FROM slink 
+                query="""SELECT fsid, tsid
+                         FROM slink
                          WHERE fsid in (%s)""" % sids
                 lc.execute(query)
                 for (fsid, tsid) in lc:
                     links[lang2][int(fsid)].add(int(tsid))
                     lang2_sids.add(tsid) # this is a list of sids in the target langauge to fetch details
 
-            elif os.path.isfile("../db/%s-%s.db" % (lang2, searchlang)):
+            else:
+                try:
+                    lcon = connect(f"{lang2}-{searchlang}")
+                except FileNotFoundError:
+                    lcon = None
 
-                linkdb = "../db/%s-%s.db" % (lang2, searchlang)
-                errlog.write("Found lang2-lang1: %s \n" % linkdb) #LOG
-                lcon = sqlite3.connect("%s" % linkdb)
-                lc = lcon.cursor()
-                query="""SELECT fsid, tsid 
-                         FROM slink  
-                         WHERE tsid in (%s)""" % sids
-                lc.execute(query)
-                for (fsid, tsid) in lc:
-                    links[lang2][int(tsid)].add(int(fsid))
-                    lang2_sids.add(fsid)
+                if lcon:
+                    errlog.write("Found lang2-lang1: %s-%s \n" % (lang2, searchlang)) #LOG
+                    lc = lcon.cursor()
+                    query="""SELECT fsid, tsid
+                             FROM slink
+                             WHERE tsid in (%s)""" % sids
+                    lc.execute(query)
+                    for (fsid, tsid) in lc:
+                        links[lang2][int(tsid)].add(int(fsid))
+                        lang2_sids.add(fsid)
 
 
             lang2_sids = ",".join("'%s'" % s for s in lang2_sids)
@@ -597,8 +607,10 @@ if corpusdb != "../db/None.db":
             # this will happen per lang in langs2.
             ##############################################
 
-            corpusdb = "../db/%s.db" % lang2
-            conc = sqlite3.connect(corpusdb)
+            try:
+                conc = connect(lang2)
+            except FileNotFoundError:
+                continue
             cc = conc.cursor()
             cc2 = conc.cursor()
 

@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
-import re, sqlite3, datetime, time, re, itertools, traceback
+import re, sqlite3, datetime, time, re, itertools, traceback, sys
 
 from ntumc_util import *
 from ntumc_webkit import *
+from ntumc_gatekeeper import connect
+from html import escape
 
 # import sys,codecs
 # sys.stdout = codecs.getwriter('utf8')(sys.stdout)
@@ -102,7 +104,12 @@ else:
 ################################################################################
 # CONNECT TO DB
 ################################################################################
-con = sqlite3.connect(linked_db) 
+try:
+    con = connect(linked_db)
+except FileNotFoundError:
+    print("Content-type: text/html; charset=utf-8\n")
+    print(f"<p>Unknown linked corpus: {escape(str(linked_db))}</p>")
+    sys.exit(0)
 c = con.cursor()
 ################################################################################
 
